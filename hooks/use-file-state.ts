@@ -45,7 +45,7 @@ export function useFileState(options: FileStateOptions) {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<FileMetaData[]>([]);
   const [selectedFolders, setSelectedFolders] = useState<Folder[]>([]); 
-  const [currentFolderId, setCurrentFolderId] = useState<FolderId>(folderId);
+  const [currentFolder, setCurrentFolder] = useState<Folder | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFileTypes, setSelectedFileTypes] = useState<FileType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,17 +66,21 @@ export function useFileState(options: FileStateOptions) {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
   const [isMoveFileModalOpen, setIsMoveFileModalOpen] = useState(false);
+  const [isRenameFolderModalOpen, setIsRenameFolderModalOpen] = useState(false);
 
 
   //load folders
   const loadFolders = useCallback(async () => {
     try {
-      const foldersData = await provider.getFolders(currentFolderId || null);
+      // Need to fetch current folder details if we have an ID but no object (e.g. from URL)
+      // This part is tricky because currentFolder might be null initially but folderId memo is set
+      
+      const foldersData = await provider.getFolders(currentFolder?.id ?? null);
       setFolders(foldersData);
     } catch (error) {
       console.error("Failed to load folders:", error);
     }
-  }, [currentFolderId, provider]);
+  }, [currentFolder, provider]);
   
   // Load files
   const loadFiles = useCallback(async () => {
@@ -84,7 +88,7 @@ export function useFileState(options: FileStateOptions) {
     setIsLoading(true);
     try {
       const result = await provider.getFiles(
-        currentFolderId || null,
+        currentFolder?.id ?? null,
         selectedFileTypes.length > 0 ? selectedFileTypes : null,
         searchQuery,
         currentPage,
@@ -114,9 +118,26 @@ export function useFileState(options: FileStateOptions) {
     } finally {
       setIsLoading(false);
     }
-  }, [currentFolderId, searchQuery, selectedFileTypes, mode, acceptedFileTypes, allowedFileTypes, provider]);
+  }, [currentFolder, searchQuery, selectedFileTypes, mode, acceptedFileTypes, allowedFileTypes, provider]);
 
-  // Initial data load
+  // Initial data load & Current Folder Sync
+  useEffect(() => {
+    const fetchCurrentFolder = async () => {
+       if (folderId && (!currentFolder || currentFolder.id !== folderId)) {
+           try{
+               const folder = await provider.getFolder(folderId);
+               setCurrentFolder(folder);
+           }catch(e){
+               console.error("Failed to fetch current folder", e);
+               setCurrentFolder(null); // Fallback to root? Or error state?
+           }
+       } else if (folderId === null && currentFolder !== null) {
+           setCurrentFolder(null);
+       }
+    };
+    fetchCurrentFolder();
+  }, [folderId, provider]); // Removed currentFolder dependency to avoid loops, logic inside handles it
+
   useEffect(() => {
     loadFolders();
   }, [loadFolders]);
@@ -129,11 +150,11 @@ export function useFileState(options: FileStateOptions) {
   useEffect(() => {
     setSelectedFolders([]);
     setSelectedFiles([]);
-  }, [currentFolderId, searchQuery]);
+  }, [currentFolder, searchQuery]);
 
 
   const isInSelectionMode = () => selectedFiles.length > 0 || selectedFolders.length > 0;
-  const getCurrentFolder = () => folders.find((f) => f.id === currentFolderId) || null;
+  const getCurrentFolder = () => currentFolder;
 
   // Checkbox states
   const getGlobalCheckboxState = () => {
@@ -163,7 +184,7 @@ return {
     folders,
     selectedFiles,
     selectedFolders,
-    currentFolderId,
+    currentFolder,
     searchQuery,
     selectedFileTypes,
     isLoading,
@@ -171,6 +192,7 @@ return {
     isUploadModalOpen,
     isCreateFolderModalOpen,
     isMoveFileModalOpen,
+    isRenameFolderModalOpen,
     currentFolders : folders,
 
     // Setters
@@ -178,13 +200,15 @@ return {
     setFolders,
     setSelectedFiles,
     setSelectedFolders,
-    setCurrentFolderId,
+    setCurrentFolder,
     setSearchQuery,
     setSelectedFileTypes,
+
     setPagination,
     setIsUploadModalOpen,
     setIsCreateFolderModalOpen,
     setIsMoveFileModalOpen,
+    setIsRenameFolderModalOpen,
 
     // Loaders
     loadFolders,

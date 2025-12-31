@@ -8,6 +8,7 @@ export type FileUploadInput = {
 export interface IFileManagerProvider {
 
     //Read
+    getFolder(folderId: FolderId): Promise<Folder | null>;
     getFolders(folderId: FolderId): Promise<Folder[]>;
     getTags(): Promise<string[]>;
     getFiles(
@@ -30,8 +31,6 @@ export interface IFileManagerProvider {
     updateFileMetaData(fileId: EntityId, metaData: Partial<FileMetaData>): Promise<FileMetaData>;
 
     //Delete
-    deleteFolder(folderId: EntityId): Promise<void>;
-    deleteFile(fileId: EntityId): Promise<void>;
     deleteFiles(fileIds: EntityId[]): Promise<void>;
     deleteFolders(folderIds: EntityId[]): Promise<void>;
 

@@ -7,9 +7,9 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html>
+    <html lang="en">
       <body className={cn("text-base antialiased", inter.className)}>
         <div className="isolate">{children}</div>
       </body>

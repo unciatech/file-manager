@@ -12,11 +12,11 @@ export function useFileHandlers(state: FileState) {
     files,
     selectedFiles,
     selectedFolders,
-    currentFolderId,
+    currentFolder,
     currentFolders,
     setSelectedFiles,
     setSelectedFolders,
-    setCurrentFolderId,
+    setCurrentFolder,
     setPagination,
     loadFiles,
     loadFolders,
@@ -78,9 +78,15 @@ export function useFileHandlers(state: FileState) {
   );
 
 
-   // Folder Navigation
+  // Folder Navigation
   const handleFolderSelect = useCallback((folderId: FolderId) => {
-    setCurrentFolderId(folderId);
+    // If navigating to root (null), set currentFolder to null immediately
+    if (folderId === null) {
+      setCurrentFolder(null);
+    }
+    // If we have the folder in the current list, we could set it immediately to avoid loading state
+    // but the effect in useFileState will handle fetching details if needed.
+    
     setSelectedFiles([]);
     setSelectedFolders([]);
 
@@ -88,7 +94,7 @@ export function useFileHandlers(state: FileState) {
       const newUrl = (folderId === null ) ? "/media" : `/media/${folderId}`;
       router.push(newUrl);
     }
-  }, [mode, router, setCurrentFolderId, setSelectedFiles, setSelectedFolders]);
+  }, [mode, router, setCurrentFolder, setSelectedFiles, setSelectedFolders]);
 
     // Folder Click (selection vs navigation)
   const handleFolderClick = useCallback((
@@ -149,6 +155,10 @@ export function useFileHandlers(state: FileState) {
 
   // Pagination
   const handlePageChange = useCallback((page: number) => {
+
+    //update the provider pagination state if applicable
+    
+
     setPagination((prev) => ({ ...prev, currentPage: page }));
   }, [setPagination]);
 
@@ -156,25 +166,25 @@ export function useFileHandlers(state: FileState) {
   // CRUD Operations
   const uploadFiles = useCallback(async (fileUploadInput: FileUploadInput[]) => {
     try {
-      await provider.uploadFiles(fileUploadInput, currentFolderId);
+      await provider.uploadFiles(fileUploadInput, currentFolder?.id ?? null);
       await loadFiles();
       setSelectedFiles([]);
     } catch (error) {
       console.error("Upload failed:", error);
     }
-  }, [currentFolderId, provider, loadFiles, setSelectedFiles]);
+  }, [currentFolder, provider, loadFiles, setSelectedFiles]);
   const createFolder = useCallback(async (name: string) => {
     try {
       await provider.createFolder(
         name,
-        currentFolderId || null
+        currentFolder?.id ?? null
       );
       await loadFolders();
       setSelectedFiles([]);
     } catch (error) {
       console.error("Failed to create folder:", error);
     }
-  }, [currentFolderId, provider, loadFolders, setSelectedFiles]);
+  }, [currentFolder, provider, loadFolders, setSelectedFiles]);
 
   const bulkMove = useCallback(async (targetFolderId: FolderId) => {
     try {
@@ -217,7 +227,7 @@ export function useFileHandlers(state: FileState) {
         await provider.deleteFiles(selectedFiles.map((f) => f.id));
       }
       if (selectedFolders.length > 0) {
-        await Promise.all(selectedFolders.map((f) => provider.deleteFolder(f.id)));
+        await provider.deleteFolders(selectedFolders.map((f) => f.id));
       }
       await loadFiles();
       await loadFolders();

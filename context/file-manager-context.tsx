@@ -9,13 +9,14 @@ import { createContext, useContext, useMemo, useState } from "react";
 const FileManagerContext = createContext<FileManagerContextType | undefined>(undefined);
 
 // Context type - combines state and handlers
+
 interface FileManagerContextType {
   // State
   files: FileMetaData[];
   folders: Folder[];
   selectedFiles: FileMetaData[];
   selectedFolders: Folder[];
-  currentFolderId: FolderId;
+  currentFolder: Folder | null;
   searchQuery: string;
   selectedFileTypes: FileType[];
   isLoading: boolean;
@@ -23,9 +24,13 @@ interface FileManagerContextType {
   isUploadModalOpen: boolean;
   isCreateFolderModalOpen: boolean;
   isMoveFileModalOpen: boolean;
+  isRenameFolderModalOpen: boolean;
   mode: "page" | "modal";
   selectionMode: "single" | "multiple";
   acceptedFileTypes?: string[];
+
+  // Provider
+  provider: IFileManagerProvider;
 
   // Setters
   setSearchQuery: (query: string) => void;
@@ -33,6 +38,7 @@ interface FileManagerContextType {
   setIsUploadModalOpen: (isOpen: boolean) => void;
   setIsCreateFolderModalOpen: (isOpen: boolean) => void;
   setIsMoveFileModalOpen: (isOpen: boolean) => void;
+  setIsRenameFolderModalOpen: (isOpen: boolean) => void;
   setSelectedFiles: (files: FileMetaData[]) => void;
   setSelectedFolders: (folders: Folder[]) => void;
 
@@ -106,7 +112,7 @@ export function FileManagerProvider({
     folders: state.folders,
     selectedFiles: state.selectedFiles,
     selectedFolders: state.selectedFolders,
-    currentFolderId: state.currentFolderId,
+    currentFolder: state.currentFolder,
     searchQuery: state.searchQuery,
     selectedFileTypes: state.selectedFileTypes,
     isLoading: state.isLoading,
@@ -114,6 +120,7 @@ export function FileManagerProvider({
     isUploadModalOpen: state.isUploadModalOpen,
     isCreateFolderModalOpen: state.isCreateFolderModalOpen,
     isMoveFileModalOpen: state.isMoveFileModalOpen,
+    isRenameFolderModalOpen: state.isRenameFolderModalOpen,
     mode: state.mode,
     selectionMode: state.selectionMode,
     acceptedFileTypes: state.acceptedFileTypes,
@@ -124,8 +131,10 @@ export function FileManagerProvider({
     setIsUploadModalOpen: state.setIsUploadModalOpen,
     setIsCreateFolderModalOpen: state.setIsCreateFolderModalOpen,
     setIsMoveFileModalOpen: state.setIsMoveFileModalOpen,
+
     setSelectedFiles: state.setSelectedFiles,
     setSelectedFolders: state.setSelectedFolders,
+    setIsRenameFolderModalOpen: state.setIsRenameFolderModalOpen,
 
     // Handlers
     handleFileSelect: handlers.handleFileSelect,
@@ -156,7 +165,8 @@ export function FileManagerProvider({
     // Callbacks
     onClose: state.onClose,
     onFilesSelected: state.onFilesSelected,
-  }), [state, handlers]);
+    provider,
+  }), [state, handlers, provider]);
 
   return (
     <FileManagerContext.Provider value={value}>

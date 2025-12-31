@@ -16,7 +16,10 @@
     "utils": "@/lib/utils",
     "ui": "@/components/ui",
     "lib": "@/lib",
-    "hooks": "@/hooks"
+    "hooks": "@/hooks",
+    "icons": "@/components/icons",
+    "context": "@/context",
+    "types": "@/types"
   },
   "registries": {
     "@reui": "https://reui.io/r/{name}.json"

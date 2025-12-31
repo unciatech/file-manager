@@ -28,6 +28,12 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class MockProvider implements IFileManagerProvider {
 
+  getFolder(folderId: FolderId): Promise<Folder | null> {
+    if (folderId === null) return Promise.resolve(null);
+    const folder = mockFolders.find((f) => f.id === folderId);
+    return Promise.resolve(folder || null);
+  }
+
   getFolders(folderId: FolderId): Promise<Folder[]> {
     // If folderId is provided, return only folder with similar parentId; else filter those folder with parentId null
     if (folderId !== null) {
@@ -202,36 +208,13 @@ export class MockProvider implements IFileManagerProvider {
 
     return uploadedFiles;
   }
+
   renameFolder(folderId: EntityId, newName: string): Promise<Folder> {
     const folder = mockFolders.find((f) => f.id === folderId);
     if (!folder) {
       return Promise.reject(new Error("Folder not found"));
     }
     folder.name = newName;
-    folder.updatedAt = new Date();
-    return Promise.resolve(folder);
-  }
-  moveFile(
-    fileId: EntityId,
-    newFolderId: FolderId
-  ): Promise<FileMetaData> {
-    const file = mockFiles.find((f) => f.id === fileId);
-    if (!file) {
-      return Promise.reject(new Error("File not found"));
-    }
-    file.folderId = newFolderId;
-    file.updatedAt = new Date();
-    return Promise.resolve(file);
-  }
-  moveFolder(
-    folderId: EntityId,
-    newParentId: FolderId
-  ): Promise<Folder> {
-    const folder = mockFolders.find((f) => f.id === folderId);
-    if (!folder) {
-      return Promise.reject(new Error("Folder not found"));
-    }
-    folder.parentId = newParentId;
     folder.updatedAt = new Date();
     return Promise.resolve(folder);
   }
@@ -247,31 +230,6 @@ export class MockProvider implements IFileManagerProvider {
     file.metaData = { ...file.metaData, ...metaData };
     file.updatedAt = new Date();
     return Promise.resolve(file);
-  }
-
-  deleteFolder(folderId: EntityId): Promise<void> {
-    const folderIndex = mockFolders.findIndex((f) => f.id === folderId);
-    if (folderIndex === -1) {
-      return Promise.reject(new Error("Folder not found"));
-    }
-    //remove folder
-    mockFolders.splice(folderIndex, 1);
-    //remove files in the folder
-    for (let i = mockFiles.length - 1; i >= 0; i--) {
-      if (mockFiles[i].folderId === folderId) {
-        mockFiles.splice(i, 1);
-      }
-    }
-    return Promise.resolve();
-  }
-
-  deleteFile(fileId: EntityId): Promise<void> {
-    const fileIndex = mockFiles.findIndex((f) => f.id === fileId);
-    if (fileIndex === -1) {
-      return Promise.reject(new Error("File not found"));
-    }
-    mockFiles.splice(fileIndex, 1);
-    return Promise.resolve();
   }
 
   deleteFiles(fileIds: EntityId[]): Promise<void> {

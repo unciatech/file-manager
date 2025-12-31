@@ -228,7 +228,7 @@ export interface FileManagerProps {
     onFilesSelected?: (files: FileMetaData[] ) => void;
     onClose?: () => void;
     acceptedFileTypes?: FileType[] // For modal mode - what types to show
-    provider: IFileManagerProvider
+    provider?: IFileManagerProvider // Optional - falls back to MockProvider
 }
 
 

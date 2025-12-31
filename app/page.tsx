@@ -1,5 +1,7 @@
 "use client"
 
-export default function FileManager(){
-  
+import { redirect } from "next/navigation"
+
+export default function Home() {
+  redirect("/media")
 }
