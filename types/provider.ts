@@ -25,14 +25,14 @@ export interface IFileManagerProvider {
     uploadFiles(files: FileUploadInput[], folderId?: FolderId): Promise<FileMetaData[]>;
 
     //Update
-    renameFolder(folderId: EntityId, newName: string): Promise<Folder>;
+    renameFolder(folderId: FolderId, newName: string): Promise<Folder>;
     moveFiles(fileIds: EntityId[], newFolderId: FolderId): Promise<FileMetaData[]>;
     moveFolders(folderIds: FolderId[], newParentId: FolderId): Promise<Folder[]>;
     updateFileMetaData(fileId: EntityId, metaData: Partial<FileMetaData>): Promise<FileMetaData>;
 
     //Delete
     deleteFiles(fileIds: EntityId[]): Promise<void>;
-    deleteFolders(folderIds: EntityId[]): Promise<void>;
+    deleteFolders(folderIds: FolderId[]): Promise<void>;
 
     //Find
     findFiles(searchQuery: string): Promise<FileMetaData[]>;

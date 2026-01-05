@@ -2,7 +2,7 @@
 
 import { useFileHandlers, useFileState } from "@/hooks";
 import { MockProvider } from "@/providers/mock-provider";
-import { EntityId, FileManagerProps, FileMetaData, FileType, FolderId, Folder, PaginationInfo } from "@/types/file-manager";
+import { EntityId, FileManagerProps, FileMetaData, FileType, FolderId, Folder, PaginationInfo, Mode, SelectionMode, SELECTION_MODE, MODE } from "@/types/file-manager";
 import { FileUploadInput, IFileManagerProvider } from "@/types/provider";
 import { createContext, useContext, useMemo, useState } from "react";
 
@@ -18,39 +18,42 @@ interface FileManagerContextType {
   selectedFolders: Folder[];
   currentFolder: Folder | null;
   searchQuery: string;
-  selectedFileTypes: FileType[];
   isLoading: boolean;
   pagination: PaginationInfo;
+
+  //modal
   isUploadModalOpen: boolean;
   isCreateFolderModalOpen: boolean;
   isMoveFileModalOpen: boolean;
   isRenameFolderModalOpen: boolean;
-  mode: "page" | "modal";
-  selectionMode: "single" | "multiple";
-  acceptedFileTypes?: string[];
+
+
+  mode: Mode;
+  selectionMode: SelectionMode;
+  acceptedFileTypesForModal?: FileType[]; // what type of files, your file-manager will handel, like images, videos, etc.
 
   // Provider
   provider: IFileManagerProvider;
+  basePath?: string;
 
   // Setters
   setSearchQuery: (query: string) => void;
-  setSelectedFileTypes: (types: FileType[]) => void;
+  setSelectedFiles: (files: FileMetaData[]) => void;
+  setSelectedFolders: (folders: Folder[]) => void;
+  
+  //Modals Setters
   setIsUploadModalOpen: (isOpen: boolean) => void;
   setIsCreateFolderModalOpen: (isOpen: boolean) => void;
   setIsMoveFileModalOpen: (isOpen: boolean) => void;
   setIsRenameFolderModalOpen: (isOpen: boolean) => void;
-  setSelectedFiles: (files: FileMetaData[]) => void;
-  setSelectedFolders: (folders: Folder[]) => void;
 
   // Handlers
-  handleFileSelect: (file: FileMetaData, event?: React.MouseEvent, isCheckboxClick?: boolean) => void;
-  handleFolderSelect: (folderId: FolderId) => void;
-  handleFolderClick: (folder: Folder, event: React.MouseEvent, isCheckboxClick?: boolean) => void;
+  handleFileClick: (file: FileMetaData, event?: React.MouseEvent, isCheckboxClick?: boolean) => void;
+  handleFolderClick: (folder: Folder | null, event?: React.MouseEvent, isCheckboxClick?: boolean) => void;
   handleClearSelection: () => void;
   handleSelectAllGlobal: (checked: boolean) => void;
-  handleSelectAllFolders: (checked: boolean) => void;
-  handleSelectAllFiles: (checked: boolean) => void;
-  handlePageChange: (page: number) => void;
+
+  setCurrentPage: (page: number) => void;
 
   // CRUD
   uploadFiles: (fileUploadInput: FileUploadInput[]) => Promise<void>;
@@ -64,42 +67,38 @@ interface FileManagerContextType {
   // Computed
   isInSelectionMode: () => boolean;
   getCurrentFolder: () => Folder | null;
-  getGlobalCheckboxState: () => boolean | "indeterminate";
-  getFoldersCheckboxState: () => boolean | "indeterminate";
-  getFilesCheckboxState: () => boolean | "indeterminate";
+  getSelectionState: () => boolean | "indeterminate";
 
-  // Callbacks
+
+  // Callbacks for modal mode
   onClose?: () => void;
   onFilesSelected?: (files: FileMetaData[]) => void;
 }
 
 export function FileManagerProvider({
   children,
-  mode = "page",
-  selectionMode = "single",
+  mode = MODE.PAGE,
+  selectionMode = SELECTION_MODE.SINGLE,
   allowedFileTypes,
   onFilesSelected,
   onClose,
-  acceptedFileTypes,
+  acceptedFileTypesForModal,
   initialFolderId = null,
-  provider : propProvider,
+  provider,
+  basePath = "/media",
 }: FileManagerProps & { children: React.ReactNode }) {
   
-  // Stabilize provider - use useState with lazy initializer for stable fallback instance
-  // This ensures the MockProvider is only created once if no provider is passed
-  const [fallbackProvider] = useState<IFileManagerProvider>(() => new MockProvider());
-  const provider = propProvider ?? fallbackProvider;
-
    // Use the state hook
   const state = useFileState({
     mode,
     selectionMode,
     initialFolderId,
-    acceptedFileTypes,
+    acceptedFileTypesForModal,
     allowedFileTypes,
     provider,
     onFilesSelected,
     onClose,
+    basePath,
   });
 
     // Use the handlers hook
@@ -114,7 +113,6 @@ export function FileManagerProvider({
     selectedFolders: state.selectedFolders,
     currentFolder: state.currentFolder,
     searchQuery: state.searchQuery,
-    selectedFileTypes: state.selectedFileTypes,
     isLoading: state.isLoading,
     pagination: state.pagination,
     isUploadModalOpen: state.isUploadModalOpen,
@@ -123,11 +121,10 @@ export function FileManagerProvider({
     isRenameFolderModalOpen: state.isRenameFolderModalOpen,
     mode: state.mode,
     selectionMode: state.selectionMode,
-    acceptedFileTypes: state.acceptedFileTypes,
+    acceptedFileTypesForModal: state.acceptedFileTypesForModal,
 
     // Setters
     setSearchQuery: state.setSearchQuery,
-    setSelectedFileTypes: state.setSelectedFileTypes,
     setIsUploadModalOpen: state.setIsUploadModalOpen,
     setIsCreateFolderModalOpen: state.setIsCreateFolderModalOpen,
     setIsMoveFileModalOpen: state.setIsMoveFileModalOpen,
@@ -137,14 +134,14 @@ export function FileManagerProvider({
     setIsRenameFolderModalOpen: state.setIsRenameFolderModalOpen,
 
     // Handlers
-    handleFileSelect: handlers.handleFileSelect,
-    handleFolderSelect: handlers.handleFolderSelect,
+    // Handlers
+    handleFileClick: handlers.handleFileClick,
     handleFolderClick: handlers.handleFolderClick,
     handleClearSelection: handlers.handleClearSelection,
     handleSelectAllGlobal: handlers.handleSelectAllGlobal,
-    handleSelectAllFolders: handlers.handleSelectAllFolders,
-    handleSelectAllFiles: handlers.handleSelectAllFiles,
-    handlePageChange: handlers.handlePageChange,
+
+    setCurrentPage: handlers.setCurrentPage,
+
 
     // CRUD
     uploadFiles: handlers.uploadFiles,
@@ -158,14 +155,14 @@ export function FileManagerProvider({
     // Computed
     isInSelectionMode: state.isInSelectionMode,
     getCurrentFolder: state.getCurrentFolder,
-    getGlobalCheckboxState: state.getGlobalCheckboxState,
-    getFoldersCheckboxState: state.getFoldersCheckboxState,
-    getFilesCheckboxState: state.getFilesCheckboxState,
+    getSelectionState: state.getSelectionState,
+
 
     // Callbacks
     onClose: state.onClose,
     onFilesSelected: state.onFilesSelected,
     provider,
+    basePath: state.basePath,
   }), [state, handlers, provider]);
 
   return (

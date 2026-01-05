@@ -1,3 +1,4 @@
+'use client'
 export default function HomeIcon(
   props: Readonly<React.SVGProps<SVGSVGElement>>
 ) {

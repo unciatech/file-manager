@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] });
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
-      <body className={cn("text-base antialiased", inter.className)}>
+      <body className={cn("text-base antialiased", inter.className)} suppressHydrationWarning>
         <div className="isolate">{children}</div>
       </body>
     </html>

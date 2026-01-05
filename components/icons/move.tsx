@@ -1,7 +1,8 @@
+'use client'
 export default function MoveIcon(
   props: Readonly<React.SVGProps<SVGSVGElement>>
 ) {
-  return (
+  return (  
     <svg
       width="24"
       height="24"

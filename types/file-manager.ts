@@ -54,6 +54,7 @@ const DOCUMENT_FORMAT_ENUM = createEnum([
   "xlsx",
   "pptx",
   "txt",
+  "json",
 ] as const);
 export const DOCUMENT_FORMAT = DOCUMENT_FORMAT_ENUM.map;
 export const DOCUMENT_FORMATS = DOCUMENT_FORMAT_ENUM.values;
@@ -77,6 +78,7 @@ export type AudioFormat = typeof AUDIO_FORMATS[number];
 const OTHER_FORMAT_ENUM = createEnum([
   "zip",
   "rar",
+  "exe"
 ] as const);
 export const OTHER_FORMAT = OTHER_FORMAT_ENUM.map;
 export const OTHER_FORMATS = OTHER_FORMAT_ENUM.values;
@@ -148,7 +150,7 @@ export type EntityId = string | number;
 export type FolderId = string | number | null;
 
 export interface Folder{
-    id: EntityId;
+    id: FolderId;
     name: string;
     parentId: FolderId;
     color?: string;
@@ -225,10 +227,14 @@ export interface FileManagerProps {
     allowedFileTypes: FileType[];
     viewMode: ViewMode;
     initialFolderId: FolderId;
-    onFilesSelected?: (files: FileMetaData[] ) => void;
-    onClose?: () => void;
-    acceptedFileTypes?: FileType[] // For modal mode - what types to show
-    provider?: IFileManagerProvider // Optional - falls back to MockProvider
+
+    //Modal Callbacks
+    onFilesSelected?: (files: FileMetaData[] ) => void; // when in modal mode, use this to get selected files
+    onClose?: () => void; // when in modal mode, use this to handle close action
+
+    acceptedFileTypesForModal?: FileType[] // when in modal mode - what types to show ("image" | "video" | "document" | "audio" | "other")
+    provider: IFileManagerProvider // Optional - falls back to MockProvider
+    basePath?: string
 }
 
 
@@ -236,9 +242,12 @@ export interface FileStateOptions {
   mode: Mode;
   selectionMode: SelectionMode;
   initialFolderId: FolderId;
-  acceptedFileTypes?: FileType[];
+  acceptedFileTypesForModal?: FileType[];
   allowedFileTypes?: FileType[];
   provider: IFileManagerProvider;
+  basePath?: string;
+
+  //Modal Callbacks
   onFilesSelected?: (files: FileMetaData[]) => void;
   onClose?: () => void;
 }

@@ -172,4 +172,92 @@ export const mockFiles: FileMetaData[] = [
       videoSource: "remote",
     },
   },
+  {
+    id: 6,
+    name: "podcast_episode.mp3",
+    type: "audio",
+    url: "/placeholder.svg?height=400&width=300",
+    size: 5242880, // 5 MB
+    createdAt: new Date("2024-05-02T10:00:00Z"),
+    updatedAt: new Date("2024-05-02T10:00:00Z"),
+    folderId: 4,
+    tags: ["personal"],
+    metaData: {
+      duration: 3600, // 1 hour
+      format: "mp3",
+    },
+  },
+  {
+    id: 7,
+    name: "notes.txt",
+    type: "document",
+    url: "/placeholder.svg?height=400&width=300",
+    size: 1024, // 1 KB
+    createdAt: new Date("2024-05-01T09:00:00Z"),
+    updatedAt: new Date("2024-05-01T09:00:00Z"),
+    folderId: 1,
+    tags: ["work"],
+    metaData: {
+      format: "txt",
+    },
+  },
+  {
+    id: 9,
+    name: "data.json",
+    type: "document",
+    url: "/placeholder.svg?height=400&width=300",
+    size: 2048, // 2 KB
+    createdAt: new Date("2024-04-30T15:00:00Z"),
+    updatedAt: new Date("2024-04-30T15:00:00Z"),
+    folderId: 1,
+    tags: ["project"],
+    metaData: {
+      format: "json",
+    },
+  },
+  {
+    id: 10,
+    name: "archive.zip",
+    type: "other",
+    url: "/placeholder.svg?height=400&width=300",
+    size: 104857600, // 100 MB
+    createdAt: new Date("2024-04-29T12:00:00Z"),
+    updatedAt: new Date("2024-04-29T12:00:00Z"),
+    folderId: 5,
+    tags: ["archive"],
+    metaData: {
+      format: "zip",
+      description: "Project backup",
+    },
+  },
+  {
+    id: 11,
+    name: "setup.exe",
+    type: "other",
+    url: "/placeholder.svg?height=400&width=300",
+    size: 52428800, // 50 MB
+    createdAt: new Date("2024-04-28T11:00:00Z"),
+    updatedAt: new Date("2024-04-28T11:00:00Z"),
+    folderId: 5,
+    tags: ["software"],
+    metaData: {
+      format: "exe",
+      description: "Installer",
+    },
+  },
+  {
+    id: 12,
+    name: "old_stuff.rar",
+    type: "other",
+    url: "/placeholder.svg?height=400&width=300",
+    size: 20971520, // 20 MB
+    createdAt: new Date("2024-04-27T10:00:00Z"),
+    updatedAt: new Date("2024-04-27T10:00:00Z"),
+    folderId: 5,
+    tags: ["archive"],
+    metaData: {
+      format: "rar",
+      description: "Old files",
+    },
+  },
 ];
