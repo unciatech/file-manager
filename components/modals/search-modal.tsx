@@ -21,7 +21,7 @@ export default function SearchDialog() {
   const [fileResults, setFileResults] = useState<FileMetaData[]>([]);
   const [folderResults, setFolderResults] = useState<Folder[]>([]);
   const [loading, setLoading] = useState(false);
-  const { provider, setSearchQuery: setGlobalSearchQuery, handleFolderSelect } = useFileManager();
+  const { provider, handleFolderClick, handleClearSelection } = useFileManager();
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -63,16 +63,19 @@ export default function SearchDialog() {
 
   const handleInputChange = (value: string) => {
     setSearchQuery(value);
-    setGlobalSearchQuery(value); // update global search query
   };
 
   return (
     <>
-      <Button variant="outline" onClick={() => setOpen(true)}>
-        <SearchIcon />
+      <Button
+      variant="outline"
+      size="lg"
+      className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-gradient-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+      onClick={() => setOpen(true)}>
+        <SearchIcon className="size-5 mr-2" />
         Search
       </Button>
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
         <CommandInput
           placeholder="Type to search files or folders..."
           value={searchQuery}
@@ -89,10 +92,9 @@ export default function SearchDialog() {
                 <CommandItem
                   key={folder.id}
                   onSelect={() => {
+                    handleClearSelection(); // Critical: prevent phantom selection
                     setOpen(false);
-                    handleFolderSelect(folder.id);
-                    //navigate to folder if folder selected or open file if file selected
-
+                    handleFolderClick(folder);
                   }}
                 >
                   <span>{folder.name}</span>

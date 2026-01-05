@@ -22,7 +22,7 @@ import HomeIcon from '@/components/icons/home';
 interface BreadcrumbNavigationProps {
   folders: Folder[];
   currentFolder: Folder | null;
-  onFolderSelect: (folderId: string | number | null) => void;
+  onFolderClick: (folder: Folder | null) => void;
 }
 
 const BREAKPOINTS = {
@@ -36,7 +36,7 @@ const MAX_VISIBLE = {
   desktop: 4,
 };
 
-export default function BreadcrumbNavigation({ folders, currentFolder, onFolderSelect }: Readonly<BreadcrumbNavigationProps>) {
+export default function BreadcrumbNavigation({ folders, currentFolder, onFolderClick }: Readonly<BreadcrumbNavigationProps>) {
   const [maxVisible, setMaxVisible] = useState(MAX_VISIBLE.desktop);
 
   useEffect(() => {
@@ -91,11 +91,11 @@ export default function BreadcrumbNavigation({ folders, currentFolder, onFolderS
         <BreadcrumbItem>
           <Button
             variant="ghost"
-            size="sm"
+            size="lg"
             className="-ml-2"
-            onClick={() => onFolderSelect(null)}
+            onClick={() => onFolderClick(null)}
           >
-            <HomeIcon className="mr-2 h-4 w-4" />
+            
             Home
           </Button>
         </BreadcrumbItem>
@@ -115,7 +115,7 @@ export default function BreadcrumbNavigation({ folders, currentFolder, onFolderS
                   {collapsedItems.map((folder) => (
                     <DropdownMenuItem
                       key={folder.id}
-                      onClick={() => onFolderSelect(folder.id)}
+                      onClick={() => onFolderClick(folder)}
                     >
                       {folder.name}
                     </DropdownMenuItem>
@@ -139,7 +139,7 @@ export default function BreadcrumbNavigation({ folders, currentFolder, onFolderS
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onFolderSelect(folder.id)}
+                  onClick={() => onFolderClick(folder)}
                   className="max-w-[150px] truncate"
                 >
                   {folder.name}

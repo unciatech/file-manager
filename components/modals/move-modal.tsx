@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "../ui/button";
+import { FolderId } from "@/types/file-manager";
 
 export function MoveModal() {
   const {
@@ -22,7 +23,7 @@ export function MoveModal() {
     bulkMove
   } = useFileManager();
 
-  const [targetFolderId, setTargetFolderId] = useState<string | number | null>(
+  const [targetFolderId, setTargetFolderId] = useState<FolderId>(
     null
   );
 
@@ -64,7 +65,7 @@ export function MoveModal() {
                   -- Select a folder --
                 </option>
                 {folders.map((folder) => (
-                  <option key={folder.id} value={folder.id}>
+                  <option key={folder.id ?? null} value={folder.id ?? ""}>
                     {folder.name}
                   </option>
                 ))}

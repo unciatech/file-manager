@@ -9,7 +9,7 @@ import {
   MODE,
   PaginationInfo,
 } from "@/types/file-manager";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function useFileState(options: FileStateOptions) {
@@ -17,14 +17,15 @@ export function useFileState(options: FileStateOptions) {
     mode,
     selectionMode,
     initialFolderId,
-    acceptedFileTypes,
+    acceptedFileTypesForModal,
     allowedFileTypes,
     provider,
     onFilesSelected,
     onClose,
+    basePath,
   } = options;
 
-  const router = useRouter();
+
   const params = useParams();
 
   // Determine initial folder from params if in page mode
@@ -44,10 +45,9 @@ export function useFileState(options: FileStateOptions) {
   const [files, setFiles] = useState<FileMetaData[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<FileMetaData[]>([]);
-  const [selectedFolders, setSelectedFolders] = useState<Folder[]>([]); 
+  const [selectedFolders, setSelectedFolders] = useState<Folder[]>([]);
   const [currentFolder, setCurrentFolder] = useState<Folder | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFileTypes, setSelectedFileTypes] = useState<FileType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
@@ -74,68 +74,67 @@ export function useFileState(options: FileStateOptions) {
     try {
       // Need to fetch current folder details if we have an ID but no object (e.g. from URL)
       // This part is tricky because currentFolder might be null initially but folderId memo is set
-      
+
       const foldersData = await provider.getFolders(currentFolder?.id ?? null);
       setFolders(foldersData);
     } catch (error) {
       console.error("Failed to load folders:", error);
     }
   }, [currentFolder, provider]);
-  
+
   // Load files
   const loadFiles = useCallback(async () => {
     const { currentPage, filesPerPage } = paginationRef.current;
     setIsLoading(true);
+
     try {
+
+      let fileTypes: FileType[] | undefined = [];
+      if (mode === MODE.MODAL) {
+        fileTypes = acceptedFileTypesForModal;
+      } else {
+        fileTypes = allowedFileTypes;
+      }
+
       const result = await provider.getFiles(
         currentFolder?.id ?? null,
-        selectedFileTypes.length > 0 ? selectedFileTypes : null,
+        fileTypes,
         searchQuery,
         currentPage,
         filesPerPage,
       );
 
-      let filteredFiles = result.files;
 
-      // Filter by accepted file types for modal mode
-      if (mode === "modal" && acceptedFileTypes) {
-        filteredFiles = filteredFiles.filter((file) =>
-          acceptedFileTypes.includes(file.type)
-        );
-      }
-
-      // Filter by allowed file types if specified
-      if (allowedFileTypes) {
-        filteredFiles = filteredFiles.filter((file) =>
-          allowedFileTypes.includes(file.type)
-        );
-      }
-
-      setFiles(filteredFiles);
+      setFiles(result.files);
       setPagination(result.pagination);
     } catch (error) {
       console.error("Failed to load files:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [currentFolder, searchQuery, selectedFileTypes, mode, acceptedFileTypes, allowedFileTypes, provider]);
+  }, [currentFolder, searchQuery, acceptedFileTypesForModal, mode, allowedFileTypes, provider]);
 
   // Initial data load & Current Folder Sync
   useEffect(() => {
+
     const fetchCurrentFolder = async () => {
-       if (folderId && (!currentFolder || currentFolder.id !== folderId)) {
-           try{
-               const folder = await provider.getFolder(folderId);
-               setCurrentFolder(folder);
-           }catch(e){
-               console.error("Failed to fetch current folder", e);
-               setCurrentFolder(null); // Fallback to root? Or error state?
-           }
-       } else if (folderId === null && currentFolder !== null) {
-           setCurrentFolder(null);
-       }
+      if (folderId && (!currentFolder || currentFolder.id !== folderId)) {
+        try {
+          setIsLoading(true);
+          const folder = await provider.getFolder(folderId);
+          setCurrentFolder(folder);
+        } catch (e) {
+          console.error("Failed to fetch current folder", e);
+          setCurrentFolder(null); // Fallback to root? Or error state?
+        } finally {
+          setIsLoading(false);
+        }
+      } else if (folderId === null && currentFolder !== null) {
+        setCurrentFolder(null);
+      }
     };
     fetchCurrentFolder();
+
   }, [folderId, provider]); // Removed currentFolder dependency to avoid loops, logic inside handles it
 
   useEffect(() => {
@@ -157,28 +156,16 @@ export function useFileState(options: FileStateOptions) {
   const getCurrentFolder = () => currentFolder;
 
   // Checkbox states
-  const getGlobalCheckboxState = () => {
-    const totalItems = files.length + (mode === "page" ? folders.length : 0);
+  const getSelectionState = () => {
+    const totalItems = files.length + (mode === MODE.PAGE ? folders.length : 0);
     const selectedItems = selectedFiles.length + selectedFolders.length;
     if (selectedItems === 0) return false;
     if (selectedItems === totalItems) return true;
     return "indeterminate";
   };
 
-  const getFoldersCheckboxState = () => {
-    if (folders.length === 0) return false;
-    if (selectedFolders.length === 0) return false;
-    if (selectedFolders.length === folders.length) return true;
-    return "indeterminate";
-  };
 
-  const getFilesCheckboxState = () => {
-    if (files.length === 0) return false;
-    if (selectedFiles.length === 0) return false;
-    if (selectedFiles.length === files.length) return true;
-    return "indeterminate";
-  };
-return {
+  return {
     // State
     files,
     folders,
@@ -186,14 +173,13 @@ return {
     selectedFolders,
     currentFolder,
     searchQuery,
-    selectedFileTypes,
     isLoading,
     pagination,
     isUploadModalOpen,
     isCreateFolderModalOpen,
     isMoveFileModalOpen,
     isRenameFolderModalOpen,
-    currentFolders : folders,
+    currentFolders: folders,
 
     // Setters
     setFiles,
@@ -202,9 +188,9 @@ return {
     setSelectedFolders,
     setCurrentFolder,
     setSearchQuery,
-    setSelectedFileTypes,
-
     setPagination,
+
+    //Modal Setters
     setIsUploadModalOpen,
     setIsCreateFolderModalOpen,
     setIsMoveFileModalOpen,
@@ -217,18 +203,17 @@ return {
     // Computed
     isInSelectionMode,
     getCurrentFolder,
-    getGlobalCheckboxState,
-    getFoldersCheckboxState,
-    getFilesCheckboxState,
+    getSelectionState,
+
 
     // Config
     mode,
     selectionMode,
-    acceptedFileTypes,
+    acceptedFileTypesForModal,
     provider,
-    router,
     onFilesSelected,
     onClose,
+    basePath,
   };
 }
 

@@ -2,8 +2,9 @@
 
 import { useCallback, MouseEvent } from "react";
 import { FileState } from "./use-file-state";
-import { FileMetaData, Folder, FolderId } from "@/types/file-manager";
+import { FileMetaData, Folder, FolderId, MODE } from "@/types/file-manager";
 import { FileUploadInput } from "@/types/provider";
+import { useRouter } from "next/navigation";
 
 export function useFileHandlers(state: FileState) {
   const {
@@ -22,205 +23,323 @@ export function useFileHandlers(state: FileState) {
     loadFolders,
     isInSelectionMode,
     provider,
-    router,
     onFilesSelected,
     onClose,
+    basePath,
   } = state;
 
-  //File Selection
-  const handleFileSelect = useCallback(
-    (file: FileMetaData, event?: MouseEvent, isCheckboxClick = false) => {
-      if (isCheckboxClick) {
-        setSelectedFiles((prev) => {
-          const isSelected = prev.find((f) => f.id === file.id);
-          if (isSelected) {
-            return prev.filter((f) => f.id !== file.id);
-          } else {
-            return [...prev, file];
-          }
-        });
-        return;
-      }
+  const router = useRouter();
 
-      if (event && (event.metaKey || event.ctrlKey)) {
-        setSelectedFiles((prev) => {
-          const isSelected = prev.some((f) => f.id === file.id);
-          return isSelected
-            ? prev.filter((f) => f.id !== file.id)
-            : [...prev, file];
-        });
-        return;
-      }
-
-      if (isInSelectionMode()) {
-        setSelectedFiles((prev) => {
-          const isSelected = prev.some((f) => f.id === file.id);
-          return isSelected
-            ? prev.filter((f) => f.id !== file.id)
-            : [...prev, file];
-        });
+  /**
+   * Helper function to toggle files in the selection
+   * @param prev - Previous selection array
+   * @param filesToToggle - Files to toggle
+   * @returns Updated selection array
+   */
+  const toggleFilesInSelection = (
+    prev: FileMetaData[],
+    filesToToggle: FileMetaData[]
+  ): FileMetaData[] => {
+    let updated = [...prev];
+    filesToToggle.forEach((file) => {
+      const isSelected = updated.some((f) => f.id === file.id);
+      if (isSelected) {
+        updated = updated.filter((f) => f.id !== file.id);
       } else {
-        setSelectedFiles([file]);
-        if (mode === "modal" && selectionMode === "single") {
+        updated.push(file);
+      }
+    });
+    return updated;
+  };
+
+  /**
+   * Helper function to toggle folders in the selection
+   * @param prev - Previous selection array
+   * @param foldersToToggle - Folders to toggle
+   * @returns Updated selection array
+   */
+  const toggleFoldersInSelection = (
+    prev: Folder[],
+    foldersToToggle: Folder[]
+  ): Folder[] => {
+    let updated = [...prev];
+    foldersToToggle.forEach((folder) => {
+      const isSelected = updated.some((f) => f.id === folder.id);
+      if (isSelected) {
+        updated = updated.filter((f) => f.id !== folder.id);
+      } else {
+        updated.push(folder);
+      }
+    });
+    return updated;
+  };
+
+
+  /**
+   * Handles file click events
+   * In modal mode: Selects the file and triggers callback
+   * In page mode: Opens preview/details (placeholder)
+   * 
+   * @param file - The file that was clicked
+   */
+  /**
+   * Handles file click/selection events
+   * - Checkbox click or Ctrl/Cmd+click: Toggles file in selection
+   * - Modal mode: Selects file and returns (single), or toggles (multiple)
+   * - Page mode: Opens preview/details
+   * 
+   * @param file - The file that was clicked
+   * @param event - Mouse event for detecting modifier keys
+   * @param isCheckboxClick - Whether this was explicitly a selection action (checkbox)
+   */
+  const handleFileClick = useCallback(
+    (file: FileMetaData, event?: MouseEvent, isCheckboxClick = false) => {
+      const fileArray = [file];
+
+      // 1. Explicit Selection Action (Checkbox or Ctrl/Cmd + Click)
+      const isExplicitSelection = isCheckboxClick || (event && (event.metaKey || event.ctrlKey));
+
+      if (isExplicitSelection) {
+        setSelectedFiles((prev) => toggleFilesInSelection(prev, fileArray));
+        return;
+      }
+
+      // 2. Already in Selection Mode -> Toggle behavior
+      if (isInSelectionMode() && mode !== MODE.MODAL) {
+         // In modal, we might want simple click to select, but for now consistent with page behavior:
+         // If "Selecting...", click toggles. 
+         setSelectedFiles((prev) => toggleFilesInSelection(prev, fileArray));
+         return;
+      }
+
+      // 3. Modal Mode specific handling
+      if (mode === MODE.MODAL) {
+        if (selectionMode === "single") {
+          setSelectedFiles([file]);
           onFilesSelected?.([file]);
           onClose?.();
+        } else {
+           // In multiple mode, regular click toggles
+           setSelectedFiles((prev) => toggleFilesInSelection(prev, fileArray));
         }
+        return;
       }
+
+      // 4. Page Mode Regular Click -> Preview/Open
+      // TODO: Implement preview or details view
+      console.log("File clicked:", file);
+      // alert(`File clicked: ${file.name}`);
     },
-    [
-      mode,
-      selectionMode,
-      isInSelectionMode,
-      setSelectedFiles,
-      onFilesSelected,
-      onClose,
-    ]
+    [mode, selectionMode, isInSelectionMode, setSelectedFiles, onFilesSelected, onClose]
   );
 
 
-  // Folder Navigation
-  const handleFolderSelect = useCallback((folderId: FolderId) => {
-    // If navigating to root (null), set currentFolder to null immediately
-    if (folderId === null) {
-      setCurrentFolder(null);
-    }
-    // If we have the folder in the current list, we could set it immediately to avoid loading state
-    // but the effect in useFileState will handle fetching details if needed.
-    
-    setSelectedFiles([]);
-    setSelectedFolders([]);
 
-    if (mode === "page") {
-      const newUrl = (folderId === null ) ? "/media" : `/media/${folderId}`;
-      router.push(newUrl);
-    }
-  }, [mode, router, setCurrentFolder, setSelectedFiles, setSelectedFolders]);
+  /**
+   * Handles folder click/navigation events
+   * - Checkbox click or Ctrl/Cmd+click: Toggles folder in selection
+   * - Regular click: Navigates to the folder (clearing selections)
+   * 
+   * @param folder - The folder object, or null for Root
+   * @param event - Mouse event for detecting modifier keys
+   * @param isCheckboxClick - Whether this was explicitly a selection action
+   */
+  const handleFolderClick = useCallback(
+    (folder: Folder | null, event?: MouseEvent, isCheckboxClick = false) => {
+      const folderId = folder ? folder.id : null;
 
-    // Folder Click (selection vs navigation)
-  const handleFolderClick = useCallback((
-    folder: Folder,
-    event: MouseEvent,
-    isCheckboxClick = false
-  ) => {
-    if (isCheckboxClick) {
-      setSelectedFolders((prev) => {
-        const isSelected = prev.some((f) => f.id === folder.id);
-        return isSelected ? prev.filter((f) => f.id !== folder.id) : [...prev, folder];
-      });
-      return;
-    }
+       // 1. Explicit Selection Action (Checkbox or Ctrl/Cmd + Click)
+       // Note: Root (null) cannot be selected
+      const isExplicitSelection = isCheckboxClick || (event && (event.metaKey || event.ctrlKey));
+      
+      if (isExplicitSelection && folder) {
+        setSelectedFolders((prev) => toggleFoldersInSelection(prev, [folder]));
+        return;
+      }
 
-    if (event.metaKey || event.ctrlKey) {
-      setSelectedFolders((prev) => {
-        const isSelected = prev.some((f) => f.id === folder.id);
-        return isSelected ? prev.filter((f) => f.id !== folder.id) : [...prev, folder];
-      });
-      return;
-    }
+      // 2. Already in Selection Mode -> Toggle (if not root)
+      if (isInSelectionMode() && folder) {
+        setSelectedFolders((prev) => toggleFoldersInSelection(prev, [folder]));
+        return;
+      }
 
-    if (isInSelectionMode()) {
-      setSelectedFolders((prev) => {
-        const isSelected = prev.some((f) => f.id === folder.id);
-        return isSelected ? prev.filter((f) => f.id !== folder.id) : [...prev, folder];
-      });
-    } else {
-      handleFolderSelect(folder.id);
-    }
-  }, [isInSelectionMode, setSelectedFolders, handleFolderSelect]);
+      // 3. Navigation (Regular Click)
+      // Navigate to folder (or root)
+      setCurrentFolder(folder);
+      
+      // Clear selection when navigating
+      setSelectedFiles([]);
+      setSelectedFolders([]);
 
-    // Selection helpers
+      // Update URL in page mode
+      if (mode === MODE.PAGE) {
+        const path = basePath ?? '/media';
+        const newUrl = folderId === null ? path : `${path}/${folderId}`;
+        router.push(newUrl);
+      }
+    },
+    [isInSelectionMode, mode, router, setCurrentFolder, setSelectedFolders, setSelectedFiles]
+  );
+
+  /**
+   * Clears all selected files and folders
+   */
   const handleClearSelection = useCallback(() => {
     setSelectedFiles([]);
     setSelectedFolders([]);
   }, [setSelectedFiles, setSelectedFolders]);
 
-    const handleSelectAllGlobal = useCallback((checked: boolean) => {
-    if (checked) {
-      setSelectedFiles(files);
-      setSelectedFolders(mode === "page" ? currentFolders : []);
-    } else {
-      setSelectedFiles([]);
-      setSelectedFolders([]);
-    }
-  }, [files, currentFolders, mode, setSelectedFiles, setSelectedFolders]);
-
-  const handleSelectAllFolders = useCallback((checked: boolean) => {
-    setSelectedFolders(checked ? currentFolders : []);
-  }, [currentFolders, setSelectedFolders]);
-
-  const handleSelectAllFiles = useCallback((checked: boolean) => {
-    setSelectedFiles(checked ? files : []);
-  }, [files, setSelectedFiles]);
-
-
-  // Pagination
-  const handlePageChange = useCallback((page: number) => {
-
-    //update the provider pagination state if applicable
-    
-
-    setPagination((prev) => ({ ...prev, currentPage: page }));
-  }, [setPagination]);
-
-
-  // CRUD Operations
-  const uploadFiles = useCallback(async (fileUploadInput: FileUploadInput[]) => {
-    try {
-      await provider.uploadFiles(fileUploadInput, currentFolder?.id ?? null);
-      await loadFiles();
-      setSelectedFiles([]);
-    } catch (error) {
-      console.error("Upload failed:", error);
-    }
-  }, [currentFolder, provider, loadFiles, setSelectedFiles]);
-  const createFolder = useCallback(async (name: string) => {
-    try {
-      await provider.createFolder(
-        name,
-        currentFolder?.id ?? null
-      );
-      await loadFolders();
-      setSelectedFiles([]);
-    } catch (error) {
-      console.error("Failed to create folder:", error);
-    }
-  }, [currentFolder, provider, loadFolders, setSelectedFiles]);
-
-  const bulkMove = useCallback(async (targetFolderId: FolderId) => {
-    try {
-      if (selectedFiles.length > 0) {
-        await provider.moveFiles(selectedFiles.map((f) => f.id), targetFolderId);
+  /**
+   * Selects or deselects all items (files and folders)
+   * In page mode: Includes folders
+   * In modal mode: Only files
+   * 
+   * @param checked - True to select all, false to deselect all
+   */
+  const handleSelectAllGlobal = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        setSelectedFiles(files);
+        setSelectedFolders(mode === MODE.PAGE ? currentFolders : []);
+      } else {
+        setSelectedFiles([]);
+        setSelectedFolders([]);
       }
-      if (selectedFolders.length > 0) {
-        await provider.moveFolders(selectedFolders.map((f) => f.id), targetFolderId);
+    },
+    [files, currentFolders, mode, setSelectedFiles, setSelectedFolders]
+  );
+
+
+
+  /**
+   * Updates the current page number
+   * @param page - The new page number
+   */
+  const setCurrentPage = useCallback(
+    (page: number) => {
+      //update the provider pagination state if applicable
+
+      setPagination((prev) => ({ ...prev, currentPage: page }));
+    },
+    [setPagination]
+  );
+
+  /**
+   * Uploads files to the current folder
+   * Clears selection after successful upload
+   * 
+   * @param fileUploadInput - Array of file upload data
+   */
+  const uploadFiles = useCallback(
+    async (fileUploadInput: FileUploadInput[]) => {
+      try {
+        await provider.uploadFiles(fileUploadInput, currentFolder?.id ?? null);
+        await loadFiles();
+        setSelectedFiles([]);
+      } catch (error) {
+        console.error("Upload failed:", error);
       }
-      await loadFiles();
-      await loadFolders();
-      setSelectedFiles([]);
-      setSelectedFolders([]);
-    } catch (error) {
-      console.error("Failed to move items:", error);
-    }
-  }, [selectedFiles, selectedFolders, provider, loadFiles, loadFolders, setSelectedFiles, setSelectedFolders]);
+    },
+    [currentFolder, provider, loadFiles, setSelectedFiles]
+  );
 
-  const renameFolder = useCallback(async (folderId: string | number, newName: string) => {
-    try {
-      await provider.renameFolder(folderId, newName);
-      await loadFolders();
-    } catch (error) {
-      console.error("Failed to rename folder:", error);
-    }
-  }, [provider, loadFolders]);
+  /**
+   * Creates a new folder in the current directory
+   * Clears selection after successful creation
+   * 
+   * @param name - Name of the folder to create
+   */
+  const createFolder = useCallback(
+    async (name: string) => {
+      try {
+        await provider.createFolder(name, currentFolder?.id ?? null);
+        await loadFolders();
+        setSelectedFiles([]);
+      } catch (error) {
+        console.error("Failed to create folder:", error);
+      }
+    },
+    [currentFolder, provider, loadFolders, setSelectedFiles]
+  );
 
-  const updateFileMetadata = useCallback(async (fileId: string | number, metadata: Partial<FileMetaData>) => {
-    try {
-      await provider.updateFileMetaData(fileId, metadata);
-      await loadFiles();
-    } catch (error) {
-      console.error("Failed to update metadata:", error);
-    }
-  }, [provider, loadFiles]);
+  /**
+   * Moves selected files and folders to a target folder
+   * Clears selection after successful move
+   * 
+   * @param targetFolderId - ID of the destination folder
+   */
+  const bulkMove = useCallback(
+    async (targetFolderId: FolderId) => {
+      try {
+        if (selectedFiles.length > 0) {
+          await provider.moveFiles(
+            selectedFiles.map((f) => f.id),
+            targetFolderId
+          );
+        }
+        if (selectedFolders.length > 0) {
+          await provider.moveFolders(
+            selectedFolders.map((f) => f.id),
+            targetFolderId
+          );
+        }
+        await loadFiles();
+        await loadFolders();
+        setSelectedFiles([]);
+        setSelectedFolders([]);
+      } catch (error) {
+        console.error("Failed to move items:", error);
+      }
+    },
+    [
+      selectedFiles,
+      selectedFolders,
+      provider,
+      loadFiles,
+      loadFolders,
+      setSelectedFiles,
+      setSelectedFolders,
+    ]
+  );
 
+  /**
+   * Renames a folder
+   * @param folderId - ID of the folder to rename
+   * @param newName - New name for the folder
+   */
+  const renameFolder = useCallback(
+    async (folderId: string | number, newName: string) => {
+      try {
+        await provider.renameFolder(folderId, newName);
+        await loadFolders();
+      } catch (error) {
+        console.error("Failed to rename folder:", error);
+      }
+    },
+    [provider, loadFolders]
+  );
+
+  /**
+   * Updates metadata for a specific file
+   * @param fileId - ID of the file to update
+   * @param metadata - Partial metadata to update
+   */
+  const updateFileMetadata = useCallback(
+    async (fileId: string | number, metadata: Partial<FileMetaData>) => {
+      try {
+        await provider.updateFileMetaData(fileId, metadata);
+        await loadFiles();
+      } catch (error) {
+        console.error("Failed to update metadata:", error);
+      }
+    },
+    [provider, loadFiles]
+  );
+
+  /**
+   * Deletes all selected files and folders
+   * Clears selection after successful deletion
+   */
   const bulkDelete = useCallback(async () => {
     try {
       if (selectedFiles.length > 0) {
@@ -236,8 +355,19 @@ export function useFileHandlers(state: FileState) {
     } catch (error) {
       console.error("Failed to delete items:", error);
     }
-  }, [selectedFiles, selectedFolders, provider, loadFiles, loadFolders, setSelectedFiles, setSelectedFolders]);
+  }, [
+    selectedFiles,
+    selectedFolders,
+    provider,
+    loadFiles,
+    loadFolders,
+    setSelectedFiles,
+    setSelectedFolders,
+  ]);
 
+  /**
+   * Refreshes all data by reloading folders and files
+   */
   const refreshData = useCallback(async () => {
     await loadFolders();
     await loadFiles();
@@ -245,14 +375,12 @@ export function useFileHandlers(state: FileState) {
 
   return {
     // Selection handlers
-    handleFileSelect,
-    handleFolderSelect,
+    handleFileClick,
     handleFolderClick,
     handleClearSelection,
     handleSelectAllGlobal,
-    handleSelectAllFolders,
-    handleSelectAllFiles,
-    handlePageChange,
+
+    setCurrentPage,
 
     // CRUD
     uploadFiles,

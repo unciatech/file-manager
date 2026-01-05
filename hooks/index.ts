@@ -7,3 +7,4 @@ export type { FileHandlers } from "./use-file-handlers";
 
 // Re-export types from types module
 export type { FileStateOptions } from "@/types/file-manager";
+

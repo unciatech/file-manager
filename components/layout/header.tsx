@@ -1,8 +1,8 @@
 import { useFileManager } from "@/context/file-manager-context";
-import { MODE } from "@/types/file-manager";
+import { MODE, SELECTION_MODE } from "@/types/file-manager";
 import { ReactNode } from "react";
 import BreadcrumbNavigation from "./breadcrumb-navigation";
-import SearchDialog from "../search/search-dialog";
+import SearchDialog from "../modals/search-modal";
 import { Button } from "../ui/button";
 import UploadFileIcon from "../icons/upload-file";
 import UploadFolderIcon from "../icons/upload-folder";
@@ -15,19 +15,15 @@ export function FileManagerHeader() {
     files,
     currentFolder,
     folders,
-    searchQuery,
-    setSearchQuery,
-    onClose,
     selectedFiles,
     selectedFolders,
     selectionMode,
     handleSelectAllGlobal,
-    getGlobalCheckboxState,
+    getSelectionState,
     setIsUploadModalOpen,
     setIsCreateFolderModalOpen,
-    acceptedFileTypes,
-    handleFolderSelect,
-    bulkDelete,
+    acceptedFileTypesForModal,
+    handleFolderClick,
     setIsMoveFileModalOpen,
   } = useFileManager();
 
@@ -37,10 +33,10 @@ export function FileManagerHeader() {
   });
 
   const getExpectedFileTypesLabel = () => {
-    if (!acceptedFileTypes || acceptedFileTypes.length === 0)
+    if (!acceptedFileTypesForModal || acceptedFileTypesForModal.length === 0)
       return "Select Files";
 
-    if (acceptedFileTypes.length === 1) {
+    if (acceptedFileTypesForModal.length === 1) {
       const typeLabels: Record<string, string> = {
         image: "Select Images",
         video: "Select Videos",
@@ -49,13 +45,13 @@ export function FileManagerHeader() {
         powerpoint: "Select PowerPoint Files",
         document: "Select Documents",
       };
-      return typeLabels[acceptedFileTypes[0]] || "Select Files";
+      return typeLabels[acceptedFileTypesForModal[0]] || "Select Files";
     }
 
     if (
-      acceptedFileTypes.length === 2 &&
-      acceptedFileTypes.includes("image") &&
-      acceptedFileTypes.includes("video")
+      acceptedFileTypesForModal.length === 2 &&
+      acceptedFileTypesForModal.includes("image") &&
+      acceptedFileTypesForModal.includes("video")
     ) {
       return "Select Media Files";
     }
@@ -68,10 +64,10 @@ export function FileManagerHeader() {
     <Button
       variant="outline"
       size="lg"
-      className="shadow-sm border-gray-300 bg-gradient-to-b from-white to-gray-100 hover:bg-gradient-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+      className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
       onClick={() => setIsMoveFileModalOpen(true)}
     >
-      <MoveIcon className="w-4 h-4 mr-2" />
+      <MoveIcon className="size-5 mr-2" />
       Move
     </Button>
   );
@@ -83,7 +79,7 @@ export function FileManagerHeader() {
   const selectAllAction: ReactNode = (
     <div className="flex flex-row items-center gap-2">
       <Checkbox
-        checked={getGlobalCheckboxState()}
+        checked={getSelectionState()}
         onCheckedChange={handleSelectAllGlobal}
       />
       <span className="text-sm text-gray-600">
@@ -96,10 +92,10 @@ export function FileManagerHeader() {
     <Button
       variant="outline"
       size="lg"
-      className="shadow-sm border-gray-300 bg-gradient-to-b from-white to-gray-100 hover:bg-gradient-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+      className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-gradient-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
       onClick={() => setIsUploadModalOpen(true)}
     >
-      <UploadFileIcon className="w-4 h-4 mr-2" />
+      <UploadFileIcon className="size-5 mr-2" />
       Upload File
     </Button>
   );
@@ -108,10 +104,10 @@ export function FileManagerHeader() {
     <Button
       variant="outline"
       size="lg"
-      className="shadow-sm border-gray-300 bg-gradient-to-b from-white to-gray-100 hover:bg-gradient-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+      className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-gradient-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
       onClick={() => setIsCreateFolderModalOpen(true)}
     >
-      <UploadFolderIcon className="w-4 h-4 mr-2" />
+      <UploadFolderIcon className="size-5 mr-2" />
       Create Folder
     </Button>
   );
@@ -121,7 +117,7 @@ export function FileManagerHeader() {
       <BreadcrumbNavigation
         folders={folders}
         currentFolder={currentFolder}
-        onFolderSelect={handleFolderSelect}
+        onFolderClick={handleFolderClick}
       />
     </div>
   );
@@ -133,8 +129,8 @@ export function FileManagerHeader() {
         {Breadcrumb}
 
         <div className="hidden md:flex md:flex-row gap-2">
-          {selectionMode === "multiple" && selectedFiles.length + selectedFolders.length > 0 && moveAction}
-          {selectionMode === "multiple" && selectAllAction}
+          {selectionMode === SELECTION_MODE.MULTIPLE && selectedFiles.length + selectedFolders.length > 0 && moveAction}
+          {selectionMode === SELECTION_MODE.MULTIPLE && selectAllAction}
         </div>
       </div>
     );
