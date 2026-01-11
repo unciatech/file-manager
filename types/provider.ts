@@ -14,9 +14,9 @@ export interface IFileManagerProvider {
     getFiles(
       folderId : FolderId,
       fileTypes?: FileType[] | null,
-      searchQuery?: string,  
       page?: number,
       limit?: number,
+      searchQuery?: string,  
     ) : Promise<{files: FileMetaData[], pagination: PaginationInfo}>;
 
 

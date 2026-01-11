@@ -1,25 +1,25 @@
-import { FileMetaData, VideoMetaData } from "@/types/file-manager";
+import { FileMetaData, AudioMetaData } from "@/types/file-manager";
 import { Icons } from "../utils/icons";
 
-interface VideoCardProps {
+interface AudioCardProps {
     file: FileMetaData;
     className?: string;
 }
 
-export function VideoCard({ file, className }: VideoCardProps) {
+export function AudioCard({ file, className }: AudioCardProps) {
     return (
         <div className="w-full h-full flex items-center justify-center bg-transparent">
             <div className="text-center">
                 <div className="text-4xl">
-                    <Icons type="video" className={className} />
+                    <Icons type="audio" className={className} />
                 </div>
             </div>
         </div>
     );
 }
 
-export function VideoCardMetadata({ file }: { file: FileMetaData }) {
-    const metaData = file.metaData as VideoMetaData;
+export function AudioCardMetadata({ file }: { file: FileMetaData }) {
+    const metaData = file.metaData as AudioMetaData;
     if (!metaData?.duration) return null;
     
     return (

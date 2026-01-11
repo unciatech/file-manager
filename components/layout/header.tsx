@@ -32,33 +32,6 @@ export function FileManagerHeader() {
     return f.parentId === currentFolder.id;
   });
 
-  const getExpectedFileTypesLabel = () => {
-    if (!acceptedFileTypesForModal || acceptedFileTypesForModal.length === 0)
-      return "Select Files";
-
-    if (acceptedFileTypesForModal.length === 1) {
-      const typeLabels: Record<string, string> = {
-        image: "Select Images",
-        video: "Select Videos",
-        pdf: "Select PDFs",
-        excel: "Select Excel Files",
-        powerpoint: "Select PowerPoint Files",
-        document: "Select Documents",
-      };
-      return typeLabels[acceptedFileTypesForModal[0]] || "Select Files";
-    }
-
-    if (
-      acceptedFileTypesForModal.length === 2 &&
-      acceptedFileTypesForModal.includes("image") &&
-      acceptedFileTypesForModal.includes("video")
-    ) {
-      return "Select Media Files";
-    }
-
-    return "Select Files";
-  };
-
   //action
   const moveAction: ReactNode = (
     <Button

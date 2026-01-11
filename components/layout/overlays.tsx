@@ -3,13 +3,96 @@
 import { UploadModal } from "../modals/upload-modal";
 import { CreateFolderModal } from "../modals/create-folder";
 import { MoveModal } from "../modals/move-modal";
+import { ImageModal } from "../modals/image-modal";
+import { VideoModal } from "../modals/video-modal";
+import { AudioModal } from "../modals/audio-modal";
+import { FileModal } from "../modals/file-modal";
+import { useFileManager } from "@/context/file-manager-context";
+import { getFileTypeFromMime } from "@/lib/file-type-utils";
+import { FILE_TYPE } from "@/types/file-manager";
 
 export function FileManagerOverlays() {
+  const {
+    fileDetailsModalFile,
+    setFileDetailsModalFile,
+    updateFileMetadata,
+    bulkDelete,
+  } = useFileManager();
+
+  const handleClose = () => {
+    setFileDetailsModalFile(null);
+  };
+
+  const handleSave = async (updates: any) => {
+    if (fileDetailsModalFile) {
+      await updateFileMetadata(fileDetailsModalFile.id, updates);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (fileDetailsModalFile) {
+      // Temporarily select the file for deletion
+      await bulkDelete();
+      handleClose();
+    }
+  };
+
+  // Determine which modal to show based on file type
+  const renderFileDetailsModal = () => {
+    if (!fileDetailsModalFile) return null;
+
+    const fileType = getFileTypeFromMime(
+      fileDetailsModalFile.mime,
+      fileDetailsModalFile.ext
+    );
+
+    switch (fileType) {
+      case FILE_TYPE.IMAGE:
+        return (
+          <ImageModal
+            file={fileDetailsModalFile}
+            onClose={handleClose}
+            onSave={handleSave}
+            onDelete={handleDelete}
+          />
+        );
+      case FILE_TYPE.VIDEO:
+        return (
+          <VideoModal
+            file={fileDetailsModalFile}
+            onClose={handleClose}
+            onSave={handleSave}
+            onDelete={handleDelete}
+          />
+        );
+      case FILE_TYPE.AUDIO:
+        return (
+          <AudioModal
+            file={fileDetailsModalFile}
+            onClose={handleClose}
+            onSave={handleSave}
+            onDelete={handleDelete}
+          />
+        );
+      case FILE_TYPE.FILE:
+      default:
+        return (
+          <FileModal
+            file={fileDetailsModalFile}
+            onClose={handleClose}
+            onSave={handleSave}
+            onDelete={handleDelete}
+          />
+        );
+    }
+  };
+
   return (
     <>
       <UploadModal />
       <CreateFolderModal />
       <MoveModal />
+      {renderFileDetailsModal()}
     </>
   );
 }

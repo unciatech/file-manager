@@ -1,5 +1,5 @@
-import React from "react";
 import { FileMetaData, OtherMetaData } from "@/types/file-manager";
+import { getFileTypeFromMime } from "@/lib/file-type-utils";
 import { Icons } from "../utils/icons";
 
 interface OtherCardProps {
@@ -8,6 +8,8 @@ interface OtherCardProps {
 }
 
 export function OtherCard({ file }: OtherCardProps) {
-    const meta = file.metaData as OtherMetaData;
-    return <Icons type={meta?.format || file.type} />;
+    // Use file extension to determine icon, fallback to derived type
+    const ext = file.ext?.replace(".", "") || "";
+    const fallbackType = file.type || getFileTypeFromMime(file.mime, file.ext);
+    return <Icons type={ext || fallbackType} />;
 }

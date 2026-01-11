@@ -62,10 +62,9 @@ export default function BreadcrumbNavigation({ folders, currentFolder, onFolderC
     let tempFolder: Folder | null | undefined = currentFolder;
 
     while (tempFolder) {
-      path.unshift(tempFolder);
-      tempFolder = tempFolder.parentId
-        ? folders.find((f) => f.id === tempFolder?.parentId) ?? undefined
-        : undefined;
+      path.unshift(tempFolder); // Add to start of array
+      // Traverse up using the nested parent object
+      tempFolder = tempFolder.parent;
     }
 
     return path;

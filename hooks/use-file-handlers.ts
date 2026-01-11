@@ -5,16 +5,17 @@ import { FileState } from "./use-file-state";
 import { FileMetaData, Folder, FolderId, MODE } from "@/types/file-manager";
 import { FileUploadInput } from "@/types/provider";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function useFileHandlers(state: FileState) {
   const {
     mode,
     selectionMode,
     files,
+    folders,
     selectedFiles,
     selectedFolders,
     currentFolder,
-    currentFolders,
     setSelectedFiles,
     setSelectedFolders,
     setCurrentFolder,
@@ -26,6 +27,8 @@ export function useFileHandlers(state: FileState) {
     onFilesSelected,
     onClose,
     basePath,
+    setIsLoading,
+    setFileDetailsModalFile,
   } = state;
 
   const router = useRouter();
@@ -125,12 +128,10 @@ export function useFileHandlers(state: FileState) {
         return;
       }
 
-      // 4. Page Mode Regular Click -> Preview/Open
-      // TODO: Implement preview or details view
-      console.log("File clicked:", file);
-      // alert(`File clicked: ${file.name}`);
+      // 4. Page Mode Regular Click -> Open Details Modal
+      setFileDetailsModalFile(file);
     },
-    [mode, selectionMode, isInSelectionMode, setSelectedFiles, onFilesSelected, onClose]
+    [mode, selectionMode, isInSelectionMode, setSelectedFiles, onFilesSelected, onClose, setFileDetailsModalFile]
   );
 
 
@@ -164,18 +165,18 @@ export function useFileHandlers(state: FileState) {
       }
 
       // 3. Navigation (Regular Click)
-      // Navigate to folder (or root)
-      setCurrentFolder(folder);
-      
-      // Clear selection when navigating
-      setSelectedFiles([]);
-      setSelectedFolders([]);
-
-      // Update URL in page mode
       if (mode === MODE.PAGE) {
+        // Navigate immediately - let URL change trigger state updates
+        // useFileState's useEffect will handle clearing selections
+        setIsLoading(true); // Trigger loading explicitly for immediate feedback
         const path = basePath ?? '/media';
         const newUrl = folderId === null ? path : `${path}/${folderId}`;
         router.push(newUrl);
+      } else {
+        // Modal/other modes: manually update state
+        setCurrentFolder(folder);
+        setSelectedFiles([]);
+        setSelectedFolders([]);
       }
     },
     [isInSelectionMode, mode, router, setCurrentFolder, setSelectedFolders, setSelectedFiles]
@@ -200,13 +201,13 @@ export function useFileHandlers(state: FileState) {
     (checked: boolean) => {
       if (checked) {
         setSelectedFiles(files);
-        setSelectedFolders(mode === MODE.PAGE ? currentFolders : []);
+        setSelectedFolders(mode === MODE.PAGE ? folders : []);
       } else {
         setSelectedFiles([]);
         setSelectedFolders([]);
       }
     },
-    [files, currentFolders, mode, setSelectedFiles, setSelectedFolders]
+    [files, folders, mode, setSelectedFiles, setSelectedFolders]
   );
 
 
@@ -236,7 +237,14 @@ export function useFileHandlers(state: FileState) {
         await provider.uploadFiles(fileUploadInput, currentFolder?.id ?? null);
         await loadFiles();
         setSelectedFiles([]);
+        toast.success("Upload Successful", {
+          description: `${fileUploadInput.length} file(s) uploaded successfully`,
+        });
       } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to upload files";
+        toast.error("Upload Failed", {
+          description: message,
+        });
         console.error("Upload failed:", error);
       }
     },
@@ -255,7 +263,14 @@ export function useFileHandlers(state: FileState) {
         await provider.createFolder(name, currentFolder?.id ?? null);
         await loadFolders();
         setSelectedFiles([]);
+        toast.success("Folder Created", {
+          description: `Folder "${name}" created successfully`,
+        });
       } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to create folder";
+        toast.error("Create Folder Failed", {
+          description: message,
+        });
         console.error("Failed to create folder:", error);
       }
     },
@@ -287,7 +302,15 @@ export function useFileHandlers(state: FileState) {
         await loadFolders();
         setSelectedFiles([]);
         setSelectedFolders([]);
+        const totalMoved = selectedFiles.length + selectedFolders.length;
+        toast.success("Move Successful", {
+          description: `${totalMoved} item(s) moved successfully`,
+        });
       } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to move items";
+        toast.error("Move Failed", {
+          description: message,
+        });
         console.error("Failed to move items:", error);
       }
     },
@@ -312,7 +335,14 @@ export function useFileHandlers(state: FileState) {
       try {
         await provider.renameFolder(folderId, newName);
         await loadFolders();
+        toast.success("Folder Renamed", {
+          description: `Folder renamed to "${newName}"`,
+        });
       } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to rename folder";
+        toast.error("Rename Failed", {
+          description: message,
+        });
         console.error("Failed to rename folder:", error);
       }
     },
@@ -330,6 +360,10 @@ export function useFileHandlers(state: FileState) {
         await provider.updateFileMetaData(fileId, metadata);
         await loadFiles();
       } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to update metadata";
+        toast.error("Update Failed", {
+          description: message,
+        });
         console.error("Failed to update metadata:", error);
       }
     },
@@ -352,7 +386,15 @@ export function useFileHandlers(state: FileState) {
       await loadFolders();
       setSelectedFiles([]);
       setSelectedFolders([]);
+      const totalDeleted = selectedFiles.length + selectedFolders.length;
+      toast.success("Delete Successful", {
+        description: `${totalDeleted} item(s) deleted successfully`,
+      });
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to delete items";
+      toast.error("Delete Failed", {
+        description: message,
+      });
       console.error("Failed to delete items:", error);
     }
   }, [

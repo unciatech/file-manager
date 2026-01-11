@@ -15,13 +15,41 @@ export function UnifiedGrid() {
         selectionMode,
         isInSelectionMode,
         selectedFiles,
-        selectedFolders
+        selectedFolders,
+        currentFolder
     } = useFileManager();
+
+    // Calculate expected item count for skeleton loading
+    // This provides a smoother UX by showing the correct number of skeleton items
+    const getSkeletonCount = () => {
+        if (!currentFolder) {
+            // Root folder - show default skeleton count
+            return 18;
+        }
+        
+        // For subfolders, show skeleton for expected folders + files from metadata
+        const expectedFolders = currentFolder.folderCount || 0;
+        const expectedFiles = currentFolder.fileCount || 0;
+        const totalItems = expectedFolders + expectedFiles;
+        
+        // Use the metadata count, or fallback to 18 if no items expected
+        return totalItems > 0 ? totalItems : 18;
+    };
+
+    const skeletonCount = getSkeletonCount();
 
     if (isLoading) {
         return (
-            <div className="grid grid-0 gap-0 md:gap-3 grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 md:px-4 lg:gap-2 lg:px-6 py-4">
-                <h1>Loading...</h1>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 p-6 content-start">
+                {Array.from({ length: skeletonCount }).map((_, i) => (
+                    <div key={i} className="flex flex-col items-center justify-start w-full gap-2">
+                        <div className="w-full aspect-square bg-gray-100 rounded-2xl animate-pulse" />
+                        <div className="flex flex-col items-center gap-1 w-full">
+                            <div className="h-4 w-20 bg-gray-100 rounded animate-pulse" />
+                            <div className="h-3 w-12 bg-gray-100 rounded animate-pulse" />
+                        </div>
+                    </div>
+                ))}
             </div>
         )
     }

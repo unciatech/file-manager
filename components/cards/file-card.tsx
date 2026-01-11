@@ -4,7 +4,7 @@ import React from "react";
 
 import { Trash2, Move, Info } from "lucide-react";
 import { FileMetaData, MODE, Mode, SELECTION_MODE, SelectionMode } from "../../types/file-manager";
-import { Card } from "../ui/card";
+
 import { Checkbox } from "../ui/checkbox";
 import {
   ContextMenu,
@@ -14,7 +14,7 @@ import {
   ContextMenuTrigger,
 } from "../ui/context-menu";
 
-import { splitAndTruncate } from "../../lib/truncate-name";
+
 import { getFileSize } from "../../lib/file-size";
 import { getFileComponents } from "../grid/file-component-registry";
 
@@ -50,8 +50,6 @@ export function FileCard({
   isInSelectionMode = false,
 }: FileCardProps) {
 
-  const formatFileSize = getFileSize; 
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm(`Are you sure you want to delete "${file.name}"?`)) {
@@ -83,7 +81,7 @@ export function FileCard({
 
   // Resolve components from registry
   const { component: FilePreviewComponent, metadataComponent: FileMetadataComponent } = getFileComponents(
-    file.type
+    file
   );
 
   return (
@@ -129,12 +127,12 @@ export function FileCard({
                 
                 {/* Metadata: Only visible if not selected or style preference */}
                 <div className={`flex flex-col items-center justify-center gap-0.5 mt-1 transition-opacity duration-200 ${isSelected ? "opacity-60" : "opacity-100"}`}>
-                     <span className="text-[11px] text-gray-500 font-medium tracking-tight">{formatFileSize(file.size)}</span>
-                     {FileMetadataComponent && (
+                     <span className="text-[11px] text-blue-600 font-medium tracking-tight">{getFileSize(file.size)}</span>
+                     {FileMetadataComponent ? (
                          <div className="text-[11px] text-gray-400 flex items-center scale-95">
-                             <FileMetadataComponent metaData={file.metaData} />
+                             <FileMetadataComponent file={file} />
                          </div>
-                     )}
+                     ) : null}
                 </div>
             </div>
         </div>
