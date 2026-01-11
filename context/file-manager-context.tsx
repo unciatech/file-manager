@@ -2,7 +2,7 @@
 
 import { useFileHandlers, useFileState } from "@/hooks";
 import { MockProvider } from "@/providers/mock-provider";
-import { EntityId, FileManagerProps, FileMetaData, FileType, FolderId, Folder, PaginationInfo, Mode, SelectionMode, SELECTION_MODE, MODE } from "@/types/file-manager";
+import { EntityId, FileManagerRootProps, FileMetaData, FileType, FolderId, Folder, PaginationInfo, Mode, SelectionMode, SELECTION_MODE, MODE } from "@/types/file-manager";
 import { FileUploadInput, IFileManagerProvider } from "@/types/provider";
 import { createContext, useContext, useMemo, useState } from "react";
 
@@ -17,7 +17,6 @@ interface FileManagerContextType {
   selectedFiles: FileMetaData[];
   selectedFolders: Folder[];
   currentFolder: Folder | null;
-  searchQuery: string;
   isLoading: boolean;
   pagination: PaginationInfo;
 
@@ -26,18 +25,19 @@ interface FileManagerContextType {
   isCreateFolderModalOpen: boolean;
   isMoveFileModalOpen: boolean;
   isRenameFolderModalOpen: boolean;
+  fileDetailsModalFile: FileMetaData | null;
 
 
   mode: Mode;
   selectionMode: SelectionMode;
-  acceptedFileTypesForModal?: FileType[]; // what type of files, your file-manager will handel, like images, videos, etc.
+  allowedFileTypes: FileType[]; // What file types can be uploaded (both page and modal mode)
+  acceptedFileTypesForModal?: FileType[]; // what type of files can be selected/viewed in modal mode
 
   // Provider
   provider: IFileManagerProvider;
   basePath?: string;
 
   // Setters
-  setSearchQuery: (query: string) => void;
   setSelectedFiles: (files: FileMetaData[]) => void;
   setSelectedFolders: (folders: Folder[]) => void;
   
@@ -46,6 +46,7 @@ interface FileManagerContextType {
   setIsCreateFolderModalOpen: (isOpen: boolean) => void;
   setIsMoveFileModalOpen: (isOpen: boolean) => void;
   setIsRenameFolderModalOpen: (isOpen: boolean) => void;
+  setFileDetailsModalFile: (file: FileMetaData | null) => void;
 
   // Handlers
   handleFileClick: (file: FileMetaData, event?: React.MouseEvent, isCheckboxClick?: boolean) => void;
@@ -86,7 +87,7 @@ export function FileManagerProvider({
   initialFolderId = null,
   provider,
   basePath = "/media",
-}: FileManagerProps & { children: React.ReactNode }) {
+}: FileManagerRootProps & { children: React.ReactNode }) {
   
    // Use the state hook
   const state = useFileState({
@@ -112,19 +113,19 @@ export function FileManagerProvider({
     selectedFiles: state.selectedFiles,
     selectedFolders: state.selectedFolders,
     currentFolder: state.currentFolder,
-    searchQuery: state.searchQuery,
     isLoading: state.isLoading,
     pagination: state.pagination,
     isUploadModalOpen: state.isUploadModalOpen,
     isCreateFolderModalOpen: state.isCreateFolderModalOpen,
     isMoveFileModalOpen: state.isMoveFileModalOpen,
     isRenameFolderModalOpen: state.isRenameFolderModalOpen,
+    fileDetailsModalFile: state.fileDetailsModalFile,
     mode: state.mode,
     selectionMode: state.selectionMode,
+    allowedFileTypes,
     acceptedFileTypesForModal: state.acceptedFileTypesForModal,
 
     // Setters
-    setSearchQuery: state.setSearchQuery,
     setIsUploadModalOpen: state.setIsUploadModalOpen,
     setIsCreateFolderModalOpen: state.setIsCreateFolderModalOpen,
     setIsMoveFileModalOpen: state.setIsMoveFileModalOpen,
@@ -132,6 +133,7 @@ export function FileManagerProvider({
     setSelectedFiles: state.setSelectedFiles,
     setSelectedFolders: state.setSelectedFolders,
     setIsRenameFolderModalOpen: state.setIsRenameFolderModalOpen,
+    setFileDetailsModalFile: state.setFileDetailsModalFile,
 
     // Handlers
     // Handlers

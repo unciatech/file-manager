@@ -12,6 +12,8 @@ import {
 import SearchIcon from "@/components/icons/search";
 import { Button } from "@/components/ui/button";
 import { useFileManager } from "@/context/file-manager-context";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { toast } from "sonner";
 
 import { FileMetaData, Folder } from "@/types/file-manager";
 
@@ -22,6 +24,9 @@ export default function SearchDialog() {
   const [folderResults, setFolderResults] = useState<Folder[]>([]);
   const [loading, setLoading] = useState(false);
   const { provider, handleFolderClick, handleClearSelection } = useFileManager();
+
+  // Debounce search query to reduce API calls
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -44,7 +49,11 @@ export default function SearchDialog() {
       ]);
       setFileResults(files);
       setFolderResults(folders);
-    } catch {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Search failed";
+      toast.error("Search Failed", {
+        description: message,
+      });
       setFileResults([]);
       setFolderResults([]);
     } finally {
@@ -52,14 +61,15 @@ export default function SearchDialog() {
     }
   }, [provider]);
 
+  // Use debounced value to trigger search
   useEffect(() => {
-    if (open && searchQuery.length > 0) {
-      doSearch(searchQuery);
+    if (open && debouncedSearchQuery.length > 0) {
+      doSearch(debouncedSearchQuery);
     } else {
       setFileResults([]);
       setFolderResults([]);
     }
-  }, [searchQuery, open, doSearch]);
+  }, [debouncedSearchQuery, open, doSearch]);
 
   const handleInputChange = (value: string) => {
     setSearchQuery(value);

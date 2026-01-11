@@ -11,6 +11,7 @@ import {
 } from "@/types/file-manager";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 
 export function useFileState(options: FileStateOptions) {
   const {
@@ -47,7 +48,6 @@ export function useFileState(options: FileStateOptions) {
   const [selectedFiles, setSelectedFiles] = useState<FileMetaData[]>([]);
   const [selectedFolders, setSelectedFolders] = useState<Folder[]>([]);
   const [currentFolder, setCurrentFolder] = useState<Folder | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
@@ -56,39 +56,134 @@ export function useFileState(options: FileStateOptions) {
     filesPerPage: 20,
   });
 
-  // Ref to track latest pagination values to avoid stale closures
-  const paginationRef = useRef(pagination);
+  // Consolidated useEffect: Sync current folder and load data
+  // This replaces 4 separate useEffects to prevent re-render cascades
   useEffect(() => {
-    paginationRef.current = pagination;
-  }, [pagination]);
+    let cancelled = false;
+
+    const syncAndLoad = async () => {
+      // Step 1: Sync current folder if needed
+      if (folderId && (!currentFolder || currentFolder.id !== folderId)) {
+        try {
+          setIsLoading(true);
+          const folder = await provider.getFolder(folderId);
+          if (cancelled) return;
+          setCurrentFolder(folder);
+          
+          // Load data for the new folder
+          await loadDataForFolder(folder);
+        } catch (e) {
+          const message = e instanceof Error ? e.message : "Failed to load folder";
+          toast.error("Load Folder Failed", {
+            description: message,
+          });
+          console.error("Failed to fetch current folder", e);
+          if (cancelled) return;
+          setCurrentFolder(null);
+          setIsLoading(false);
+        }
+      } else if (folderId === null && currentFolder !== null) {
+        // Navigate to root
+        setCurrentFolder(null);
+        await loadDataForFolder(null);
+      } else if (currentFolder) {
+        // Folder is already set, just reload data (e.g., pagination changed)
+        await loadDataForFolder(currentFolder);
+      } else {
+        // Initial load at root
+        await loadDataForFolder(null);
+      }
+    };
+
+    const loadDataForFolder = async (folder: Folder | null) => {
+      if (cancelled) return;
+      
+      setIsLoading(true);
+      try {
+        // Determine file types based on mode
+        let fileTypes: FileType[] | undefined = [];
+        if (mode === MODE.MODAL) {
+          fileTypes = acceptedFileTypesForModal;
+        } else {
+          fileTypes = allowedFileTypes;
+        }
+
+        // Load folders and files in parallel
+        const [foldersData, filesResult] = await Promise.all([
+          provider.getFolders(folder?.id ?? null),
+          provider.getFiles(
+            folder?.id ?? null,
+            fileTypes,
+            pagination.currentPage,
+            pagination.filesPerPage
+          ),
+        ]);
+
+        if (cancelled) return;
+        
+        setFolders(foldersData);
+        setFiles(filesResult.files);
+        setPagination(filesResult.pagination);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to load data";
+        toast.error("Load Data Failed", {
+          description: message,
+        });
+        console.error("Failed to load data:", error);
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    syncAndLoad();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    folderId,
+    provider,
+    mode,
+    acceptedFileTypesForModal,
+    allowedFileTypes,
+    pagination.currentPage,
+    pagination.filesPerPage,
+  ]);
+
+  // Clear selections when folder changes
+  useEffect(() => {
+    setSelectedFolders([]);
+    setSelectedFiles([]);
+  }, [currentFolder]);
 
   // Modal States
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
   const [isMoveFileModalOpen, setIsMoveFileModalOpen] = useState(false);
   const [isRenameFolderModalOpen, setIsRenameFolderModalOpen] = useState(false);
+  
+  // File Details Modal State
+  const [fileDetailsModalFile, setFileDetailsModalFile] = useState<FileMetaData | null>(null);
 
-
-  //load folders
+  // Manual reload functions for components that need to refresh data
   const loadFolders = useCallback(async () => {
     try {
-      // Need to fetch current folder details if we have an ID but no object (e.g. from URL)
-      // This part is tricky because currentFolder might be null initially but folderId memo is set
-
       const foldersData = await provider.getFolders(currentFolder?.id ?? null);
       setFolders(foldersData);
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to load folders";
+      toast.error("Load Folders Failed", {
+        description: message,
+      });
       console.error("Failed to load folders:", error);
     }
   }, [currentFolder, provider]);
 
-  // Load files
   const loadFiles = useCallback(async () => {
-    const { currentPage, filesPerPage } = paginationRef.current;
     setIsLoading(true);
-
     try {
-
       let fileTypes: FileType[] | undefined = [];
       if (mode === MODE.MODAL) {
         fileTypes = acceptedFileTypesForModal;
@@ -99,58 +194,22 @@ export function useFileState(options: FileStateOptions) {
       const result = await provider.getFiles(
         currentFolder?.id ?? null,
         fileTypes,
-        searchQuery,
-        currentPage,
-        filesPerPage,
+        pagination.currentPage,
+        pagination.filesPerPage
       );
-
 
       setFiles(result.files);
       setPagination(result.pagination);
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to load files";
+      toast.error("Load Files Failed", {
+        description: message,
+      });
       console.error("Failed to load files:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [currentFolder, searchQuery, acceptedFileTypesForModal, mode, allowedFileTypes, provider]);
-
-  // Initial data load & Current Folder Sync
-  useEffect(() => {
-
-    const fetchCurrentFolder = async () => {
-      if (folderId && (!currentFolder || currentFolder.id !== folderId)) {
-        try {
-          setIsLoading(true);
-          const folder = await provider.getFolder(folderId);
-          setCurrentFolder(folder);
-        } catch (e) {
-          console.error("Failed to fetch current folder", e);
-          setCurrentFolder(null); // Fallback to root? Or error state?
-        } finally {
-          setIsLoading(false);
-        }
-      } else if (folderId === null && currentFolder !== null) {
-        setCurrentFolder(null);
-      }
-    };
-    fetchCurrentFolder();
-
-  }, [folderId, provider]); // Removed currentFolder dependency to avoid loops, logic inside handles it
-
-  useEffect(() => {
-    loadFolders();
-  }, [loadFolders]);
-
-  useEffect(() => {
-    loadFiles();
-  }, [loadFiles]);
-
-  // Clear selected file when folder/search changes
-  useEffect(() => {
-    setSelectedFolders([]);
-    setSelectedFiles([]);
-  }, [currentFolder, searchQuery]);
-
+  }, [currentFolder, acceptedFileTypesForModal, mode, allowedFileTypes, provider, pagination.currentPage, pagination.filesPerPage]);
 
   const isInSelectionMode = () => selectedFiles.length > 0 || selectedFolders.length > 0;
   const getCurrentFolder = () => currentFolder;
@@ -172,14 +231,13 @@ export function useFileState(options: FileStateOptions) {
     selectedFiles,
     selectedFolders,
     currentFolder,
-    searchQuery,
     isLoading,
     pagination,
     isUploadModalOpen,
     isCreateFolderModalOpen,
     isMoveFileModalOpen,
     isRenameFolderModalOpen,
-    currentFolders: folders,
+    fileDetailsModalFile,
 
     // Setters
     setFiles,
@@ -187,7 +245,6 @@ export function useFileState(options: FileStateOptions) {
     setSelectedFiles,
     setSelectedFolders,
     setCurrentFolder,
-    setSearchQuery,
     setPagination,
 
     //Modal Setters
@@ -195,10 +252,13 @@ export function useFileState(options: FileStateOptions) {
     setIsCreateFolderModalOpen,
     setIsMoveFileModalOpen,
     setIsRenameFolderModalOpen,
+    setFileDetailsModalFile,
 
     // Loaders
     loadFolders,
     loadFiles,
+
+    setIsLoading,
 
     // Computed
     isInSelectionMode,

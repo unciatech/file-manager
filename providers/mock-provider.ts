@@ -5,23 +5,14 @@ import {
   FileMetaData,
   PaginationInfo,
   MetaDataType,
-  ImageFormat,
-  VideoFormat,
-  AudioFormat,
-  DocumentFormat,
-  OTHER_FORMAT,
   FILE_TYPE,
   VIDEO_SOURCE,
-  isImageFormat,
-  isVideoFormat,
-  isAudioFormat,
-  isDocumentFormat,
-  isAllFileFormat,
   VideoSource,
   EntityId,
   FolderId,
 } from "@/types/file-manager";
 import { FileUploadInput, IFileManagerProvider } from "@/types/provider";
+import { getFileTypeFromMime } from "@/lib/file-type-utils";
 
 // Simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -31,10 +22,29 @@ export class MockProvider implements IFileManagerProvider {
   getFolder(folderId: FolderId): Promise<Folder | null> {
     if (folderId === null) return Promise.resolve(null);
     const folder = mockFolders.find((f) => f.id === folderId);
-    return Promise.resolve(folder || null);
+    
+    if (!folder) return Promise.resolve(null);
+
+    // Deep copy to avoid mutating the original mock data during population
+    const result: Folder = { ...folder };
+    
+    // Recursively populate parent
+    let current = result;
+    while (current.parentId !== null) {
+      const parent = mockFolders.find((f) => f.id === current.parentId);
+      if (parent) {
+        current.parent = { ...parent };
+        current = current.parent;
+      } else {
+        break;
+      }
+    }
+
+    return Promise.resolve(result);
   }
 
   getFolders(folderId: FolderId): Promise<Folder[]> {
+    delay(500);
     // If folderId is provided, return only folder with similar parentId; else filter those folder with parentId null
     if (folderId !== null) {
       const filteredFolders = mockFolders.filter(
@@ -51,10 +61,11 @@ export class MockProvider implements IFileManagerProvider {
   getFiles(
     folderId: FolderId,
     fileTypes?: FileType[],
-    searchQuery?: string,
     page?: number,
-    limit?: number
+    limit?: number,
+    searchQuery?: string,
   ): Promise<{ files: FileMetaData[]; pagination: PaginationInfo }> {
+    delay(500);
     let filteredFiles = [...mockFiles];
 
     // Filter by folderId
@@ -64,16 +75,17 @@ export class MockProvider implements IFileManagerProvider {
       );
     }
 
-    // Filter by fileTypes
+    // Filter by fileTypes (derive type if not set)
     if (fileTypes && fileTypes.length > 0) {
-      filteredFiles = filteredFiles.filter((file) =>
-        fileTypes.includes(file.type)
-      );
+      filteredFiles = filteredFiles.filter((file) => {
+        const fileType = file.type || getFileTypeFromMime(file.mime, file.ext);
+        return fileTypes.includes(fileType);
+      });
     }
 
     // Filter by searchQuery
     if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+      const query = searchQuery?.toLowerCase();
       filteredFiles = filteredFiles.filter((file) =>
         file.name.toLowerCase().includes(query)
       );
@@ -110,7 +122,10 @@ export class MockProvider implements IFileManagerProvider {
       id: Date.now(), // simple unique id
       name,
       parentId: parentId ?? null,
+      pathId: typeof parentId === 'number' ? parentId : 0, // Fallback logic
+      path: "",
       fileCount: 0,
+      folderCount: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -119,67 +134,37 @@ export class MockProvider implements IFileManagerProvider {
   }
 
   private getMetaDataType(file: File, videoSource?: VideoSource): MetaDataType {
-    const fileExtension = file.name.split(".").pop()?.toLowerCase() || "";
-    if (!isAllFileFormat(fileExtension)) {
-      throw new Error("Unsupported file format");
-    }
-
-    if (file.type.startsWith("image/") || isImageFormat(fileExtension)) {
+    // Basic metadata extraction
+    if (file.type.startsWith("image/")) {
       return {
-        format: fileExtension as ImageFormat,
-        dimensions: { width: 0, height: 0 },
-        altText: "",
-        caption: "",
-      };
-    } else if (file.type.startsWith("video/") || isVideoFormat(fileExtension)) {
+        // Dimensions would normally require reading the image
+        // dimensions: { width: 0, height: 0 },
+        // altText: "",
+        // caption: "",
+      } as any; // Cast to any to avoid partial checks for now
+    } else if (file.type.startsWith("video/")) {
       return {
-        format: fileExtension as VideoFormat,
-        duration: 0,
-        dimensions: { width: 0, height: 0 },
+        duration: 0, // Mock
         videoSource: videoSource ?? VIDEO_SOURCE.LOCAL,
       };
-    } else if (file.type.startsWith("audio/") || isAudioFormat(fileExtension)) {
+    } else if (file.type.startsWith("audio/")) {
       return {
-        format: fileExtension as AudioFormat,
         duration: 0,
       };
-    } else if (
-      file.type.startsWith("application/") ||
-      isDocumentFormat(fileExtension)
-    ) {
-      return {
-        format: fileExtension as DocumentFormat,
-        pageCount: 0,
-      };
     }
-    // Default to OtherMetaData
+    // Default or other
     return {
-      format: OTHER_FORMAT.ZIP,
       description: "",
     };
   }
 
   private getFileType(file: File): FileType {
-    const fileExtension = file.name.split(".").pop()?.toLowerCase() || "";
-
-    if (!isAllFileFormat(fileExtension)) {
-      throw new Error("Unsupported file format");
-    }
-
-    if (file.type.startsWith("image/") || isImageFormat(fileExtension)) {
-      return FILE_TYPE.IMAGE;
-    } else if (file.type.startsWith("video/") || isVideoFormat(fileExtension)) {
-      return FILE_TYPE.VIDEO;
-    } else if (file.type.startsWith("audio/") || isAudioFormat(fileExtension)) {
-      return FILE_TYPE.AUDIO;
-    } else if (
-      file.type.startsWith("application/") ||
-      isDocumentFormat(fileExtension)
-    ) {
-      return FILE_TYPE.DOCUMENT;
-    }
-    return FILE_TYPE.OTHER;
+    // Use the centralized utility function
+    const ext = "." + file.name.split(".").pop()?.toLowerCase();
+    return getFileTypeFromMime(file.type, ext);
   }
+
+  // Note: Static helper removed - use getFileTypeFromMime from lib/file-type-utils instead
 
   async uploadFiles(
     files: FileUploadInput[],
@@ -190,17 +175,25 @@ export class MockProvider implements IFileManagerProvider {
     const uploadedFiles: FileMetaData[] = [];
 
     for (const { file, videoSource } of files) {
+      const fileType = this.getFileType(file);
+      const ext = "." + file.name.split(".").pop()?.toLowerCase();
+      
       const newFile: FileMetaData = {
         id: Date.now() + Math.random(), // Ensure unique IDs
         name: file.name,
         folderId: folderId ?? null,
         size: file.size,
-        url: URL.createObjectURL(file),
-        type: this.getFileType(file),
+        url: URL.createObjectURL(file), // Mock URL
+        // type field omitted - will be derived from mime/ext using getFileTypeFromMime
+        mime: file.type || "application/octet-stream",
+        ext: ext,
         metaData: this.getMetaDataType(file, videoSource),
         createdAt: new Date(),
         updatedAt: new Date(),
         tags: [],
+        // Mock default dims for images if needed, or leave undefined
+        width: fileType === FILE_TYPE.IMAGE ? 800 : undefined,
+        height: fileType === FILE_TYPE.IMAGE ? 600 : undefined,
       };
       mockFiles.push(newFile);
       uploadedFiles.push(newFile);
@@ -261,7 +254,7 @@ export class MockProvider implements IFileManagerProvider {
 
   findFiles(searchQuery: string): Promise<FileMetaData[]> {
     //search tags and file names
-    const query = searchQuery.toLowerCase();
+    const query = searchQuery?.toLowerCase();
     const foundFiles = mockFiles.filter(
       (file) =>
         file.name.toLowerCase().includes(query) ||
@@ -272,7 +265,7 @@ export class MockProvider implements IFileManagerProvider {
   
   findFolders(searchQuery: string): Promise<Folder[]> {
     //search folder with names and tags
-    const query = searchQuery.toLowerCase();
+    const query = searchQuery?.toLowerCase();
     const foundFolders = mockFolders.filter((folder) =>
       folder.name.toLowerCase().includes(query)
     );

@@ -10,11 +10,8 @@ export default function MediaPage() {
 
   return (
     <FileManager
-      mode="page"
-      selectionMode="multiple"
-      allowedFileTypes={["image", "video", "audio", "document", "other"]}
+      allowedFileTypes={["images", "videos", "audios", "files"]}
       viewMode="grid"
-      initialFolderId={null}
       provider={provider}
     />
   );

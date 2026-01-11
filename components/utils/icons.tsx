@@ -1,27 +1,32 @@
-import { 
-  Image as ImageIcon, 
-  Video, 
-  FileArchive,  
-  LucideProps 
-} from "lucide-react";
-import PdfIcon from "../icons/pdf";
-import ExcelIcon from "../icons/excel";
-import PptIcon from "../icons/ppt";
-import DocIcon from "../icons/doc";
-import TextDocIcon from "../icons/text";
-import FileIcon from "../icons/file";
-import ZipIcon from "../icons/zip";
-import JsonIcon from "../icons/json";
-import MusicIcon from "../icons/music";
-import RarIcon from "../icons/rar";
-import ExeIcon from "../icons/exe";
+import {
+  PdfIcon,
+  ExcelIcon,
+  PptIcon,
+  DocIcon,
+  TextDocIcon,
+  FileIcon,
+  ZipIcon,
+  JsonIcon,
+  MusicIcon,
+  RarIcon,
+  ExeIcon,
+  ImageIcon,
+  VideoIcon,
+  FolderWithFilesIcon,
+  EmptyFolderIcon,
+} from "../icons";
 
-export const Icons = ({ type, className, ...props }: { type: string } & LucideProps) => {
+
+export const Icons = ({ type, className, ...props }: { type: string, className?: string }) => {
   switch (type) {
+    case "folder-with-files":
+      return <FolderWithFilesIcon className={className} {...props} />;
+    case "folder":
+      return <EmptyFolderIcon className={className} {...props} />;
     case "image":
       return <ImageIcon className={className} {...props} />;
     case "video":
-      return <Video className={className} {...props} />;
+      return <VideoIcon className={className} {...props} />;
     case "audio":
       return <MusicIcon className={className} {...props} />;
     case "pdf":
@@ -40,7 +45,7 @@ export const Icons = ({ type, className, ...props }: { type: string } & LucidePr
       return <TextDocIcon className={className} {...props} />;
     case "json":
       return <JsonIcon className={className} {...props} />;
-    case "zip": 
+    case "zip":
       return <ZipIcon className={className} {...props} />;
     case "rar":
       return <RarIcon className={className} {...props} />;

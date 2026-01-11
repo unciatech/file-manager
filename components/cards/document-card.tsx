@@ -1,4 +1,3 @@
-import React from "react";
 import { DocumentMetaData, FileMetaData } from "@/types/file-manager";
 import { Icons } from "../utils/icons";
 
@@ -15,12 +14,11 @@ export function DocumentCard({ file, className }: DocumentCardProps) {
     // In types, DocumentFormat = pdf, docx, xlsx, pptx, txt.
     // So I can check `(file.metaData as DocumentMetaData)?.format`
     
-    const meta = file.metaData as DocumentMetaData;
-    const format = meta?.format;
-
-    // Map format to Icon type if Icons supports it, otherwise generic 'document'
-    // Icons component supports: pdf, excel/xlsx, powerpoint/pptx, doc/docx, txt, json
-    const iconType = format || "document";
+    // Use file extension to determine icon
+    // remove leading dot
+    const ext = file.ext?.replace(".", "") || "";
+    
+    const iconType = ext || "file";
     
     // Note: I am assuming Icons component handles these strings. 
     
@@ -35,10 +33,11 @@ export function DocumentCard({ file, className }: DocumentCardProps) {
     );
 }
 
-export function DocumentCardMetadata({ metaData }: { metaData: DocumentMetaData | null }) {
+export function DocumentCardMetadata({ file }: { file: FileMetaData }) {
+    const metaData = file.metaData as DocumentMetaData;
     if (!metaData?.pageCount) return null;
     return (
-        <p className="text-xs text-gray-600 mb-2">
+        <p className="text-xs text-blue-600 mb-2">
             Pages: {metaData.pageCount}
         </p>
     );
