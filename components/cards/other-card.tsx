@@ -10,6 +10,6 @@ interface OtherCardProps {
 export function OtherCard({ file }: OtherCardProps) {
     // Use file extension to determine icon, fallback to derived type
     const ext = file.ext?.replace(".", "") || "";
-    const fallbackType = file.type || getFileTypeFromMime(file.mime, file.ext);
+    const fallbackType = getFileTypeFromMime(file.mime, file.ext);
     return <Icons type={ext || fallbackType} />;
 }

@@ -61,26 +61,26 @@ export function FileModal({ file, onClose, onSave, onDelete }: FileModalProps) {
       {/* Metadata Grid */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+          <p className="text-xs font-medium text-muted-foreground tracking-wide mb-1">
             Size
           </p>
-          <p className="text-sm font-medium">{getFileSize(file.size)}</p>
+          <p className="text-xs font-bold text-blue-600">{getFileSize(file.size)}</p>
         </div>
 
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+          <p className="text-xs font-medium text-muted-foreground  tracking-wide mb-1">
             Date
           </p>
-          <p className="text-sm font-medium">
+          <p className="text-xs font-bold text-blue-600">
             {formatDate(file.createdAt)}
           </p>
         </div>
 
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+          <p className="text-xs font-medium text-muted-foreground tracking-wide mb-1">
             Extension
           </p>
-          <p className="text-sm font-medium">{ext}</p>
+          <p className="text-xs font-bold text-blue-600">{ext}</p>
         </div>
 
         {documentMeta?.pageCount && (
@@ -131,7 +131,7 @@ export function FileModal({ file, onClose, onSave, onDelete }: FileModalProps) {
   );
 
   const footer = (
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-center gap-2">
       <Button variant="outline" onClick={onClose}>
         Cancel
       </Button>

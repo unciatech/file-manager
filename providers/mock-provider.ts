@@ -78,7 +78,7 @@ export class MockProvider implements IFileManagerProvider {
     // Filter by fileTypes (derive type if not set)
     if (fileTypes && fileTypes.length > 0) {
       filteredFiles = filteredFiles.filter((file) => {
-        const fileType = file.type || getFileTypeFromMime(file.mime, file.ext);
+        const fileType =  getFileTypeFromMime(file.mime, file.ext);
         return fileTypes.includes(fileType);
       });
     }

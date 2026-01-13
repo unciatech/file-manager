@@ -134,7 +134,7 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
   );
 
   const footer = (
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-center gap-2">
       <Button variant="outline" onClick={onClose}>
         Cancel
       </Button>

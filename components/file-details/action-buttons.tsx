@@ -4,6 +4,7 @@ import { FileMetaData } from '@/types/file-manager';
 import { Download, Link2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { DownloadIcon, FullscreenIcon, LinkIcon, TrashIcon } from '../icons';
 
 interface ActionButtonsProps {
   file: FileMetaData;
@@ -51,7 +52,7 @@ export function ActionButtons({
         className="h-9 w-9"
         title="Delete"
       >
-        <Trash2 className="h-4 w-4" />
+        <TrashIcon className="size-5.5 text-gray-700" />
       </Button>
 
       <Button
@@ -61,7 +62,7 @@ export function ActionButtons({
         className="h-9 w-9"
         title="Download"
       >
-        <Download className="h-4 w-4" />
+        <DownloadIcon className="size-5.5 text-gray-900" />
       </Button>
 
       <Button
@@ -71,7 +72,7 @@ export function ActionButtons({
         className="h-9 w-9"
         title="Copy Link"
       >
-        <Link2 className="h-4 w-4" />
+        <LinkIcon className="size-5.5 text-gray-600"  strokeWidth={2.5}/>
       </Button>
 
       {showFullscreen && onFullscreen && (
@@ -82,19 +83,7 @@ export function ActionButtons({
           className="h-9 w-9"
           title="Fullscreen"
         >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
-            />
-          </svg>
+          <FullscreenIcon className="size-5.5 text-gray-600" stroke='currentColor' strokeWidth={1}/>
         </Button>
       )}
     </div>

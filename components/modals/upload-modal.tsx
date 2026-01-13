@@ -35,8 +35,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getFileSize } from '@/lib/file-size';
-import { fileTypesToAccept, getFileTypesDescription } from '@/lib/file-type-utils';
+import { fileTypesToAccept, getFileTypeFromMime, getFileTypesDescription } from '@/lib/file-type-utils';
 import { FileUploadInput } from '@/types/provider';
+import { middleTruncate } from '@/lib/truncate-name';
+import { Icons } from '../utils/icons';
 
 
 
@@ -125,7 +127,7 @@ export function UploadModal() {
       const fileInputs: FileUploadInput[] = completedFiles.map((item) => ({
         name: item.file.name,
         size: item.file.size,
-        type: item.file.type,
+        type: getFileTypeFromMime(item.file),
         lastModified: item.file instanceof File ? item.file.lastModified : Date.now(),
         file: item.file as File,
         metadata: {},
@@ -144,15 +146,8 @@ export function UploadModal() {
   };
 
   const getFileIcon = (file: File) => {
-    const type = file.type;
-    if (type.startsWith('image/')) return <ImageIcon className="size-6" />;
-    if (type.startsWith('video/')) return <VideoIcon className="size-6" />;
-    if (type.startsWith('audio/')) return <HeadphonesIcon className="size-6" />;
-    if (type.includes('pdf')) return <FileTextIcon className="size-6" />;
-    if (type.includes('word') || type.includes('doc')) return <FileTextIcon className="size-6" />;
-    if (type.includes('excel') || type.includes('sheet')) return <FileSpreadsheetIcon className="size-6" />;
-    if (type.includes('zip') || type.includes('rar')) return <FileArchiveIcon className="size-6" />;
-    return <FileTextIcon className="size-6" />;
+    const fileType = getFileTypeFromMime(file.type);
+    return <Icons type={fileType} />;
   };
 
   const completedCount = uploadItems.filter((item) => item.status === 'completed').length;
@@ -164,7 +159,7 @@ export function UploadModal() {
       <DialogContent className="p-0 max-w-4xl max-h-[80vh] flex flex-col" variant="default">
         <DialogHeader className="pt-5 pb-3 m-0 border-b border-border">
           <DialogTitle className="px-6 text-base">
-            Upload Files {currentFolder && `to ${currentFolder.name}`}
+            Upload Files {currentFolder && <span className="ml-1 text-sm text-muted-foreground">to { middleTruncate(currentFolder.name)}</span>}
           </DialogTitle>
           <DialogDescription />
         </DialogHeader>
