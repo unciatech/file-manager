@@ -22,3 +22,11 @@ export { default as UploadFileIcon } from "./upload-file";
 export { default as UploadFolderIcon } from "./upload-folder";
 export { default as ChevronLeftIcon } from "./chevron-left";
 export { default as ChevronRightIcon } from "./chevron-right";
+export { default as PlusIcon } from "./plus";
+export { default as TrashIcon } from "./trash";
+export { default as CrossIcon } from "./cross";
+export { default as DownloadIcon } from "./download";
+export { default as LinkIcon } from "./link";
+export { default as FullscreenIcon } from "./fullscreen";
+
+

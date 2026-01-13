@@ -98,7 +98,6 @@ export interface FileMetaData{
     // Core details
     size: number; //bytes
     url: string;
-    type?: FileType; // Optional: can be derived from mime and ext using getFileTypeFromMime()
     mime: string; // e.g. "image/jpeg"
     ext?: string; // e.g. ".jpg"
     hash?: string;

@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Folder } from '@/types/file-manager';
 import HomeIcon from '@/components/icons/home';
+import { middleTruncate } from '@/lib/truncate-name';
 
 interface BreadcrumbNavigationProps {
   folders: Folder[];
@@ -33,7 +34,7 @@ const BREAKPOINTS = {
 const MAX_VISIBLE = {
   mobile: 3,
   tablet: 3,
-  desktop: 4,
+  desktop: 6,
 };
 
 export default function BreadcrumbNavigation({ folders, currentFolder, onFolderClick }: Readonly<BreadcrumbNavigationProps>) {
@@ -116,7 +117,7 @@ export default function BreadcrumbNavigation({ folders, currentFolder, onFolderC
                       key={folder.id}
                       onClick={() => onFolderClick(folder)}
                     >
-                      {folder.name}
+                     { middleTruncate(folder.name, 20)}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -131,17 +132,17 @@ export default function BreadcrumbNavigation({ folders, currentFolder, onFolderC
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               {index === visibleItems.length - 1 ? (
-                <BreadcrumbPage className="max-w-[150px] truncate">
-                  {folder.name}
+                <BreadcrumbPage className=" truncate">
+                  { middleTruncate(folder.name, 20)}
                 </BreadcrumbPage>
               ) : (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onFolderClick(folder)}
-                  className="max-w-[150px] truncate"
+                  className=" truncate"
                 >
-                  {folder.name}
+                  { middleTruncate(folder.name, 20)}
                 </Button>
               )}
             </BreadcrumbItem>

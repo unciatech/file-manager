@@ -4,10 +4,11 @@ import { ReactNode } from "react";
 import BreadcrumbNavigation from "./breadcrumb-navigation";
 import SearchDialog from "../modals/search-modal";
 import { Button } from "../ui/button";
-import UploadFileIcon from "../icons/upload-file";
+
 import UploadFolderIcon from "../icons/upload-folder";
 import MoveIcon from "../icons/move";
 import { Checkbox } from "../ui/checkbox";
+import { PlusIcon } from "../icons";
 
 export function FileManagerHeader() {
   const {
@@ -68,7 +69,7 @@ export function FileManagerHeader() {
       className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-gradient-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
       onClick={() => setIsUploadModalOpen(true)}
     >
-      <UploadFileIcon className="size-5 mr-2" />
+      <PlusIcon className="size-5 text-gray-900" stroke="black" strokeWidth="1" />
       Upload File
     </Button>
   );
@@ -80,13 +81,13 @@ export function FileManagerHeader() {
       className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-gradient-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
       onClick={() => setIsCreateFolderModalOpen(true)}
     >
-      <UploadFolderIcon className="size-5 mr-2" />
+      <UploadFolderIcon className="size-5 text-gray-900" />
       Create Folder
     </Button>
   );
 
   const Breadcrumb: ReactNode = (
-    <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6 mb-3">
+    <div className="flex w-full items-center gap-1 pr-4 lg:gap-2 lg:pr-6 mb-3">
       <BreadcrumbNavigation
         folders={folders}
         currentFolder={currentFolder}

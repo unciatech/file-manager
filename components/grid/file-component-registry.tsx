@@ -1,11 +1,10 @@
 import React from "react";
-import { FileMetaData, FileType } from "@/types/file-manager";
+import { FileMetaData } from "@/types/file-manager";
 import { getFileTypeFromMime } from "@/lib/file-type-utils";
 import { ImageCard, ImageCardMetadata } from "../cards/image-card";
 import { VideoCard, VideoCardMetadata } from "../cards/video-card";
 import { AudioCard, AudioCardMetadata } from "../cards/audio-card";
 import { DocumentCard, DocumentCardMetadata } from "../cards/document-card";
-import { OtherCard } from "../cards/other-card";
 import { DefaultCard } from "../cards/default-card";
 
 // Define the interface for the registry values
@@ -40,6 +39,6 @@ export const FILE_COMPONENT_REGISTRY: Record<string, FileComponentConfig> = {
 // Helper to get component safely
 export function getFileComponents(file: FileMetaData) {
     // Derive type from MIME and extension if not explicitly set
-    const type = file.type || getFileTypeFromMime(file.mime, file.ext);
+    const type = getFileTypeFromMime(file.mime, file.ext);
     return FILE_COMPONENT_REGISTRY[type] || FILE_COMPONENT_REGISTRY.default;
 }

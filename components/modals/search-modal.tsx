@@ -9,13 +9,16 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import SearchIcon from "@/components/icons/search";
 import { Button } from "@/components/ui/button";
 import { useFileManager } from "@/context/file-manager-context";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { toast } from "sonner";
 
-import { FileMetaData, Folder } from "@/types/file-manager";
+import { FileMetaData, Folder, FileType, FILE_TYPE } from "@/types/file-manager";
+import { middleTruncate } from "@/lib/truncate-name";
+import {FolderIcon, SearchIcon} from "../icons";
+import { Icons } from "../utils/icons";
+import { getIconType } from "@/lib/get-icon-type";
 
 export default function SearchDialog() {
   const [open, setOpen] = useState(false);
@@ -82,7 +85,7 @@ export default function SearchDialog() {
       size="lg"
       className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-gradient-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
       onClick={() => setOpen(true)}>
-        <SearchIcon className="size-5 mr-2" />
+        <SearchIcon className="size-4 mr-1  text-gray-700" />
         Search
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
@@ -107,7 +110,8 @@ export default function SearchDialog() {
                     handleFolderClick(folder);
                   }}
                 >
-                  <span>{folder.name}</span>
+                  <FolderIcon className="size-4  mr-2 shrink-0" strokeWidth={1.5} />
+                  <span>{ middleTruncate(folder.name, 60)}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -116,7 +120,8 @@ export default function SearchDialog() {
             <CommandGroup heading="Files">
               {fileResults.map((file) => (
                 <CommandItem key={file.id}>
-                  <span>{file.name}</span>
+                  <Icons type={getIconType(file.mime, file.ext)} className="size-4 mr-2 shrink-0" />
+                  <span>{middleTruncate(file.name, 60)}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
