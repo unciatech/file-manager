@@ -14,14 +14,19 @@ export function BulkActionBar() {
   
   const totalSelected = selectedFiles.length + selectedFolders.length;
   const barRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(true); // Start with true, assuming bar is initially visible
+  const [hasInitialized, setHasInitialized] = useState(false); // Track if observer has run
   
   useEffect(() => {
-    if (totalSelected === 0) return;
+    if (totalSelected === 0) {
+      setHasInitialized(false);
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
+        setHasInitialized(true); // Mark as initialized after first observation
       },
       {
         threshold: 0,
@@ -101,17 +106,19 @@ export function BulkActionBar() {
       </div>
 
       {/* Floating bulk actions bar - appears at top when original is not visible */}
-      <div
-        className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-lg transition-transform duration-300 ${
-          isVisible ? "-translate-y-full" : "translate-y-0"
-        }`}
-      >
-        <div className="px-4 sm:px-6 py-3 max-w-7xl mx-auto">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <ActionButtons />
+      {hasInitialized && (
+        <div
+          className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-lg transition-transform duration-300 ${
+            isVisible ? "-translate-y-full" : "translate-y-0"
+          }`}
+        >
+          <div className="px-4 sm:px-6 py-3 max-w-7xl mx-auto">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <ActionButtons />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

@@ -19,20 +19,22 @@ export function FileManagerModal({
           <DialogTitle className="px-6 text-base">Select Files</DialogTitle>
         </DialogHeader>
         
-        <ScrollArea className="text-sm h-full my-3 ps-6 pe-5 me-1">
-          <FileManagerComposition.Modal {...props} onClose={onClose}>
-            <div className="flex h-full relative pb-12 overflow-hidden">
-              <div className="flex-1 flex flex-col">
-                <FileManagerComposition.Header />
-                <FileManagerComposition.Content />
-                <FileManagerComposition.Footer />
-              </div>
-              <FileManagerComposition.Overlays />
-            </div>
-          </FileManagerComposition.Modal>
-        </ScrollArea>
-        
-        <FileManagerModalFooter onClose={onClose} />
+        <FileManagerComposition.Modal {...props} onClose={onClose}>
+          <div className="flex flex-col h-full"> 
+            <ScrollArea className="text-sm flex-1 my-3 ps-6 pe-5 me-1">
+                <div className="flex h-full relative pb-12 overflow-hidden">
+                  <div className="flex-1 flex flex-col">
+                    <FileManagerComposition.Header />
+                    <FileManagerComposition.Content />
+                    <FileManagerComposition.Footer />
+                  </div>
+                  <FileManagerComposition.Overlays />
+                </div>
+            </ScrollArea>
+          
+            <FileManagerModalFooter onClose={onClose} />
+          </div>
+        </FileManagerComposition.Modal>
       </DialogContent>
     </Dialog>
   );
