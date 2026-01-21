@@ -6,6 +6,7 @@ import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogT
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileManagerModalProps } from "@/types/file-manager";
 import { useFileManager } from "@/context/file-manager-context";
+import { MoveAction, SelectAllAction } from "./layout/header-actions";
 
 export function FileManagerModal({
   open,
@@ -24,7 +25,10 @@ export function FileManagerModal({
             <ScrollArea className="text-sm flex-1 my-3 ps-6 pe-5 me-1">
                 <div className="flex h-full relative pb-12 overflow-hidden">
                   <div className="flex-1 flex flex-col">
-                    <FileManagerComposition.Header />
+                    <FileManagerComposition.Header>
+                      <MoveAction />
+                      <SelectAllAction />
+                    </FileManagerComposition.Header>
                     <FileManagerComposition.Content />
                     <FileManagerComposition.Footer />
                   </div>
