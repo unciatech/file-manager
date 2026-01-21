@@ -7,6 +7,50 @@ import { FileUploadInput } from "@/types/provider";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+/**
+ * Helper function to toggle files in the selection
+ * @param prev - Previous selection array
+ * @param filesToToggle - Files to toggle
+ * @returns Updated selection array
+ */
+const toggleFilesInSelection = (
+  prev: FileMetaData[],
+  filesToToggle: FileMetaData[]
+): FileMetaData[] => {
+  let updated = [...prev];
+  filesToToggle.forEach((file) => {
+    const isSelected = updated.some((f) => f.id === file.id);
+    if (isSelected) {
+      updated = updated.filter((f) => f.id !== file.id);
+    } else {
+      updated.push(file);
+    }
+  });
+  return updated;
+};
+
+/**
+ * Helper function to toggle folders in the selection
+ * @param prev - Previous selection array
+ * @param foldersToToggle - Folders to toggle
+ * @returns Updated selection array
+ */
+const toggleFoldersInSelection = (
+  prev: Folder[],
+  foldersToToggle: Folder[]
+): Folder[] => {
+  let updated = [...prev];
+  foldersToToggle.forEach((folder) => {
+    const isSelected = updated.some((f) => f.id === folder.id);
+    if (isSelected) {
+      updated = updated.filter((f) => f.id !== folder.id);
+    } else {
+      updated.push(folder);
+    }
+  });
+  return updated;
+};
+
 export function useFileHandlers(state: FileState) {
   const {
     mode,
@@ -32,50 +76,6 @@ export function useFileHandlers(state: FileState) {
   } = state;
 
   const router = useRouter();
-
-  /**
-   * Helper function to toggle files in the selection
-   * @param prev - Previous selection array
-   * @param filesToToggle - Files to toggle
-   * @returns Updated selection array
-   */
-  const toggleFilesInSelection = (
-    prev: FileMetaData[],
-    filesToToggle: FileMetaData[]
-  ): FileMetaData[] => {
-    let updated = [...prev];
-    filesToToggle.forEach((file) => {
-      const isSelected = updated.some((f) => f.id === file.id);
-      if (isSelected) {
-        updated = updated.filter((f) => f.id !== file.id);
-      } else {
-        updated.push(file);
-      }
-    });
-    return updated;
-  };
-
-  /**
-   * Helper function to toggle folders in the selection
-   * @param prev - Previous selection array
-   * @param foldersToToggle - Folders to toggle
-   * @returns Updated selection array
-   */
-  const toggleFoldersInSelection = (
-    prev: Folder[],
-    foldersToToggle: Folder[]
-  ): Folder[] => {
-    let updated = [...prev];
-    foldersToToggle.forEach((folder) => {
-      const isSelected = updated.some((f) => f.id === folder.id);
-      if (isSelected) {
-        updated = updated.filter((f) => f.id !== folder.id);
-      } else {
-        updated.push(folder);
-      }
-    });
-    return updated;
-  };
 
 
   /**
