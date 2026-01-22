@@ -173,13 +173,13 @@ export function useFileHandlers(state: FileState) {
         const newUrl = folderId === null ? path : `${path}/${folderId}`;
         router.push(newUrl);
       } else {
-        // Modal/other modes: manually update state
-        setCurrentFolder(folder);
-        setSelectedFiles([]);
-        setSelectedFolders([]);
+        // Modal mode: Use search params for navigation
+        setIsLoading(true);
+        const newUrl = folderId === null ? '?' : `?folderId=${folderId}`;
+        router.push(newUrl, { scroll: false });
       }
     },
-    [isInSelectionMode, mode, router, setCurrentFolder, setSelectedFolders, setSelectedFiles]
+    [isInSelectionMode, mode, router, setCurrentFolder, setSelectedFolders, setSelectedFiles, basePath, setIsLoading]
   );
 
   /**

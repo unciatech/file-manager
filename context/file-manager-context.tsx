@@ -1,10 +1,9 @@
 "use client";
 
 import { useFileHandlers, useFileState } from "@/hooks";
-import { MockProvider } from "@/providers/mock-provider";
 import { EntityId, FileManagerRootProps, FileMetaData, FileType, FolderId, Folder, PaginationInfo, Mode, SelectionMode, SELECTION_MODE, MODE } from "@/types/file-manager";
 import { FileUploadInput, IFileManagerProvider } from "@/types/provider";
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useMemo } from "react";
 
 const FileManagerContext = createContext<FileManagerContextType | undefined>(undefined);
 

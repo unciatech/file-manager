@@ -9,6 +9,12 @@ import mime from 'mime';
  * @returns The corresponding FileType
  */
 export function getFileTypeFromMime(mimeType: string, extension?: string): FileType {
+  // Defensive check: ensure mimeType is a string
+  if (typeof mimeType !== 'string') {
+    console.warn('getFileTypeFromMime: mimeType is not a string:', mimeType);
+    return FILE_TYPE.FILE;
+  }
+
   let effectiveMime = mimeType;
   
   // If extension is provided, use it to get accurate MIME type

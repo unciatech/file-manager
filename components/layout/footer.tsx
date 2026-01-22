@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useFileManager } from "../../context/file-manager-context";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem } from "../ui/pagination";
 import { Button } from "../ui/button";
