@@ -2,11 +2,11 @@
 
 import { FileManagerComposition } from "@/components/file-manager-root";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileManagerModalProps } from "@/types/file-manager";
+import { FileManagerModalProps, SELECTION_MODE } from "@/types/file-manager";
 import { useFileManager } from "@/context/file-manager-context";
-import { MoveAction, SelectAllAction } from "./layout/header-actions";
+import { BulkActionBar } from "./layout";
 
 export function FileManagerModal({
   open,
@@ -17,25 +17,27 @@ export function FileManagerModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="p-0" variant="fullscreen">
         <DialogHeader className="pt-5 pb-3 m-0 border-b border-border">
-          <DialogTitle className="px-6 text-base">Select Files</DialogTitle>
+          <DialogTitle className="px-6 text-base">
+            Select {props.fileSelectionMode === SELECTION_MODE.SINGLE ? "Single File" : "Multiple Files"} 
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Browse and select files from your media library
+          </DialogDescription>
         </DialogHeader>
-        
+
         <FileManagerComposition.Modal {...props} onClose={onClose}>
-          <div className="flex flex-col h-full"> 
-            <ScrollArea className="text-sm flex-1 my-3 ps-6 pe-5 me-1">
-                <div className="flex h-full relative pb-12 overflow-hidden">
-                  <div className="flex-1 flex flex-col">
-                    <FileManagerComposition.Header>
-                      <MoveAction />
-                      <SelectAllAction />
-                    </FileManagerComposition.Header>
-                    <FileManagerComposition.Content />
-                    <FileManagerComposition.Footer />
-                  </div>
-                  <FileManagerComposition.Overlays />
-                </div>
+          <div className="flex flex-col h-[calc(100vh-6rem)]">
+            <ScrollArea className="text-sm flex-1 py-3">
+              <div className="flex flex-col min-h-full">
+                <FileManagerComposition.Header>
+                  <BulkActionBar />
+                </FileManagerComposition.Header>
+                <FileManagerComposition.Content />
+                <FileManagerComposition.Footer />
+                <FileManagerComposition.Overlays />
+              </div>
             </ScrollArea>
-          
+
             <FileManagerModalFooter onClose={onClose} />
           </div>
         </FileManagerComposition.Modal>
@@ -46,14 +48,14 @@ export function FileManagerModal({
 
 function FileManagerModalFooter({ onClose }: { onClose: () => void }) {
   const { selectedFiles, onFilesSelected } = useFileManager();
-  
+
   const handleSelect = () => {
     if (onFilesSelected && selectedFiles.length > 0) {
       onFilesSelected(selectedFiles);
       onClose();
     }
   };
-  
+
   return (
     <DialogFooter className="px-6 py-4 border-t border-border">
       <DialogClose asChild>
@@ -61,8 +63,8 @@ function FileManagerModalFooter({ onClose }: { onClose: () => void }) {
           Cancel
         </Button>
       </DialogClose>
-      <Button 
-        type="button" 
+      <Button
+        type="button"
         onClick={handleSelect}
         disabled={selectedFiles.length === 0}
       >

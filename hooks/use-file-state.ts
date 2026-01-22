@@ -9,7 +9,7 @@ import {
   MODE,
   PaginationInfo,
 } from "@/types/file-manager";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -28,10 +28,12 @@ export function useFileState(options: FileStateOptions) {
 
 
   const params = useParams();
+  const searchParams = useSearchParams();
 
-  // Determine initial folder from params if in page mode
+  // Determine folder from URL based on mode
   const folderId = useMemo<FolderId>(() => {
     if (mode === MODE.PAGE && params?.path) {
+      // Page mode: Use path params (/media/123)
       const path = Array.isArray(params.path) ? params.path[0] : params.path;
 
       return typeof path === "string" && /^\d+$/.test(path)
@@ -39,8 +41,16 @@ export function useFileState(options: FileStateOptions) {
         : null;
     }
 
+    if (mode === MODE.MODAL) {
+      // Modal mode: Use search params (?folderId=123)
+      const folderIdParam = searchParams.get('folderId');
+      if (folderIdParam && /^\d+$/.test(folderIdParam)) {
+        return Number(folderIdParam);
+      }
+    }
+
     return initialFolderId ?? null;
-  }, [mode, params, initialFolderId]);
+  }, [mode, params, searchParams, initialFolderId]);
 
   // Core State
   const [files, setFiles] = useState<FileMetaData[]>([]);

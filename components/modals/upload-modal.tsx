@@ -127,7 +127,7 @@ export function UploadModal() {
       const fileInputs: FileUploadInput[] = completedFiles.map((item) => ({
         name: item.file.name,
         size: item.file.size,
-        type: getFileTypeFromMime(item.file),
+        type: getFileTypeFromMime(item.file.type, item.file.name.split('.').pop()),
         lastModified: item.file instanceof File ? item.file.lastModified : Date.now(),
         file: item.file as File,
         metadata: {},
