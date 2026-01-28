@@ -17,6 +17,7 @@ import { FolderId, Folder } from "@/types/file-manager";
 import { ChevronRight } from 'lucide-react';
 import FolderIcon from "../icons/folder";
 import { middleTruncate } from "@/lib/truncate-name";
+import { CrossIcon } from "../icons";
 
 type FolderTreeState = {
   folders: Map<FolderId, Folder[]>; // parentId -> children
@@ -66,7 +67,7 @@ function FolderTreeItem({
   };
 
   return (
-    <li>
+    <li >
       <div className="flex items-center gap-1.5 py-1">
         {hasChildren ? (
           <button
@@ -94,7 +95,7 @@ function FolderTreeItem({
             }`}
         >
           <FolderIcon className="size-5 text-sky-500 shrink-0" strokeWidth={1.5} />
-          <span className="truncate min-w-0">{ middleTruncate(folder.name)} {isDisabled ? <span className="text-xs">(Already selected)</span> : ''}</span>
+          <span className="truncate min-w-0">{ middleTruncate(folder.name, 15)} {isDisabled ? <span className="text-xs font-medium text-gray-900">(Already selected)</span> : ''}</span>
         </button>
       </div>
 
@@ -252,9 +253,23 @@ export function MoveModal() {
 
   return (
     <Dialog open={isMoveFileModalOpen} onOpenChange={handleOpenChange} >
-      <DialogContent className="p-0 max-w-3xl max-h-[90vh] flex flex-col" variant="default">
+      <DialogContent className="p-0 max-w-3xl max-h-full md:max-h-[90vh] flex flex-col" variant="default" showCloseButton={false}>
         <DialogHeader className="pt-5 pb-3 m-0 border-b border-border">
-          <DialogTitle className="px-6 text-base">Move Items</DialogTitle>
+          <DialogTitle className="px-6 text-base">
+            <div className="flex w-full items-center justify-between gap-2">
+            <span>Move Items</span>
+              <Button
+                variant="outline"
+                size="icon"
+                radius="full"
+                onClick={() => handleOpenChange(false)}
+                className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:text-red-600 hover:border-red-200 hover:from-red-50 hover:to-red-100 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+              >
+            <CrossIcon className="size-5" />
+            <span className="hidden">Close</span>
+          </Button>
+        </div>
+          </DialogTitle>
           <DialogDescription />
         </DialogHeader>
         <ScrollArea className="text-sm h-full my-3 ps-6 pe-5 me-1">
@@ -281,7 +296,7 @@ export function MoveModal() {
                   ))}
                 </div>
               ) : (
-                <ul className="border border-gray-200 rounded-lg p-2 bg-white min-h-[200px]">
+                <ul className="border border-gray-200 rounded-lg p-2 bg-white min-h-[200px] overflow-scroll">
                   {rootFolders.length === 0 ? (
                     <li className="text-gray-500 text-center py-8">
                       No folders available
@@ -304,13 +319,13 @@ export function MoveModal() {
             </div>
           </div>
         </ScrollArea>
-        <DialogFooter className="px-6 py-4 border-t border-border">
+        <DialogFooter className="px-6 py-4 border-t border-border w-full sm:justify-between justify-center items-center flex-col sm:flex-row gap-2 ">
           <DialogClose asChild>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" radius="full" className='w-full md:w-auto'>
               Cancel
             </Button>
           </DialogClose>
-          <Button type="button" onClick={handleMove} disabled={!targetFolderId}>
+          <Button type="button" onClick={handleMove} disabled={!targetFolderId} radius="full" className='w-full md:w-auto'>
             Move
           </Button>
         </DialogFooter>

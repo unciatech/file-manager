@@ -146,11 +146,11 @@ export function ImageModal({ file, onClose, onSave, onDelete }: ImageModalProps)
   );
 
   const footer = (
-    <div className="flex justify-between items-center gap-2">
-      <Button variant="outline" onClick={onClose}>
+    <div className="flex w-full justify-between items-center flex-col sm:flex-row gap-2 ">
+      <Button className='w-full md:w-auto' variant="outline" onClick={onClose} radius="full">
         Cancel
       </Button>
-      <Button onClick={handleSave}>
+      <Button className='w-full md:w-auto' onClick={handleSave} radius="full">
         Finish
       </Button>
     </div>

@@ -1,7 +1,6 @@
 'use client'
 import { FileManagerProvider } from "@/context/file-manager-context";
 import {
-  FileManagerContent,
   FileManagerFooter,
   FileManagerHeader,
   FileManagerOverlays,
@@ -55,6 +54,5 @@ export const FileManagerComposition = {
     Modal: FileManagerModalProvider,
     Header: FileManagerHeader,
     Footer: FileManagerFooter,
-    Content: FileManagerContent,
     Overlays: FileManagerOverlays,
 }

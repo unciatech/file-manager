@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { getFileSize } from '@/lib/file-size';
 import { formatDate } from '@/lib/format-utils';
-import { Icons } from '@/components/utils/icons';
+import { Icons } from '@/lib/icons';
 
 interface FileModalProps {
   file: FileMetaData;
@@ -131,12 +131,12 @@ export function FileModal({ file, onClose, onSave, onDelete }: FileModalProps) {
   );
 
   const footer = (
-    <div className="flex justify-between items-center gap-2">
-      <Button variant="outline" onClick={onClose}>
+    <div className="flex w-full justify-between items-center flex-col sm:flex-row gap-2 ">
+      <Button className='w-full md:w-auto' variant="outline" onClick={onClose} radius="full">
         Cancel
       </Button>
-      <Button onClick={handleSave}>
-        Finish
+      <Button className='w-full md:w-auto' onClick={handleSave} radius="full">
+        Save
       </Button>
     </div>
   );

@@ -15,7 +15,6 @@ import {
 } from "../ui/context-menu";
 
 import FolderIcon from "../icons/folder";
-import { Icons } from "../utils/icons";
 
 
 interface FolderCardProps {
@@ -92,11 +91,11 @@ export function FolderCard({
           {/* Icon Container: Gray background, rounded, subtle shadow */}
           {/* When selected, usually just the label is highlighted in Finder. */}
           <div className={`
-                relative w-full aspect-square flex items-center justify-center mb-1 overflow-hidden rounded-2xl
+                relative w-full aspect-square flex items-center justify-center mb-1 overflow-hidden rounded-2xl hover:bg-gray-200/60
                 
                 ${isSelected ? "bg-gray-200/60 " : ""}
             `}>
-            <div className="w-[75%] h-[75%] flex items-center justify-center transform">
+            <div className="w-[75%] h-[75%] flex items-center justify-center transform ">
               <FolderIcon className="w-full h-full text-blue-400 fill-blue-400/20 drop-shadow-sm" strokeWidth={1.5} />
               {/* {
                 (folder.fileCount ?? 0) === 0 ? (

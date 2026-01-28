@@ -134,11 +134,11 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
   );
 
   const footer = (
-    <div className="flex justify-between items-center gap-2">
-      <Button variant="outline" onClick={onClose}>
+    <div className="flex gap-2 w-full sm:justify-between justify-center items-center flex-col sm:flex-row ">
+      <Button variant="outline" onClick={onClose} radius="full" className='w-full md:w-auto'>
         Cancel
       </Button>
-      <Button onClick={handleSave}>
+      <Button onClick={handleSave} radius="full" className='w-full md:w-auto'>
         Finish
       </Button>
     </div>

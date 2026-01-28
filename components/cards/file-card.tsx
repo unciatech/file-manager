@@ -95,7 +95,7 @@ export function FileCard({
              {/* Icon Container: Gray background, rounded, subtle shadow */}
              {/* When selected, often Finder darkens the icon slightly or adds a border. keeping it simple clean. */}
             <div className={`
-                relative w-full aspect-square flex items-center justify-center mb-1 overflow-hidden rounded-2xl
+                relative w-full aspect-square flex items-center justify-center mb-1 overflow-hidden rounded-2xl hover:bg-gray-200/60
                 
                 ${isSelected ? "bg-gray-200/60" : "group-hover:ring-black/10 transition-shadow"}
             `}>

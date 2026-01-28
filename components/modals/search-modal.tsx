@@ -17,16 +17,15 @@ import { toast } from "sonner";
 import { FileMetaData, Folder, FileType, FILE_TYPE } from "@/types/file-manager";
 import { middleTruncate } from "@/lib/truncate-name";
 import {FolderIcon, SearchIcon} from "../icons";
-import { Icons } from "../utils/icons";
+import { Icons } from "@/lib/icons";
 import { getIconType } from "@/lib/get-icon-type";
 
 export default function SearchDialog() {
-  const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [fileResults, setFileResults] = useState<FileMetaData[]>([]);
   const [folderResults, setFolderResults] = useState<Folder[]>([]);
   const [loading, setLoading] = useState(false);
-  const { provider, handleFolderClick, handleClearSelection } = useFileManager();
+  const { provider, handleFolderClick, handleClearSelection, isSearchModalOpen, setIsSearchModalOpen } = useFileManager();
 
   // Debounce search query to reduce API calls
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
@@ -35,13 +34,13 @@ export default function SearchDialog() {
     const down = (e: KeyboardEvent) => {
       if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((open) => !open);
+        setIsSearchModalOpen(!isSearchModalOpen);
       }
     };
 
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, []);
+  }, [isSearchModalOpen, setIsSearchModalOpen]);
 
   const doSearch = useCallback(async (q: string) => {
     setLoading(true);
@@ -66,13 +65,13 @@ export default function SearchDialog() {
 
   // Use debounced value to trigger search
   useEffect(() => {
-    if (open && debouncedSearchQuery.length > 0) {
+    if (isSearchModalOpen && debouncedSearchQuery.length > 0) {
       doSearch(debouncedSearchQuery);
     } else {
       setFileResults([]);
       setFolderResults([]);
     }
-  }, [debouncedSearchQuery, open, doSearch]);
+  }, [debouncedSearchQuery, isSearchModalOpen, doSearch]);
 
   const handleInputChange = (value: string) => {
     setSearchQuery(value);
@@ -82,13 +81,14 @@ export default function SearchDialog() {
     <>
       <Button
       variant="outline"
-      size="lg"
-      className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-gradient-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
-      onClick={() => setOpen(true)}>
-        <SearchIcon className="size-4 mr-1  text-gray-700" />
-        Search
+      size="icon"
+      radius="full"
+      className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+      onClick={() => setIsSearchModalOpen(true)}>
+        <SearchIcon className="size-4 text-gray-700" />
+        <span className="hidden">Search</span>
       </Button>
-      <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
+      <CommandDialog open={isSearchModalOpen} onOpenChange={setIsSearchModalOpen} shouldFilter={false}>
         <CommandInput
           placeholder="Type to search files or folders..."
           value={searchQuery}
@@ -106,7 +106,7 @@ export default function SearchDialog() {
                   key={folder.id}
                   onSelect={() => {
                     handleClearSelection(); // Critical: prevent phantom selection
-                    setOpen(false);
+                    setIsSearchModalOpen(false);
                     handleFolderClick(folder);
                   }}
                 >

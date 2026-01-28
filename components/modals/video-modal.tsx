@@ -136,11 +136,11 @@ export function VideoModal({ file, onClose, onSave, onDelete }: VideoModalProps)
   );
 
   const footer = (
-    <div className="flex justify-between items-center">
-      <Button variant="outline" onClick={onClose}>
+    <div className="flex w-full sm:justify-between justify-center items-center flex-col sm:flex-row gap-2 ">
+      <Button variant="outline" onClick={onClose} radius="full" className='w-full md:w-auto'>
         Cancel
       </Button>
-      <Button onClick={handleSave}>
+      <Button onClick={handleSave} radius="full" className='w-full md:w-auto'>
         Finish
       </Button>
     </div>

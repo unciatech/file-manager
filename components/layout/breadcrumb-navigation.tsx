@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
   Breadcrumb,
   BreadcrumbEllipsis,
@@ -19,17 +18,14 @@ import {
 import { Folder } from '@/types/file-manager';
 import HomeIcon from '@/components/icons/home';
 import { middleTruncate } from '@/lib/truncate-name';
+import { ChevronDown } from 'lucide-react';
+import { useViewport } from '@/lib/use-viewport';
 
 interface BreadcrumbNavigationProps {
   folders: Folder[];
   currentFolder: Folder | null;
   onFolderClick: (folder: Folder | null) => void;
 }
-
-const BREAKPOINTS = {
-  mobile: 640,
-  tablet: 1024,
-};
 
 const MAX_VISIBLE = {
   mobile: 3,
@@ -38,24 +34,7 @@ const MAX_VISIBLE = {
 };
 
 export default function BreadcrumbNavigation({ folders, currentFolder, onFolderClick }: Readonly<BreadcrumbNavigationProps>) {
-  const [maxVisible, setMaxVisible] = useState(MAX_VISIBLE.desktop);
-
-  useEffect(() => {
-    const updateMaxVisible = () => {
-      const width = window.innerWidth;
-      if (width < BREAKPOINTS.mobile) {
-        setMaxVisible(MAX_VISIBLE.mobile);
-      } else if (width < BREAKPOINTS.tablet) {
-        setMaxVisible(MAX_VISIBLE.tablet);
-      } else {
-        setMaxVisible(MAX_VISIBLE.desktop);
-      }
-    };
-
-    updateMaxVisible();
-    window.addEventListener('resize', updateMaxVisible);
-    return () => window.removeEventListener('resize', updateMaxVisible);
-  }, []);
+  const { viewportMode } = useViewport();
 
   //TODO: Wrong logic, only works when complete folder tree is loaded
   const getCurrentPath = () => {
@@ -73,8 +52,53 @@ export default function BreadcrumbNavigation({ folders, currentFolder, onFolderC
 
   const path = getCurrentPath();
 
-  // Calculate which items to show and which to collapse
-  // We always show Home, so maxVisible includes Home + path items
+  // Calculate maxVisible based on viewport mode
+  const maxVisible = viewportMode === 'mobile' 
+    ? MAX_VISIBLE.mobile 
+    : viewportMode === 'tablet' 
+    ? MAX_VISIBLE.tablet 
+    : MAX_VISIBLE.desktop;
+
+  // For mobile/tablet: show dropdown select
+  if (viewportMode === 'mobile' || viewportMode === 'tablet') {
+    const allLocations = [
+      { id: 'home', name: 'Home', folder: null },
+      ...path.map((folder) => ({ id: folder.id, name: folder.name, folder }))
+    ];
+    
+    const currentLocation = currentFolder 
+      ? { id: currentFolder.id, name: currentFolder.name, folder: currentFolder }
+      : { id: 'home', name: 'Home', folder: null };
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="lg"
+            className="w-full justify-between -ml-1 max-w-[280px] sm:max-w-xs"
+          >
+            <span className="truncate">{middleTruncate(currentLocation.name, 25)}</span>
+            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-[280px] sm:w-[320px]">
+          {allLocations.map((location) => (
+            <DropdownMenuItem
+              key={location.id}
+              onClick={() => onFolderClick(location.folder)}
+              className={location.id === currentLocation.id ? 'bg-accent' : ''}
+            >
+              {location.name === 'Home' && <HomeIcon className="mr-2 h-4 w-4" />}
+              <span className="truncate">{middleTruncate(location.name, 30)}</span>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  // For desktop: show traditional breadcrumb
   const totalItems = path.length + 1; // +1 for Home
   const shouldCollapse = totalItems > maxVisible;
   
@@ -92,10 +116,10 @@ export default function BreadcrumbNavigation({ folders, currentFolder, onFolderC
           <Button
             variant="ghost"
             size="lg"
-            className="-ml-2"
+            className="-ml-1"
             onClick={() => onFolderClick(null)}
           >
-            
+            <HomeIcon className="mr-2 h-4 w-4" />
             Home
           </Button>
         </BreadcrumbItem>

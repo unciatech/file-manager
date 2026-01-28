@@ -38,7 +38,9 @@ import { getFileSize } from '@/lib/file-size';
 import { fileTypesToAccept, getFileTypeFromMime, getFileTypesDescription } from '@/lib/file-type-utils';
 import { FileUploadInput } from '@/types/provider';
 import { middleTruncate } from '@/lib/truncate-name';
-import { Icons } from '../utils/icons';
+import { Icons } from '@/lib/icons';
+import UploadCloudIcon from '../icons/upload-cloud';
+import { CrossIcon } from '../icons';
 
 
 
@@ -156,10 +158,22 @@ export function UploadModal() {
 
   return (
     <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
-      <DialogContent className="p-0 max-w-4xl max-h-[80vh] flex flex-col" variant="default">
+      <DialogContent className="p-0 max-w-4xl max-h-[80vh] flex flex-col" variant="default" showCloseButton={false}>
         <DialogHeader className="pt-5 pb-3 m-0 border-b border-border">
           <DialogTitle className="px-6 text-base">
-            Upload Files {currentFolder && <span className="ml-1 text-sm text-muted-foreground">to { middleTruncate(currentFolder.name)}</span>}
+            <div className="flex w-full items-center justify-between gap-2">
+            <span>Upload Files</span>
+              <Button
+                variant="outline"
+                size="icon"
+                radius="full"
+                onClick={() => setIsUploadModalOpen(false)}
+                className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:text-red-600 hover:border-red-200 hover:from-red-50 hover:to-red-100 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+              >
+            <CrossIcon className="size-5" />
+            <span className="hidden">Close</span>
+          </Button>
+        </div>
           </DialogTitle>
           <DialogDescription />
         </DialogHeader>
@@ -168,7 +182,7 @@ export function UploadModal() {
           {/* Upload Area */}
           <div
             className={cn(
-              'relative rounded-lg border border-dashed p-6 text-center transition-colors mb-4',
+              'relative rounded-lg border-dashed border-[2.5px]  bg-gray-100 border-gray-300 px-6 py-16 text-center transition-colors mb-4',
               isDragging
                 ? 'border-primary bg-primary/5'
                 : 'border-muted-foreground/25 hover:border-muted-foreground/50',
@@ -180,14 +194,14 @@ export function UploadModal() {
           >
             <input {...getInputProps()} className="sr-only" />
 
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center">
               <div
                 className={cn(
-                  'flex h-12 w-12 items-center justify-center rounded-full bg-muted transition-colors',
+                  'flex h-12 w-12 items-center justify-center rounded-full transition-colors',
                   isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/25',
                 )}
               >
-                <Upload className="h-5 w-5 text-muted-foreground" />
+                <UploadCloudIcon className='mb-3 text-zinc-400 dark:text-zinc-500'/>
               </div>
 
               <div className="space-y-2">
@@ -376,13 +390,13 @@ export function UploadModal() {
           )}
         </div>
 
-        <DialogFooter className="px-6 py-4 border-t border-border">
+        <DialogFooter className="px-6 py-4 border-t border-border w-full sm:justify-between justify-center items-center flex-col sm:flex-row gap-2 ">
           <DialogClose asChild>
-            <Button type="button" variant="outline" onClick={handleClose}>
+            <Button type="button" radius="full" variant="outline" onClick={handleClose} className='w-full md:w-auto'>
               Cancel
             </Button>
           </DialogClose>
-          <Button type="button" onClick={handleUpload} disabled={!canUpload}>
+          <Button type="button" radius="full" onClick={handleUpload} disabled={!canUpload} className='w-full md:w-auto'>
             Upload {completedCount > 0 && `(${completedCount})`}
           </Button>
         </DialogFooter>

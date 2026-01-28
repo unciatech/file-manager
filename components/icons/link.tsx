@@ -12,7 +12,7 @@ export default function LinkIcon(
             viewBox="0 0 24 24"
             {...props}
         >
-            <g fill="none" stroke="currentColor" strokeLinecap="round" >
+            <g fill="currentColor" stroke="currentColor" strokeLinecap="round" >
                 <path d="M14 12a6 6 0 1 1-6-6" />
                 <path d="M10 12a6 6 0 1 1 6 6" />
             </g>

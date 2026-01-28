@@ -22,6 +22,7 @@ interface FileManagerContextType {
   //modal
   isUploadModalOpen: boolean;
   isCreateFolderModalOpen: boolean;
+  isSearchModalOpen: boolean;
   isMoveFileModalOpen: boolean;
   isRenameFolderModalOpen: boolean;
   fileDetailsModalFile: FileMetaData | null;
@@ -43,6 +44,7 @@ interface FileManagerContextType {
   //Modals Setters
   setIsUploadModalOpen: (isOpen: boolean) => void;
   setIsCreateFolderModalOpen: (isOpen: boolean) => void;
+  setIsSearchModalOpen: (isOpen: boolean) => void;
   setIsMoveFileModalOpen: (isOpen: boolean) => void;
   setIsRenameFolderModalOpen: (isOpen: boolean) => void;
   setFileDetailsModalFile: (file: FileMetaData | null) => void;
@@ -116,6 +118,7 @@ export function FileManagerProvider({
     pagination: state.pagination,
     isUploadModalOpen: state.isUploadModalOpen,
     isCreateFolderModalOpen: state.isCreateFolderModalOpen,
+    isSearchModalOpen: state.isSearchModalOpen,
     isMoveFileModalOpen: state.isMoveFileModalOpen,
     isRenameFolderModalOpen: state.isRenameFolderModalOpen,
     fileDetailsModalFile: state.fileDetailsModalFile,
@@ -127,6 +130,7 @@ export function FileManagerProvider({
     // Setters
     setIsUploadModalOpen: state.setIsUploadModalOpen,
     setIsCreateFolderModalOpen: state.setIsCreateFolderModalOpen,
+    setIsSearchModalOpen: state.setIsSearchModalOpen,
     setIsMoveFileModalOpen: state.setIsMoveFileModalOpen,
 
     setSelectedFiles: state.setSelectedFiles,

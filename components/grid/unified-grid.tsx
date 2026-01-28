@@ -40,7 +40,7 @@ export function UnifiedGrid() {
 
     if (isLoading) {
         return (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 p-6 content-start">
+            <div className="p-4 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 content-start">
                 {Array.from({ length: skeletonCount }).map((_, i) => (
                     <div key={i} className="flex flex-col items-center justify-start w-full gap-2">
                         <div className="w-full aspect-square bg-gray-100 rounded-2xl animate-pulse" />
@@ -55,7 +55,7 @@ export function UnifiedGrid() {
     }
 
     return (
-        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 p-6 content-start">
+        <div className="p-4 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 content-start">
             {folders.map((folder) => (
                 <FolderCard
                     key={folder.id}
