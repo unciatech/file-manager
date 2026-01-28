@@ -171,6 +171,7 @@ export function useFileState(options: FileStateOptions) {
   // Modal States
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isMoveFileModalOpen, setIsMoveFileModalOpen] = useState(false);
   const [isRenameFolderModalOpen, setIsRenameFolderModalOpen] = useState(false);
   
@@ -245,6 +246,7 @@ export function useFileState(options: FileStateOptions) {
     pagination,
     isUploadModalOpen,
     isCreateFolderModalOpen,
+    isSearchModalOpen,
     isMoveFileModalOpen,
     isRenameFolderModalOpen,
     fileDetailsModalFile,
@@ -260,6 +262,7 @@ export function useFileState(options: FileStateOptions) {
     //Modal Setters
     setIsUploadModalOpen,
     setIsCreateFolderModalOpen,
+    setIsSearchModalOpen,
     setIsMoveFileModalOpen,
     setIsRenameFolderModalOpen,
     setFileDetailsModalFile,

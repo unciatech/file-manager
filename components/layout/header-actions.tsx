@@ -1,6 +1,5 @@
 import { useFileManager } from "@/context/file-manager-context";
 import { SELECTION_MODE } from "@/types/file-manager";
-import { ReactNode } from "react";
 import SearchDialog from "../modals/search-modal";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
@@ -26,8 +25,8 @@ export function MoveAction() {
       className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
       onClick={() => setIsMoveFileModalOpen(true)}
     >
-      <MoveIcon className="size-5 mr-2" />
-      Move
+      <MoveIcon className="size-5" />
+      <span className="hidden sm:inline">Move</span>
     </Button>
   );
 }
@@ -74,12 +73,13 @@ export function UploadFileAction() {
   return (
     <Button
       variant="outline"
-      size="lg"
+      size="md"
+      radius="full"
       className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
       onClick={() => setIsUploadModalOpen(true)}
     >
       <PlusIcon className="size-5 text-gray-900" stroke="black" strokeWidth="1" />
-      Upload File
+      <span className="hidden sm:inline">Upload File</span>
     </Button>
   );
 }
@@ -90,12 +90,13 @@ export function CreateFolderAction() {
   return (
     <Button
       variant="outline"
-      size="lg"
+      size="icon"
+      radius="full"
       className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
       onClick={() => setIsCreateFolderModalOpen(true)}
     >
-      <UploadFolderIcon className="size-5 text-gray-900" />
-      Create Folder
+      <UploadFolderIcon className="size-5  text-gray-900" />
+      <span className="hidden">Create Folder</span>
     </Button>
   );
 }

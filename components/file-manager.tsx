@@ -3,12 +3,11 @@
 import { FileManagerComposition } from "@/components/file-manager-root";
 import { FileManagerPageProps } from "@/types/file-manager";
 import {
-  CreateFolderAction,
+  BulkActionsFloating,
   HeaderNavigation,
-  MoveAction,
-  SearchAction,
-  UploadFileAction,
+  ResponsiveHeaderActions,
 } from "./layout";
+import { UnifiedGrid } from "./grid/unified-grid";
 
 export function FileManager(props: FileManagerPageProps) {
   return (
@@ -19,16 +18,12 @@ export function FileManager(props: FileManagerPageProps) {
           <FileManagerComposition.Header>
             <div className="flex w-full justify-between gap-2">
               <HeaderNavigation />
-              <div className="flex gap-2">
-                <MoveAction />
-                <UploadFileAction />
-                <CreateFolderAction />
-                <SearchAction />
-              </div>
+              <ResponsiveHeaderActions />
             </div>
           </FileManagerComposition.Header>
-          <FileManagerComposition.Content />
-          <FileManagerComposition.Footer />
+          <BulkActionsFloating className="-mb-1" />
+          <UnifiedGrid />
+          <FileManagerComposition.Footer className="py-6" />
         </div>
 
         <FileManagerComposition.Overlays />

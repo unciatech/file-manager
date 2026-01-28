@@ -1,5 +1,5 @@
 import { FileMetaData, AudioMetaData } from "@/types/file-manager";
-import { Icons } from "../utils/icons";
+import { Icons } from "@/lib/icons";
 
 interface AudioCardProps {
     file: FileMetaData;

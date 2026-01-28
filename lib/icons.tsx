@@ -14,7 +14,7 @@ import {
   VideoIcon,
   FolderWithFilesIcon,
   EmptyFolderIcon,
-} from "../icons";
+} from "@/components/icons";
 
 
 export const Icons = ({ type, className, ...props }: { type: string, className?: string }) => {

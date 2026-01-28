@@ -3,10 +3,12 @@
 import { FileManagerComposition } from "@/components/file-manager-root";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileManagerModalProps, SELECTION_MODE } from "@/types/file-manager";
+import { FileManagerModalProps } from "@/types/file-manager";
 import { useFileManager } from "@/context/file-manager-context";
-import { BulkActionBar } from "./layout";
+import { BulkActionsStatic, HeaderNavigation } from "./layout";
+import { UnifiedGrid } from "./grid/unified-grid";
+import { ModalResponsiveHeaderActions } from "./layout/header-actions-responsive";
+import { CrossIcon } from "./icons";
 
 export function FileManagerModal({
   open,
@@ -14,35 +16,43 @@ export function FileManagerModal({
   ...props
 }: FileManagerModalProps) {
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="p-0" variant="fullscreen">
-        <DialogHeader className="pt-5 pb-3 m-0 border-b border-border">
-          <DialogTitle className="px-6 text-base">
-            Select {props.fileSelectionMode === SELECTION_MODE.SINGLE ? "Single File" : "Multiple Files"} 
-          </DialogTitle>
-          <DialogDescription className="sr-only">
-            Browse and select files from your media library
-          </DialogDescription>
-        </DialogHeader>
-
-        <FileManagerComposition.Modal {...props} onClose={onClose}>
-          <div className="flex flex-col h-[calc(100vh-6rem)]">
-            <ScrollArea className="text-sm flex-1 py-3">
-              <div className="flex flex-col min-h-full">
-                <FileManagerComposition.Header>
-                  <BulkActionBar />
-                </FileManagerComposition.Header>
-                <FileManagerComposition.Content />
-                <FileManagerComposition.Footer />
-                <FileManagerComposition.Overlays />
+    <FileManagerComposition.Modal {...props} onClose={onClose}>
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="p-0" variant="fullscreen" showCloseButton={false}>
+          <DialogHeader className="pt-5 pb-3 m-0 border-b border-border">
+            <DialogTitle className="px-6 text-base">
+              <div className="flex w-full justify-between gap-2">
+                <HeaderNavigation />
+                <ModalResponsiveHeaderActions />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  radius="full"
+                  onClick={onClose}
+                  className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:text-red-600 hover:border-red-200 hover:from-red-50 hover:to-red-100 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+                >
+                  <CrossIcon className="size-5" />
+                  <span className="hidden">Close</span>
+                </Button>
               </div>
-            </ScrollArea>
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              Browse and select files from your media library
+            </DialogDescription>
+          </DialogHeader>
 
-            <FileManagerModalFooter onClose={onClose} />
+
+
+          <div className="overflow-y-auto flex-1 pb-4">
+            <UnifiedGrid />
+            <FileManagerComposition.Footer />
+            <FileManagerComposition.Overlays />
           </div>
-        </FileManagerComposition.Modal>
-      </DialogContent>
-    </Dialog>
+
+          <FileManagerModalFooter onClose={onClose} />
+        </DialogContent>
+      </Dialog>
+    </FileManagerComposition.Modal>
   );
 }
 
@@ -57,9 +67,10 @@ function FileManagerModalFooter({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <DialogFooter className="px-6 py-4 border-t border-border">
+    <DialogFooter className="px-6 py-4 border-t border-border w-full sm:justify-between justify-center items-center flex-col sm:flex-row gap-2">
+      <BulkActionsStatic />
       <DialogClose asChild>
-        <Button type="button" variant="outline" onClick={onClose}>
+        <Button type="button" variant="outline" onClick={onClose} radius="full" className='w-full md:w-auto mr-0'>
           Cancel
         </Button>
       </DialogClose>
@@ -67,6 +78,7 @@ function FileManagerModalFooter({ onClose }: { onClose: () => void }) {
         type="button"
         onClick={handleSelect}
         disabled={selectedFiles.length === 0}
+        radius="full" className='w-full md:w-auto'
       >
         Select {selectedFiles.length > 0 && `(${selectedFiles.length})`}
       </Button>

@@ -1,7 +1,6 @@
 import { useFileManager } from "@/context/file-manager-context";
 import { Button } from "../ui/button";
 import { CrossIcon, MoveIcon, TrashIcon } from "../icons";
-import { useEffect, useRef, useState } from "react";
 
 interface ActionButtonsProps {
   totalSelected: number;
@@ -13,43 +12,38 @@ interface ActionButtonsProps {
 function ActionButtons({ totalSelected, onMove, onDelete, onClear }: ActionButtonsProps) {
   return (
     <>
-      {/* Selection Count */}
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md shadow-sm">
-        <span className="text-sm font-medium text-gray-700">
-          {totalSelected} item{totalSelected > 1 ? "s" : ""} selected
-        </span>
-      </div>
-
       {/* Action Buttons */}
       <div className="flex items-center gap-2 flex-1 sm:flex-initial">
         <Button
           variant="outline"
-          size="sm"
+          size="lg"
+          radius="full"
           onClick={onMove}
-          className="h-8 px-3 text-sm font-normal bg-white hover:bg-gray-50 border-gray-200 shadow-sm"
+          className="text-sm font-normal bg-white hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 border-gray-200 shadow-sm"
         >
-          <MoveIcon className="size-3.5 sm:mr-1.5" />
+          <MoveIcon className="size-4" />
           <span className="hidden sm:inline">Move</span>
         </Button>
 
         <Button
           variant="outline"
-          size="sm"
+          size="lg"
+          radius="full"
           onClick={onDelete}
-          className="h-8 px-3 text-sm font-normal bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 border-gray-200 shadow-sm"
+          className="text-sm font-normal bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 border-gray-200 shadow-sm"
         >
-          <TrashIcon className="size-3.5 sm:mr-1.5" />
-          <span className="hidden sm:inline">Delete</span>
+          <TrashIcon className="size-4" />
+          <span className="hidden">Delete</span>
         </Button>
       </div>
 
       {/* Clear Button - Right aligned on desktop */}
-      <div className="ml-auto">
+      <div className="">
         <Button
-          variant="ghost"
-          size="sm"
+          variant="outline"
+          size="lg"
           onClick={onClear}
-          className="h-8 px-3 underline text-sm font-normal text-blue-600 hover:text-blue-700 hover:bg-gray-100"
+          className="rounded-full text-sm font-normal text-blue-600 hover:text-blue-700 hover:bg-blue-50 hover:font-bold hover:border-blue-200 transition-all duration-200"
         >
           <CrossIcon className="size-4 text-blue-600" />
           Clear
@@ -59,7 +53,8 @@ function ActionButtons({ totalSelected, onMove, onDelete, onClear }: ActionButto
   );
 }
 
-export function BulkActionBar() {
+// Static variant - no floating behavior (for modals)
+export function BulkActionsStatic() {
   const {
     selectedFiles,
     selectedFolders,
@@ -67,79 +62,58 @@ export function BulkActionBar() {
     handleClearSelection,
     setIsMoveFileModalOpen,
   } = useFileManager();
-  
+
   const totalSelected = selectedFiles.length + selectedFolders.length;
-  const barRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(true); // Start with true, assuming bar is initially visible
-  const [hasInitialized, setHasInitialized] = useState(false); // Track if observer has run
-  
-  useEffect(() => {
-    if (totalSelected === 0) {
-      setHasInitialized(false);
-      return;
-    }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-        setHasInitialized(true); // Mark as initialized after first observation
-      },
-      {
-        threshold: 0,
-        rootMargin: "0px",
-      }
-    );
-
-    if (barRef.current) {
-      observer.observe(barRef.current);
-    }
-
-    return () => {
-      if (barRef.current) {
-        observer.unobserve(barRef.current);
-      }
-    };
-  }, [totalSelected]);
-  
   if (totalSelected === 0) return null;
 
   const handleMove = () => setIsMoveFileModalOpen(true);
 
   return (
-    <>
-      {/* Original inline bulk actions bar */}
-      <div ref={barRef} className="w-full">
-        <div className="px-4 sm:px-6 py-3">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <ActionButtons 
-              totalSelected={totalSelected}
-              onMove={handleMove}
-              onDelete={bulkDelete}
-              onClear={handleClearSelection}
-            />
-          </div>
-        </div>
+    <div className="w-full">
+
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        <ActionButtons
+          totalSelected={totalSelected}
+          onMove={handleMove}
+          onDelete={bulkDelete}
+          onClear={handleClearSelection}
+        />
       </div>
 
-      {/* Floating bulk actions bar - appears at top when original is not visible */}
-      {hasInitialized && (
-        <div
-          className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-lg transition-transform duration-300 ${
-            isVisible ? "-translate-y-full" : "translate-y-0"
-          }`}
-        >
-          <div className="px-4 sm:px-6 py-3 max-w-7xl mx-auto">
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <ActionButtons 
-                totalSelected={totalSelected}
-                onMove={handleMove}
-                onDelete={bulkDelete}
-                onClear={handleClearSelection}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 }
+
+// Floating variant - fixed at bottom (for page mode)
+export function BulkActionsFloating({ className }: { className?: string }) {
+  const {
+    selectedFiles,
+    selectedFolders,
+    bulkDelete,
+    handleClearSelection,
+    setIsMoveFileModalOpen,
+  } = useFileManager();
+
+  const totalSelected = selectedFiles.length + selectedFolders.length;
+
+  if (totalSelected === 0) return null;
+
+  const handleMove = () => setIsMoveFileModalOpen(true);
+
+  return (
+    <div className={`fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-t border-gray-200 shadow-lg ${className || ''}`}>
+      <div className="px-4 sm:px-6 py-3 mx-auto">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <ActionButtons
+            totalSelected={totalSelected}
+            onMove={handleMove}
+            onDelete={bulkDelete}
+            onClear={handleClearSelection}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+

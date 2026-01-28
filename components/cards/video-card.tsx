@@ -1,5 +1,5 @@
 import { FileMetaData, VideoMetaData } from "@/types/file-manager";
-import { Icons } from "../utils/icons";
+import { Icons } from "@/lib/icons";
 
 interface VideoCardProps {
     file: FileMetaData;

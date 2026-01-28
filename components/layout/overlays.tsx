@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { UploadModal } from "../modals/upload-modal";
 import { CreateFolderModal } from "../modals/create-folder";
 import { MoveModal } from "../modals/move-modal";
@@ -11,7 +12,7 @@ import { useFileManager } from "@/context/file-manager-context";
 import { getFileTypeFromMime } from "@/lib/file-type-utils";
 import { FILE_TYPE } from "@/types/file-manager";
 
-export function FileManagerOverlays() {
+export function FileManagerOverlays({ className }: { className?: string }) {
   const {
     fileDetailsModalFile,
     setFileDetailsModalFile,
@@ -88,11 +89,11 @@ export function FileManagerOverlays() {
   };
 
   return (
-    <>
+    <div className={cn('', className)}>
       <UploadModal />
       <CreateFolderModal />
       <MoveModal />
       {renderFileDetailsModal()}
-    </>
+    </div>
   );
 }

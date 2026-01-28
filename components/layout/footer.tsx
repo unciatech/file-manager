@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { useFileManager } from "../../context/file-manager-context";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem } from "../ui/pagination";
 import { Button } from "../ui/button";
@@ -23,13 +24,13 @@ function getPageNumbers(current: number, total: number) {
   return pages;
 }
 
-export function FileManagerFooter() {
+export function FileManagerFooter({ className }: { className?: string }) {
   const { pagination, setCurrentPage } = useFileManager();
   const { currentPage, totalPages } = pagination;
   const pageNumbers = getPageNumbers(currentPage, totalPages);
 
   return (
-    <Pagination>
+    <Pagination className={className}>
       <PaginationContent>
         <PaginationItem>
           <Button

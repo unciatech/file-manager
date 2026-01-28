@@ -1,9 +1,15 @@
+import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
 
-export function FileManagerHeader({ children }: { children?: ReactNode }) {
+export function FileManagerHeader({
+  children,
+  className
+}: {
+  children?: ReactNode;
+  className?: string;
+}) {
   return (
-
-    <div className="p-4 hidden md:flex md:flex-row gap-2">
+    <div className={cn('p-4 flex md:flex-row gap-2', className)}>
       {children}
     </div>
   );
