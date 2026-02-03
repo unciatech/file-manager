@@ -298,8 +298,7 @@ export function useFileHandlers(state: FileState) {
             targetFolderId
           );
         }
-        await loadFiles();
-        await loadFolders();
+        await Promise.all([loadFiles(), loadFolders()]);
         setSelectedFiles([]);
         setSelectedFolders([]);
         const totalMoved = selectedFiles.length + selectedFolders.length;
@@ -382,8 +381,7 @@ export function useFileHandlers(state: FileState) {
       if (selectedFolders.length > 0) {
         await provider.deleteFolders(selectedFolders.map((f) => f.id));
       }
-      await loadFiles();
-      await loadFolders();
+      await Promise.all([loadFiles(), loadFolders()]);
       setSelectedFiles([]);
       setSelectedFolders([]);
       const totalDeleted = selectedFiles.length + selectedFolders.length;
@@ -411,8 +409,7 @@ export function useFileHandlers(state: FileState) {
    * Refreshes all data by reloading folders and files
    */
   const refreshData = useCallback(async () => {
-    await loadFolders();
-    await loadFiles();
+    await Promise.all([loadFolders(), loadFiles()]);
   }, [loadFolders, loadFiles]);
 
   return {

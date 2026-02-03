@@ -174,7 +174,7 @@ export function FileManagerProvider({
     onFilesSelected: state.onFilesSelected,
     provider,
     basePath: state.basePath,
-  }), [state, handlers, provider]);
+  }), [state, handlers, provider, allowedFileTypes, maxUploadFiles, maxUploadSize]);
 
   return (
     <FileManagerContext.Provider value={value}>
