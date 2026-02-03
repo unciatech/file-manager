@@ -195,6 +195,8 @@ export interface FileManagerRootProps {
   basePath?: string;
   onFilesSelected?: (files: FileMetaData[]) => void;
   onClose?: () => void;
+  maxUploadFiles?: number; // default: 50
+  maxUploadSize?: number; // in bytes, default: 100MB
 }
 
 export interface FileStateOptions {

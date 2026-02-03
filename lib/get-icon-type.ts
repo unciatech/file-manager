@@ -57,6 +57,7 @@ export function getIconType(mimeType: string, extension?: string): string {
     // Microsoft Office - Excel
     case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
     case 'application/vnd.ms-excel':
+    case 'text/csv': // CSV files are spreadsheets
       return 'excel';
     
     // Microsoft Office - PowerPoint
@@ -73,6 +74,25 @@ export function getIconType(mimeType: string, extension?: string): string {
   // Text files
   if (effectiveMime.startsWith('text/')) {
     return 'txt';
+  }
+  
+  // Extension-based fallback for files that mime library doesn't handle well
+  if (extension) {
+    const ext = extension.toLowerCase().replace(/^\./, '');
+    
+    switch (ext) {
+      case 'exe':
+      case 'msi':
+        return 'exe';
+      case 'zip':
+        return 'zip';
+      case 'rar':
+        return 'rar';
+      case 'pdf':
+        return 'pdf';
+      case 'csv':
+        return 'excel';
+    }
   }
   
   // Default fallback

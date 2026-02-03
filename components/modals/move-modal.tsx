@@ -263,7 +263,7 @@ export function MoveModal() {
                 size="icon"
                 radius="full"
                 onClick={() => handleOpenChange(false)}
-                className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:text-red-600 hover:border-red-200 hover:from-red-50 hover:to-red-100 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+                className="border-gray-200 bg-white hover:text-red-600 hover:border-red-200 hover:bg-red-50"
               >
             <CrossIcon className="size-5" />
             <span className="hidden">Close</span>

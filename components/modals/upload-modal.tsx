@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useFileManager } from '@/context/file-manager-context';
+import { FileMetaData } from '@/types/file-manager';
 import {
   Dialog,
   DialogClose,
@@ -20,27 +21,16 @@ import {
 } from '@/hooks/use-file-upload';
 import { useUploadSimulation, type FileUploadItem } from '@/hooks/use-upload-simulation';
 import {
-  CloudUpload,
-  FileArchiveIcon,
-  FileSpreadsheetIcon,
-  FileTextIcon,
-  HeadphonesIcon,
-  ImageIcon,
   RefreshCwIcon,
-  Trash2,
   TriangleAlert,
-  Upload,
-  VideoIcon,
-  XIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getFileSize } from '@/lib/file-size';
 import { fileTypesToAccept, getFileTypeFromMime, getFileTypesDescription } from '@/lib/file-type-utils';
 import { FileUploadInput } from '@/types/provider';
-import { middleTruncate } from '@/lib/truncate-name';
-import { Icons } from '@/lib/icons';
 import UploadCloudIcon from '../icons/upload-cloud';
 import { CrossIcon } from '../icons';
+import { getFileComponents } from '../grid/file-component-registry';
 
 
 
@@ -49,13 +39,11 @@ export function UploadModal() {
     isUploadModalOpen,
     setIsUploadModalOpen,
     uploadFiles,
-    currentFolder,
     allowedFileTypes,
+    maxUploadFiles,
+    maxUploadSize,
   } = useFileManager();
 
-  const maxFiles = 50;
-  const maxSize = 100 * 1024 * 1024; // 100MB
-  
   // Use allowedFileTypes for upload restrictions (applies to both page and modal mode)
   const acceptString = fileTypesToAccept(allowedFileTypes);
   const fileTypesDescription = getFileTypesDescription(allowedFileTypes);
@@ -75,8 +63,8 @@ export function UploadModal() {
       getInputProps,
     },
   ] = useFileUpload({
-    maxFiles,
-    maxSize,
+    maxFiles: maxUploadFiles,
+    maxSize: maxUploadSize,
     accept: acceptString,
     multiple: true,
     onFilesChange: (newFiles) => {
@@ -132,8 +120,7 @@ export function UploadModal() {
         type: getFileTypeFromMime(item.file.type, item.file.name.split('.').pop()),
         lastModified: item.file instanceof File ? item.file.lastModified : Date.now(),
         file: item.file as File,
-        metadata: {},
-        videoSource: undefined,
+        metadata: {}
       }));
 
       uploadFiles(fileInputs);
@@ -147,9 +134,24 @@ export function UploadModal() {
     setUploadItems([]);
   };
 
-  const getFileIcon = (file: File) => {
-    const fileType = getFileTypeFromMime(file.type);
-    return <Icons type={fileType} />;
+  const getFilePreviewComponent = (file: File, preview?: string) => {
+    // Create a mock FileMetaData object to use with the registry
+    const mockFileMetadata: FileMetaData = {
+      id: 'temp',
+      name: file.name,
+      size: file.size,
+      mime: file.type,
+      ext: file.name.split('.').pop() || '',
+      url: preview || '', // Use preview URL for images, empty for others
+      createdAt: new Date(file.lastModified),
+      updatedAt: new Date(file.lastModified),
+      folderId: null,
+      metaData: {},
+    };
+
+    // Get the appropriate component from registry
+    const { component: FilePreviewComponent } = getFileComponents(mockFileMetadata);
+    return <FilePreviewComponent file={mockFileMetadata} metaData={mockFileMetadata.metaData} />;
   };
 
   const completedCount = uploadItems.filter((item) => item.status === 'completed').length;
@@ -168,7 +170,7 @@ export function UploadModal() {
                 size="icon"
                 radius="full"
                 onClick={() => setIsUploadModalOpen(false)}
-                className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:text-red-600 hover:border-red-200 hover:from-red-50 hover:to-red-100 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+                className="border-gray-200 bg-white hover:text-red-600 hover:border-red-200 hover:bg-red-50"
               >
             <CrossIcon className="size-5" />
             <span className="hidden">Close</span>
@@ -216,7 +218,7 @@ export function UploadModal() {
                   </button>
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {fileTypesDescription} • Max size: {getFileSize(maxSize)} • Max files: {maxFiles}
+                  {fileTypesDescription} • Max size: {getFileSize(maxUploadSize)} • Max files: {maxUploadFiles}
                 </p>
               </div>
             </div>
@@ -225,21 +227,6 @@ export function UploadModal() {
           {/* Files Grid */}
           {uploadItems.length > 0 && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium">
-                  Files ({uploadItems.length}) • Completed: {completedCount}
-                </h3>
-                <div className="flex gap-2">
-                  <Button onClick={openFileDialog} variant="outline" size="sm">
-                    <CloudUpload className="size-4" />
-                    Add files
-                  </Button>
-                  <Button onClick={clearFiles} variant="outline" size="sm">
-                    <Trash2 className="size-4" />
-                    Remove all
-                  </Button>
-                </div>
-              </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                 {uploadItems.map((fileItem) => (
@@ -251,58 +238,18 @@ export function UploadModal() {
                       size="icon"
                       className="absolute -end-2 -top-2 z-10 size-6 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
                     >
-                      <XIcon className="size-3" />
+                      <CrossIcon className="size-3" />
                     </Button>
 
                     {/* Wrapper */}
                     <div className="relative overflow-hidden rounded-lg border bg-card transition-colors">
-                      {/* Image preview or file icon area */}
+                      {/* File preview area - uses component registry */}
                       <div className="relative aspect-square bg-muted border-b border-border">
-                        {fileItem.file instanceof File && fileItem.file.type.startsWith('image/') && fileItem.preview ? (
-                          <>
-                            {/* Image cover */}
-                            <img
-                              src={fileItem.preview}
-                              alt={fileItem.file.name}
-                              className="h-full w-full object-cover"
-                            />
-                            {/* Progress overlay for uploading images */}
-                            {fileItem.status === 'uploading' && (
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                                <div className="relative">
-                                  <svg className="size-12 -rotate-90" viewBox="0 0 48 48">
-                                    <circle
-                                      cx="24"
-                                      cy="24"
-                                      r="20"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="3"
-                                      className="text-muted/60"
-                                    />
-                                    <circle
-                                      cx="24"
-                                      cy="24"
-                                      r="20"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="3"
-                                      strokeDasharray={`${2 * Math.PI * 20}`}
-                                      strokeDashoffset={`${2 * Math.PI * 20 * (1 - fileItem.progress / 100)}`}
-                                      className="text-white transition-all duration-300"
-                                      strokeLinecap="round"
-                                    />
-                                  </svg>
-                                </div>
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          /* File icon area for non-images */
-                          <div className="flex h-full items-center justify-center text-muted-foreground/80">
+                        <div className="flex h-full items-center justify-center p-4">
+                          <div className="w-[75%] h-[75%] flex items-center justify-center">
                             {fileItem.status === 'uploading' ? (
-                              <div className="relative">
-                                <svg className="size-12 -rotate-90" viewBox="0 0 48 48">
+                              <div className="relative w-full h-full flex items-center justify-center">
+                                <svg className="size-12 -rotate-90 absolute" viewBox="0 0 48 48">
                                   <circle
                                     cx="24"
                                     cy="24"
@@ -325,25 +272,21 @@ export function UploadModal() {
                                     strokeLinecap="round"
                                   />
                                 </svg>
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                  {fileItem.file instanceof File && getFileIcon(fileItem.file)}
-                                </div>
+                                {fileItem.file instanceof File && getFilePreviewComponent(fileItem.file, fileItem.preview)}
                               </div>
                             ) : (
-                              <div className="text-4xl">
-                                {fileItem.file instanceof File && getFileIcon(fileItem.file)}
-                              </div>
+                              fileItem.file instanceof File && getFilePreviewComponent(fileItem.file, fileItem.preview)
                             )}
                           </div>
-                        )}
+                        </div>
                       </div>
 
                       {/* File info footer */}
                       <div className="p-3">
                         <div className="space-y-1">
-                          <p className="truncate text-sm font-medium">{fileItem.file.name}</p>
+                          <p className="truncate text-xs font-medium">{fileItem.file.name}</p>
                           <div className="relative flex items-center justify-between gap-2">
-                            <span className="text-xs text-muted-foreground">{getFileSize(fileItem.file.size)}</span>
+                            <span className="text-[11px] text-blue-600 font-medium tracking-tight">{getFileSize(fileItem.file.size)}</span>
 
                             {fileItem.status === 'error' && fileItem.error && (
                               <Tooltip>

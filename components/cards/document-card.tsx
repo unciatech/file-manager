@@ -1,5 +1,6 @@
 import { DocumentMetaData, FileMetaData } from "@/types/file-manager";
 import { Icons } from "@/lib/icons";
+import { getIconType } from "@/lib/get-icon-type";
 
 interface DocumentCardProps {
     file: FileMetaData;
@@ -7,20 +8,8 @@ interface DocumentCardProps {
 }
 
 export function DocumentCard({ file, className }: DocumentCardProps) {
-
-    
-    // If the previous code had specific icons for pdf, excel etc, they are likely available in generic Icons component.
-    // I will try to support them if I can map them.
-    // In types, DocumentFormat = pdf, docx, xlsx, pptx, txt.
-    // So I can check `(file.metaData as DocumentMetaData)?.format`
-    
-    // Use file extension to determine icon
-    // remove leading dot
-    const ext = file.ext?.replace(".", "") || "";
-    
-    const iconType = ext || "file";
-    
-    // Note: I am assuming Icons component handles these strings. 
+    // Use getIconType for proper icon mapping based on MIME type and extension
+    const iconType = getIconType(file.mime, file.ext);
     
     return (
         <div className="w-full h-full flex items-center justify-center bg-transparent">

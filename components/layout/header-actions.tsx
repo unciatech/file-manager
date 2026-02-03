@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import UploadFolderIcon from "../icons/upload-folder";
 import MoveIcon from "../icons/move";
-import { PlusIcon } from "../icons";
+import { PlusIcon, SearchIcon } from "../icons";
 
 export function MoveAction() {
   const {
@@ -22,7 +22,7 @@ export function MoveAction() {
     <Button
       variant="outline"
       size="lg"
-      className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+      className="border-gray-200 bg-white"
       onClick={() => setIsMoveFileModalOpen(true)}
     >
       <MoveIcon className="size-5" />
@@ -75,7 +75,7 @@ export function UploadFileAction() {
       variant="outline"
       size="md"
       radius="full"
-      className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+      className="border-gray-200 bg-white text-md font-medium"
       onClick={() => setIsUploadModalOpen(true)}
     >
       <PlusIcon className="size-5 text-gray-900" stroke="black" strokeWidth="1" />
@@ -92,11 +92,29 @@ export function CreateFolderAction() {
       variant="outline"
       size="icon"
       radius="full"
-      className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+      className="border-gray-200 bg-white"
       onClick={() => setIsCreateFolderModalOpen(true)}
     >
       <UploadFolderIcon className="size-5  text-gray-900" />
       <span className="hidden">Create Folder</span>
+    </Button>
+  );
+}
+
+
+//need to create inline search action
+export function SearchActionModal() {
+  
+
+  return (
+    <Button
+      variant="outline"
+      size="icon"
+      radius="full"
+      className="border-gray-200 bg-white"
+    >
+      <SearchIcon className="size-5  text-gray-900" />
+      <span className="hidden">Search</span>
     </Button>
   );
 }
