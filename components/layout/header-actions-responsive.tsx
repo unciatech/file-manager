@@ -86,7 +86,7 @@ export function ModalResponsiveHeaderActions({ onSearchClick }: { onSearchClick?
       <div className="hidden md:flex gap-2">
         <UploadFileAction />
         <CreateFolderAction />
-        {onSearchClick && (
+        {onSearchClick ? (
           <Button
             variant="outline"
             size="icon"
@@ -97,7 +97,7 @@ export function ModalResponsiveHeaderActions({ onSearchClick }: { onSearchClick?
             <SearchIcon className="size-5 text-gray-900" />
             <span className="hidden">Search</span>
           </Button>
-        )}
+        ) : null}
       </div>
 
       {/* Mobile/Tablet: Show dropdown menu */}
@@ -128,7 +128,7 @@ export function ModalResponsiveHeaderActions({ onSearchClick }: { onSearchClick?
               <UploadFolderIcon className="size-5 text-gray-900" />
               <span className="inline">Create Folder</span>
             </DropdownMenuItem>
-            {onSearchClick && (
+            {onSearchClick ? (
               <DropdownMenuItem
                 onClick={onSearchClick}
                 className="cursor-pointer"
@@ -136,7 +136,7 @@ export function ModalResponsiveHeaderActions({ onSearchClick }: { onSearchClick?
                 <SearchIcon className="size-5 text-gray-700" />
                 <span className="inline">Search</span>
               </DropdownMenuItem>
-            )}
+            ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

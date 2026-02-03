@@ -121,7 +121,7 @@ function FileManagerModalFooter({ onClose }: { onClose: () => void }) {
         disabled={selectedFiles.length === 0}
         radius="full" className='w-full md:w-auto'
       >
-        Select {selectedFiles.length > 0 && `(${selectedFiles.length})`}
+        Select {selectedFiles.length > 0 ? `(${selectedFiles.length})` : ''}
       </Button>
     </DialogFooter>
   );

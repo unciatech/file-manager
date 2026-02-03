@@ -66,6 +66,10 @@ export function useFileState(options: FileStateOptions) {
     filesPerPage: 20,
   });
 
+  // Use ref to track current folder without triggering re-renders
+  const currentFolderRef = useRef<Folder | null>(null);
+  currentFolderRef.current = currentFolder;
+
   // Consolidated useEffect: Sync current folder and load data
   // This replaces 4 separate useEffects to prevent re-render cascades
   useEffect(() => {
@@ -73,7 +77,7 @@ export function useFileState(options: FileStateOptions) {
 
     const syncAndLoad = async () => {
       // Step 1: Sync current folder if needed
-      if (folderId && (!currentFolder || currentFolder.id !== folderId)) {
+      if (folderId && (!currentFolderRef.current || currentFolderRef.current.id !== folderId)) {
         try {
           setIsLoading(true);
           const folder = await provider.getFolder(folderId);
@@ -92,13 +96,13 @@ export function useFileState(options: FileStateOptions) {
           setCurrentFolder(null);
           setIsLoading(false);
         }
-      } else if (folderId === null && currentFolder !== null) {
+      } else if (folderId === null && currentFolderRef.current !== null) {
         // Navigate to root
         setCurrentFolder(null);
         await loadDataForFolder(null);
-      } else if (currentFolder) {
+      } else if (currentFolderRef.current) {
         // Folder is already set, just reload data (e.g., pagination changed)
-        await loadDataForFolder(currentFolder);
+        await loadDataForFolder(currentFolderRef.current);
       } else {
         // Initial load at root
         await loadDataForFolder(null);
