@@ -14,7 +14,7 @@ import { useFileManager } from "@/context/file-manager-context";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { toast } from "sonner";
 
-import { FileMetaData, Folder, FileType, FILE_TYPE } from "@/types/file-manager";
+import { FileMetaData, Folder } from "@/types/file-manager";
 import { middleTruncate } from "@/lib/truncate-name";
 import {FolderIcon, SearchIcon} from "../icons";
 import { Icons } from "@/lib/icons";
@@ -83,7 +83,7 @@ export default function SearchDialog() {
       variant="outline"
       size="icon"
       radius="full"
-      className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+      className="border-gray-200 bg-white"
       onClick={() => setIsSearchModalOpen(true)}>
         <SearchIcon className="size-4 text-gray-700" />
         <span className="hidden">Search</span>

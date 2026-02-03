@@ -20,7 +20,7 @@ export function HeaderNavigation() {
     return (
       <div className="flex item-center w-full">
         <Skeleton className="rounded-full size-10 mr-2 shrink-0" />
-        <Skeleton className="min-w-[200px] rounded-md h-full" />
+        <Skeleton className="min-w-32 rounded-md h-full" />
       </div>
     )
   }
@@ -36,9 +36,9 @@ export function HeaderNavigation() {
             size="icon"
             radius="full"
             disabled={isLoading}
-            className="shadow-sm mr-2 border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+            className="border-gray-200 bg-white mr-2"
             onClick={handleBackClick}>
-            <ChevronLeftIcon className="size-4" />
+            <ChevronLeftIcon className="size-5" strokeWidth="1" stroke="black" />
           </Button>
           <h1 className="text-lg flex-1 min-w-0 align-middle font-semibold">{middleTruncate(currentFolder.name, 20)}</h1>
         </div>

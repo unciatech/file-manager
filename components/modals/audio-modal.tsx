@@ -3,7 +3,7 @@
 import { useState, ChangeEvent } from 'react';
 import { AudioMetaData, FileMetaData } from '@/types/file-manager';
 import { DetailsLayout } from '@/components/file-details/details-layout';
-import { ActionButtons } from '@/components/file-details/action-buttons';
+import { FileDeleteButton, FileDownloadButton, FileCopyLinkButton } from '@/components/file-details/file-action-buttons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -35,8 +35,10 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
   const previewSection = (
     <div className="flex flex-col h-full">
       {/* Action Buttons */}
-      <div className="mb-4">
-        <ActionButtons file={file} onDelete={onDelete} />
+      <div className="flex gap-2 mb-4">
+        <FileDeleteButton file={file} />
+        <FileDownloadButton file={file} />
+        <FileCopyLinkButton file={file} />
       </div>
 
       {/* Audio Preview */}

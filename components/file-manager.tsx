@@ -23,7 +23,7 @@ export function FileManager(props: FileManagerPageProps) {
           </FileManagerComposition.Header>
           <BulkActionsFloating className="-mb-1" />
           <UnifiedGrid />
-          <FileManagerComposition.Footer className="py-6" />
+          <FileManagerComposition.Footer className="pt-6 pb-10" />
         </div>
 
         <FileManagerComposition.Overlays />

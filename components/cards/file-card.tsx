@@ -96,7 +96,6 @@ export function FileCard({
              {/* When selected, often Finder darkens the icon slightly or adds a border. keeping it simple clean. */}
             <div className={`
                 relative w-full aspect-square flex items-center justify-center mb-1 overflow-hidden rounded-2xl hover:bg-gray-200/60
-                
                 ${isSelected ? "bg-gray-200/60" : "group-hover:ring-black/10 transition-shadow"}
             `}>
                 <div className="w-[75%] h-[75%] flex items-center justify-center">
@@ -117,7 +116,7 @@ export function FileCard({
             {/* Text Label: Selection highlights background in blue */}
             <div className="w-full text-center px-0.5 flex flex-col items-center">
                 <span className={`
-                    text-[13px] font-medium leading-[1.3] tracking-tight line-clamp-2 px-2.5 py-[2px] rounded-[6px] transition-colors duration-100 break-words max-w-full
+                    text-[13px] font-medium leading-[1.3] tracking-tight line-clamp-2 px-2.5 py-[2px] rounded-[6px] transition-colors duration-100 wrap-break-word max-w-full
                     ${isSelected 
                         ? "bg-[#2563EB] text-white antialiased shadow-sm" 
                         : "text-[#374151] group-hover:text-black"}

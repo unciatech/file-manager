@@ -1,5 +1,7 @@
 import { FileMetaData, VideoMetaData } from "@/types/file-manager";
 import { Icons } from "@/lib/icons";
+import { Play } from "lucide-react";
+import { useState } from "react";
 
 interface VideoCardProps {
     file: FileMetaData;
@@ -7,6 +9,30 @@ interface VideoCardProps {
 }
 
 export function VideoCard({ file, className }: VideoCardProps) {
+    const [hasError, setHasError] = useState(false);
+
+    // If we have a URL and no error, show video preview
+    if (file.url && !hasError) {
+        return (
+            <div className="relative w-full h-full">
+                {/* Video element for thumbnail */}
+                <video
+                    src={file.url}
+                    className="w-full h-full object-contain rounded-md"
+                    preload="metadata"
+                    onError={() => setHasError(true)}
+                />
+                {/* Play button overlay */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="bg-black/60 rounded-full p-2 backdrop-blur-xs">
+                        <Play className="size-5 text-white fill-white" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Fallback to icon if no URL or error
     return (
         <div className="w-full h-full flex items-center justify-center bg-transparent">
             <div className="text-center">

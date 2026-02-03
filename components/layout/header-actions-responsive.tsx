@@ -41,7 +41,7 @@ export function ResponsiveHeaderActions() {
               variant="outline"
               size="icon"
               radius="full"
-              className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+              className="border-gray-200 bg-white"
             >
               <MoreHorizontal className="size-5" />
             </Button>
@@ -77,8 +77,8 @@ export function ResponsiveHeaderActions() {
 
 
 
-export function ModalResponsiveHeaderActions() {
-  const { setIsUploadModalOpen, setIsCreateFolderModalOpen, setIsSearchModalOpen } = useFileManager();
+export function ModalResponsiveHeaderActions({ onSearchClick }: { onSearchClick?: () => void }) {
+  const { setIsUploadModalOpen, setIsCreateFolderModalOpen } = useFileManager();
 
   return (
     <>
@@ -86,6 +86,18 @@ export function ModalResponsiveHeaderActions() {
       <div className="hidden md:flex gap-2">
         <UploadFileAction />
         <CreateFolderAction />
+        {onSearchClick && (
+          <Button
+            variant="outline"
+            size="icon"
+            radius="full"
+            className="border-gray-200 bg-white"
+            onClick={onSearchClick}
+          >
+            <SearchIcon className="size-5 text-gray-900" />
+            <span className="hidden">Search</span>
+          </Button>
+        )}
       </div>
 
       {/* Mobile/Tablet: Show dropdown menu */}
@@ -96,7 +108,7 @@ export function ModalResponsiveHeaderActions() {
               variant="outline"
               size="icon"
               radius="full"
-              className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:from-gray-100 hover:to-gray-200 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
+              className="border-gray-200 bg-white"
             >
               <MoreHorizontal className="size-5" />
             </Button>
@@ -116,6 +128,15 @@ export function ModalResponsiveHeaderActions() {
               <UploadFolderIcon className="size-5 text-gray-900" />
               <span className="inline">Create Folder</span>
             </DropdownMenuItem>
+            {onSearchClick && (
+              <DropdownMenuItem
+                onClick={onSearchClick}
+                className="cursor-pointer"
+              >
+                <SearchIcon className="size-5 text-gray-700" />
+                <span className="inline">Search</span>
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

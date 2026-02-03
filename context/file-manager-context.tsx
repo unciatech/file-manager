@@ -32,6 +32,8 @@ interface FileManagerContextType {
   selectionMode: SelectionMode;
   allowedFileTypes: FileType[]; // What file types can be uploaded (both page and modal mode)
   acceptedFileTypesForModal?: FileType[]; // what type of files can be selected/viewed in modal mode
+  maxUploadFiles: number; // Maximum number of files that can be uploaded at once
+  maxUploadSize: number; // Maximum file size in bytes
 
   // Provider
   provider: IFileManagerProvider;
@@ -88,6 +90,8 @@ export function FileManagerProvider({
   initialFolderId = null,
   provider,
   basePath = "/media",
+  maxUploadFiles = 50,
+  maxUploadSize = 100 * 1024 * 1024, // 100MB
 }: FileManagerRootProps & { children: React.ReactNode }) {
   
    // Use the state hook
@@ -126,6 +130,8 @@ export function FileManagerProvider({
     selectionMode: state.selectionMode,
     allowedFileTypes,
     acceptedFileTypesForModal: state.acceptedFileTypesForModal,
+    maxUploadFiles,
+    maxUploadSize,
 
     // Setters
     setIsUploadModalOpen: state.setIsUploadModalOpen,

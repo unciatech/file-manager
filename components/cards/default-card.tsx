@@ -1,5 +1,5 @@
 import { FileMetaData } from "@/types/file-manager";
-import { getFileTypeFromMime } from "@/lib/file-type-utils";
+import { getIconType } from "@/lib/get-icon-type";
 import { Icons } from "@/lib/icons";
 
 interface DefaultCardProps {
@@ -7,6 +7,6 @@ interface DefaultCardProps {
 }
 
 export function DefaultCard({ file }: DefaultCardProps) {
-    const type = getFileTypeFromMime(file.mime, file.ext);
-    return <Icons type={type} />;
+    const iconType = getIconType(file.mime, file.ext);
+    return <Icons type={iconType} />;
 }

@@ -1,6 +1,7 @@
 'use client';
 import { FileMetaData } from "@/types/file-manager";
 import ImageIcon from "../icons/image";
+import { useState } from "react";
 
 interface ImageCardProps {
     file: FileMetaData;
@@ -8,12 +9,15 @@ interface ImageCardProps {
 }
 
 export function ImageCard({ file }: ImageCardProps) {
-    if (file.url) {
+    const [hasError, setHasError] = useState(false);
+
+    if (file.url && !hasError) {
         return (
             <img
                 src={file.url}
                 alt={file?.name?.substring(0, 10) || "image"}
                 className="w-full h-full object-contain rounded-md drop-shadow-md"
+                onError={() => setHasError(true)}
             />
         );
     }

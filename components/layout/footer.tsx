@@ -35,6 +35,7 @@ export function FileManagerFooter({ className }: { className?: string }) {
         <PaginationItem>
           <Button
             variant="ghost"
+            radius={"full"}
             asChild
             disabled={currentPage === 1}
             onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
@@ -54,6 +55,8 @@ export function FileManagerFooter({ className }: { className?: string }) {
               <Button
                 variant={page === currentPage ? 'outline' : 'ghost'}
                 mode="icon"
+                size="icon"
+                radius="full"
                 asChild
                 onClick={() => setCurrentPage(page)}
                 disabled={page === currentPage}
@@ -66,6 +69,7 @@ export function FileManagerFooter({ className }: { className?: string }) {
         <PaginationItem>
           <Button
             variant="ghost"
+            radius={"full"}
             asChild
             disabled={currentPage === totalPages}
             onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}

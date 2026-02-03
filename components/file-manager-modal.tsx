@@ -8,13 +8,25 @@ import { useFileManager } from "@/context/file-manager-context";
 import { BulkActionsStatic, HeaderNavigation } from "./layout";
 import { UnifiedGrid } from "./grid/unified-grid";
 import { ModalResponsiveHeaderActions } from "./layout/header-actions-responsive";
-import { CrossIcon } from "./icons";
+import { CrossIcon, SearchIcon } from "./icons";
+import { useState, useRef, useEffect } from "react";
+import { Input } from "./ui/input";
 
 export function FileManagerModal({
   open,
   onClose,
   ...props
 }: FileManagerModalProps) {
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus search input when search becomes active
+  useEffect(() => {
+    if (isSearchActive && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchActive]);
+
   return (
     <FileManagerComposition.Modal {...props} onClose={onClose}>
       <Dialog open={open} onOpenChange={onClose}>
@@ -22,18 +34,49 @@ export function FileManagerModal({
           <DialogHeader className="pt-5 pb-3 m-0 border-b border-border">
             <DialogTitle className="px-6 text-base">
               <div className="flex w-full justify-between gap-2">
-                <HeaderNavigation />
-                <ModalResponsiveHeaderActions />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  radius="full"
-                  onClick={onClose}
-                  className="shadow-sm border-gray-300 bg-linear-to-b from-white to-gray-100 hover:bg-linear-to-b hover:text-red-600 hover:border-red-200 hover:from-red-50 hover:to-red-100 dark:from-gray-900 dark:to-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-700"
-                >
-                  <CrossIcon className="size-5" />
-                  <span className="hidden">Close</span>
-                </Button>
+                {isSearchActive ? (
+                  /* Inline Search Mode */
+                  <div className="flex items-center gap-4 flex-1">
+                    <SearchIcon className="size-5 text-gray-500 shrink-0" />
+                    <Input
+                      ref={searchInputRef}
+                      type="text"
+                      placeholder="Search files and folders..."
+                      className="border-none shadow-none focus-visible:ring-0 h-auto p-0 text-base font-semibold"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                          setIsSearchActive(false);
+                        }
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      radius="full"
+                      onClick={() => setIsSearchActive(false)}
+                      className="border-gray-200 bg-white shrink-0"
+                    >
+                      <CrossIcon className="size-5" />
+                      <span className="sr-only">Cancel Search</span>
+                    </Button>
+                  </div>
+                ) : (
+                  /* Normal Header Mode */
+                  <>
+                    <HeaderNavigation />
+                    <ModalResponsiveHeaderActions onSearchClick={() => setIsSearchActive(true)} />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      radius="full"
+                      onClick={onClose}
+                      className="border-gray-200 bg-white"
+                    >
+                      <CrossIcon className="size-5" />
+                      <span className="hidden">Close</span>
+                    </Button>
+                  </>
+                )}
               </div>
             </DialogTitle>
             <DialogDescription className="sr-only">
@@ -41,11 +84,9 @@ export function FileManagerModal({
             </DialogDescription>
           </DialogHeader>
 
-
-
           <div className="overflow-y-auto flex-1 pb-4">
             <UnifiedGrid />
-            <FileManagerComposition.Footer />
+            <FileManagerComposition.Footer className="my-4" />
             <FileManagerComposition.Overlays />
           </div>
 

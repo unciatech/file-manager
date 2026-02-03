@@ -3,7 +3,7 @@
 import { useState, ChangeEvent } from 'react';
 import { DocumentMetaData, FileMetaData } from '@/types/file-manager';
 import { DetailsLayout } from '@/components/file-details/details-layout';
-import { ActionButtons } from '@/components/file-details/action-buttons';
+import { FileDeleteButton, FileDownloadButton, FileCopyLinkButton } from '@/components/file-details/file-action-buttons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,8 +40,10 @@ export function FileModal({ file, onClose, onSave, onDelete }: FileModalProps) {
   const previewSection = (
     <div className="flex flex-col h-full">
       {/* Action Buttons */}
-      <div className="mb-4">
-        <ActionButtons file={file} onDelete={onDelete} />
+      <div className="flex gap-2 mb-4">
+        <FileDeleteButton file={file} />
+        <FileDownloadButton file={file} />
+        <FileCopyLinkButton file={file} />
       </div>
 
       {/* File Icon Preview */}
@@ -88,7 +90,7 @@ export function FileModal({ file, onClose, onSave, onDelete }: FileModalProps) {
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
               Page Count
             </p>
-            <p className="text-sm font-medium">{documentMeta.pageCount}</p>
+            <p className="text-xs font-bold text-blue-600">{documentMeta.pageCount}</p>
           </div>
         )}
 
@@ -97,7 +99,7 @@ export function FileModal({ file, onClose, onSave, onDelete }: FileModalProps) {
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
               Author
             </p>
-            <p className="text-sm font-medium">{documentMeta.author}</p>
+            <p className="text-xs font-bold text-blue-600">{documentMeta.author}</p>
           </div>
         )}
 
