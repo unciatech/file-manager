@@ -9,7 +9,12 @@ export interface IFileManagerProvider {
 
     //Read
     getFolder(folderId: FolderId): Promise<Folder | null>;
-    getFolders(folderId: FolderId): Promise<Folder[]>;
+    getFolders(
+      folderId: FolderId,
+      page?: number,
+      limit?: number,
+      query?: string
+    ): Promise<{folders: Folder[], pagination: PaginationInfo}>;
     getTags(): Promise<string[]>;
     getFiles(
       folderId : FolderId,

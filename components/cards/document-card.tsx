@@ -1,7 +1,5 @@
 import { DocumentMetaData, FileMetaData } from "@/types/file-manager";
-import { Icons } from "@/lib/icons";
-import { getIconType } from "@/lib/get-icon-type";
-
+import { getIconType, Icons } from "@/lib/file-utils";
 interface DocumentCardProps {
     file: FileMetaData;
     className?: string;

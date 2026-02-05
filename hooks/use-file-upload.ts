@@ -19,6 +19,16 @@ export type FileWithPreview = {
   preview?: string;
 };
 
+// File upload item with progress tracking (for UI)
+export interface FileUploadItem {
+  id: string | number;
+  file: File | any; // Support both File and FileMetadata
+  preview?: string;
+  progress: number;
+  status: 'uploading' | 'completed' | 'error';
+  error?: string;
+}
+
 export type FileUploadOptions = {
   maxFiles?: number; // Only used when multiple is true, defaults to Infinity
   maxSize?: number; // in bytes

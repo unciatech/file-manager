@@ -16,9 +16,6 @@ export {
 // Responsive Header Actions
 export { ResponsiveHeaderActions } from "./header-actions-responsive";
 
-// Breadcrumb Navigation (default export)
-export { default as BreadcrumbNavigation } from "./breadcrumb-navigation";
-
 // Footer
 export { FileManagerFooter } from "./footer";
 

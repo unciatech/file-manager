@@ -58,6 +58,11 @@ interface FileManagerContextType {
   handleSelectAllGlobal: (checked: boolean) => void;
 
   setCurrentPage: (page: number) => void;
+  handlePageChange: (page: number) => void;
+  
+  // Search
+  searchQuery: string;
+  updateSearchQuery: (query: string) => void;
 
   // CRUD
   uploadFiles: (fileUploadInput: FileUploadInput[]) => Promise<void>;
@@ -152,6 +157,11 @@ export function FileManagerProvider({
     handleSelectAllGlobal: handlers.handleSelectAllGlobal,
 
     setCurrentPage: handlers.setCurrentPage,
+    handlePageChange: state.handlePageChange,
+    
+    // Search
+    searchQuery: state.searchQuery,
+    updateSearchQuery: state.updateSearchQuery,
 
 
     // CRUD

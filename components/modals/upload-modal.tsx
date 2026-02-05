@@ -19,14 +19,14 @@ import {
   useFileUpload,
   type EntityId,
 } from '@/hooks/use-file-upload';
-import { useUploadSimulation, type FileUploadItem } from '@/hooks/use-upload-simulation';
+import { type FileUploadItem } from '@/hooks/use-file-upload';
 import {
   RefreshCwIcon,
   TriangleAlert,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getFileSize } from '@/lib/file-size';
-import { fileTypesToAccept, getFileTypeFromMime, getFileTypesDescription } from '@/lib/file-type-utils';
+import { fileTypesToAccept, getFileTypeFromMime, getFileTypesDescription } from '@/lib/file-utils';
 import { FileUploadInput } from '@/types/provider';
 import UploadCloudIcon from '../icons/upload-cloud';
 import { CrossIcon } from '../icons';
@@ -48,6 +48,7 @@ export function UploadModal() {
   const acceptString = fileTypesToAccept(allowedFileTypes);
   const fileTypesDescription = getFileTypesDescription(allowedFileTypes);
 
+  // Track upload items (files in UI, immediately marked as completed)
   const [uploadItems, setUploadItems] = useState<FileUploadItem[]>([]);
 
   const [
@@ -80,11 +81,11 @@ export function UploadModal() {
             ...file,
           };
         } else {
-          // New file - set to uploading
+          // New file - mark as completed immediately (no simulation)
           return {
             ...file,
-            progress: 0,
-            status: 'uploading' as const,
+            progress: 100,
+            status: 'completed' as const,
           };
         }
       });
@@ -93,8 +94,7 @@ export function UploadModal() {
     },
   });
 
-  // Use custom hook for upload simulation instead of inline useEffect
-  useUploadSimulation(uploadItems, setUploadItems, true, 0.05);
+  // Upload simulation removed - files are marked as completed immediately
 
   const removeUploadFile = (fileId: EntityId) => {
     removeFile(fileId);

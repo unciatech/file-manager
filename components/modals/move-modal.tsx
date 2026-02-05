@@ -164,10 +164,10 @@ export function MoveModal() {
 
     setIsLoadingRoot(true);
     try {
-      const folders = await provider.getFolders(null);
+      const foldersResult = await provider.getFolders(null);
       setTreeState(prev => ({
         ...prev,
-        folders: new Map(prev.folders).set(null, folders)
+        folders: new Map(prev.folders).set(null, foldersResult.folders)
       }));
       setHasLoadedRoot(true);
     } catch (error) {
@@ -186,7 +186,7 @@ export function MoveModal() {
     }));
 
     try {
-      const children = await provider.getFolders(folderId);
+      const childrenResult = await provider.getFolders(folderId);
 
       setTreeState(prev => {
         const newLoading = new Set(prev.loading);
@@ -196,7 +196,7 @@ export function MoveModal() {
         newLoaded.add(folderId);
 
         const newFolders = new Map(prev.folders);
-        newFolders.set(folderId, children);
+        newFolders.set(folderId, childrenResult.folders);
 
         return {
           folders: newFolders,

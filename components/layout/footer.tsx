@@ -25,7 +25,7 @@ function getPageNumbers(current: number, total: number) {
 }
 
 export function FileManagerFooter({ className }: { className?: string }) {
-  const { pagination, setCurrentPage } = useFileManager();
+  const { pagination, handlePageChange } = useFileManager();
   const { currentPage, totalPages } = pagination;
   const pageNumbers = getPageNumbers(currentPage, totalPages);
 
@@ -38,7 +38,7 @@ export function FileManagerFooter({ className }: { className?: string }) {
             radius={"full"}
             asChild
             disabled={currentPage === 1}
-            onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+            onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
           >
             <span>
               <ChevronLeftIcon className="rtl:rotate-180" /> Previous
@@ -58,7 +58,7 @@ export function FileManagerFooter({ className }: { className?: string }) {
                 size="icon"
                 radius="full"
                 asChild
-                onClick={() => setCurrentPage(page)}
+                onClick={() => handlePageChange(page)}
                 disabled={page === currentPage}
               >
                 <span>{page}</span>
@@ -72,7 +72,7 @@ export function FileManagerFooter({ className }: { className?: string }) {
             radius={"full"}
             asChild
             disabled={currentPage === totalPages}
-            onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+            onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
           >
             <span>
               Next <ChevronRightIcon className="rtl:rotate-180" />
