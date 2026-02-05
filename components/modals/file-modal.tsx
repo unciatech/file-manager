@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { getFileSize } from '@/lib/file-size';
 import { formatDate } from '@/lib/format-utils';
-import { Icons } from '@/lib/icons';
+import { Icons } from '@/lib/file-utils';
 
 interface FileModalProps {
   file: FileMetaData;

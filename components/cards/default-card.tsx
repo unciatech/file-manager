@@ -1,6 +1,5 @@
 import { FileMetaData } from "@/types/file-manager";
-import { getIconType } from "@/lib/get-icon-type";
-import { Icons } from "@/lib/icons";
+import { getIconType, Icons } from "@/lib/file-utils";
 
 interface DefaultCardProps {
     file: FileMetaData;

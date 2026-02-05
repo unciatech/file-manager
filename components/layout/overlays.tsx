@@ -9,7 +9,7 @@ import { VideoModal } from "../modals/video-modal";
 import { AudioModal } from "../modals/audio-modal";
 import { FileModal } from "../modals/file-modal";
 import { useFileManager } from "@/context/file-manager-context";
-import { getFileTypeFromMime } from "@/lib/file-type-utils";
+import { getFileTypeFromMime } from "@/lib/file-utils";
 import { FILE_TYPE } from "@/types/file-manager";
 
 export function FileManagerOverlays({ className }: { className?: string }) {

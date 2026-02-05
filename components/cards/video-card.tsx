@@ -1,5 +1,5 @@
 import { FileMetaData, VideoMetaData } from "@/types/file-manager";
-import { Icons } from "@/lib/icons";
+import { Icons } from "@/lib/file-utils";
 import { Play } from "lucide-react";
 import { useState } from "react";
 

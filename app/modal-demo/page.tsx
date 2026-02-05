@@ -6,22 +6,39 @@ import { MockProvider } from "@/providers/mock-provider";
 import { FileMetaData, SELECTION_MODE } from "@/types/file-manager";
 import { IFileManagerProvider } from "@/types/provider";
 import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function ModalDemoPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [provider] = useState<IFileManagerProvider>(() => new MockProvider());
-  const [isOpen, setIsOpen] = useState(false);
+  
+  // Read modal state from URL
+  const isOpen = searchParams.get('fm') === 'true';
   const [selectedFiles, setSelectedFiles] = useState<FileMetaData[]>([]);
+
+  const handleOpen = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('fm', 'true');
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleClose = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('fm');
+    router.push(`?${params.toString()}`);
+  };
 
   const handleFilesSelected = (files: FileMetaData[]) => {
     setSelectedFiles(files);
-    setIsOpen(false);
+    handleClose();
   };
 
   return (
     <div className="p-10 flex flex-col gap-8">
       <div>
         <h1 className="text-2xl font-bold mb-4">Multi-File Selection Modal Example</h1>
-        <Button onClick={() => setIsOpen(true)}>Open File Manager (Multiple)</Button>
+        <Button onClick={handleOpen}>Open File Manager (Multiple)</Button>
       </div>
 
       <div className="border rounded-md p-4 bg-gray-50 dark:bg-gray-900 min-h-[200px]">
@@ -51,7 +68,7 @@ export default function ModalDemoPage() {
 
       <FileManagerModal
         open={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={handleClose}
         provider={provider}
         allowedFileTypes={["images", "videos", "audios", "files"]}
         fileSelectionMode={SELECTION_MODE.MULTIPLE}

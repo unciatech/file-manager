@@ -17,6 +17,17 @@ export function FileManagerModal({
   onClose,
   ...props
 }: FileManagerModalProps) {
+  return (
+    <FileManagerComposition.Modal {...props} onClose={onClose}>
+      <Dialog open={open} onOpenChange={onClose}>
+        <ModalContent onClose={onClose} />
+      </Dialog>
+    </FileManagerComposition.Modal>
+  );
+}
+
+function ModalContent({ onClose }: { onClose: () => void }) {
+  const { searchQuery, updateSearchQuery } = useFileManager();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -28,72 +39,74 @@ export function FileManagerModal({
   }, [isSearchActive]);
 
   return (
-    <FileManagerComposition.Modal {...props} onClose={onClose}>
-      <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="p-0" variant="fullscreen" showCloseButton={false}>
-          <DialogHeader className="pt-5 pb-3 m-0 border-b border-border">
-            <DialogTitle className="px-6 text-base">
-              <div className="flex w-full justify-between gap-2">
-                {isSearchActive ? (
-                  /* Inline Search Mode */
-                  <div className="flex items-center gap-4 flex-1">
-                    <SearchIcon className="size-5 text-gray-500 shrink-0" />
-                    <Input
-                      ref={searchInputRef}
-                      type="text"
-                      placeholder="Search files and folders..."
-                      className="border-none shadow-none focus-visible:ring-0 h-auto p-0 text-base font-semibold"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Escape') {
-                          setIsSearchActive(false);
-                        }
-                      }}
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      radius="full"
-                      onClick={() => setIsSearchActive(false)}
-                      className="border-gray-200 bg-white shrink-0"
-                    >
-                      <CrossIcon className="size-5" />
-                      <span className="sr-only">Cancel Search</span>
-                    </Button>
-                  </div>
-                ) : (
-                  /* Normal Header Mode */
-                  <>
-                    <HeaderNavigation />
-                    <ModalResponsiveHeaderActions onSearchClick={() => setIsSearchActive(true)} />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      radius="full"
-                      onClick={onClose}
-                      className="border-gray-200 bg-white"
-                    >
-                      <CrossIcon className="size-5" />
-                      <span className="hidden">Close</span>
-                    </Button>
-                  </>
-                )}
+    <DialogContent className="p-0" variant="fullscreen" showCloseButton={false}>
+      <DialogHeader className="pt-5 pb-3 m-0 border-b border-border">
+        <DialogTitle className="px-6 text-base">
+          <div className="flex w-full justify-between gap-2">
+            {isSearchActive ? (
+              /* Inline Search Mode */
+              <div className="flex items-center gap-4 flex-1">
+                <SearchIcon className="size-5 text-gray-500 shrink-0" />
+                <Input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search files and folders..."
+                  className="border-none shadow-none focus-visible:ring-0 h-auto p-0 text-base font-semibold"
+                  value={searchQuery}
+                  onChange={(e) => updateSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      updateSearchQuery('');
+                      setIsSearchActive(false);
+                    }
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  radius="full"
+                  onClick={() => {
+                    updateSearchQuery('');
+                    setIsSearchActive(false);
+                  }}
+                  className="border-gray-200 bg-white shrink-0"
+                >
+                  <CrossIcon className="size-5" />
+                  <span className="sr-only">Cancel Search</span>
+                </Button>
               </div>
-            </DialogTitle>
-            <DialogDescription className="sr-only">
-              Browse and select files from your media library
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="overflow-y-auto flex-1 pb-4">
-            <UnifiedGrid />
-            <FileManagerComposition.Footer className="my-4" />
-            <FileManagerComposition.Overlays />
+            ) : (
+              /* Normal Header Mode */
+              <>
+                <HeaderNavigation />
+                <ModalResponsiveHeaderActions onSearchClick={() => setIsSearchActive(true)} />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  radius="full"
+                  onClick={onClose}
+                  className="border-gray-200 bg-white"
+                >
+                  <CrossIcon className="size-5" />
+                  <span className="hidden">Close</span>
+                </Button>
+              </>
+            )}
           </div>
+        </DialogTitle>
+        <DialogDescription className="sr-only">
+          Browse and select files from your media library
+        </DialogDescription>
+      </DialogHeader>
 
-          <FileManagerModalFooter onClose={onClose} />
-        </DialogContent>
-      </Dialog>
-    </FileManagerComposition.Modal>
+      <div className="overflow-y-auto flex-1 pb-4">
+        <UnifiedGrid />
+        <FileManagerComposition.Footer className="my-4" />
+        <FileManagerComposition.Overlays />
+      </div>
+
+      <FileManagerModalFooter onClose={onClose} />
+    </DialogContent>
   );
 }
 

@@ -173,9 +173,17 @@ export function useFileHandlers(state: FileState) {
         const newUrl = folderId === null ? path : `${path}/${folderId}`;
         router.push(newUrl);
       } else {
-        // Modal mode: Use search params for navigation
+        // Modal mode: Preserve existing URL params (fm, page, limit, etc.)
         setIsLoading(true);
-        const newUrl = folderId === null ? '?' : `?folderId=${folderId}`;
+        const params = new URLSearchParams(window.location.search);
+        
+        if (folderId === null) {
+          params.delete('folderId');
+        } else {
+          params.set('folderId', folderId.toString());
+        }
+        
+        const newUrl = params.toString() ? `?${params.toString()}` : '?';
         router.push(newUrl, { scroll: false });
       }
     },

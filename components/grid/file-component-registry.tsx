@@ -1,6 +1,6 @@
 import React from "react";
 import { FileMetaData } from "@/types/file-manager";
-import { getFileTypeFromMime } from "@/lib/file-type-utils";
+import { getFileTypeFromMime } from "@/lib/file-utils";
 import { ImageCard, ImageCardMetadata } from "../cards/image-card";
 import { VideoCard, VideoCardMetadata } from "../cards/video-card";
 import { AudioCard, AudioCardMetadata } from "../cards/audio-card";

@@ -1,6 +1,5 @@
 import { FileMetaData, OtherMetaData } from "@/types/file-manager";
-import { getFileTypeFromMime } from "@/lib/file-type-utils";
-import { Icons } from "@/lib/icons";
+import { getFileTypeFromMime, Icons } from "@/lib/file-utils";
 
 interface OtherCardProps {
     file: FileMetaData;

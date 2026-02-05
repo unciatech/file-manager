@@ -12,7 +12,7 @@ import {
   FolderId,
 } from "@/types/file-manager";
 import { FileUploadInput, IFileManagerProvider } from "@/types/provider";
-import { getFileTypeFromMime } from "@/lib/file-type-utils";
+import { getFileTypeFromMime } from "@/lib/file-utils";
 
 // Simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -43,17 +43,48 @@ export class MockProvider implements IFileManagerProvider {
     return Promise.resolve(result);
   }
 
-  getFolders(folderId: FolderId): Promise<Folder[]> {
-    delay(500);
-    // If folderId is provided, return only folder with similar parentId; else filter those folder with parentId null
-    if (folderId !== null) {
-      const filteredFolders = mockFolders.filter(
-        (folder) => folder.parentId === folderId
+  async getFolders(
+    folderId: FolderId,
+    page: number = 1,
+    limit: number = 20,
+    query: string = ''
+  ): Promise<{folders: Folder[], pagination: PaginationInfo}> {
+    await delay(300);
+    
+    // Filter folders by parent
+    const filteredFolders = folderId !== null
+      ? mockFolders.filter((folder) => folder.parentId === folderId)
+      : mockFolders.filter((folder) => folder.parentId === null);
+    
+    // Filter by search query
+    let searchFiltered = filteredFolders;
+    if (query && query.trim()) {
+      const searchLower = query.toLowerCase().trim();
+      searchFiltered = filteredFolders.filter((folder) =>
+        folder.name.toLowerCase().includes(searchLower)
       );
-      return Promise.resolve(filteredFolders);
     }
-    const rootFolders = mockFolders.filter((folder) => folder.parentId === null);
-    return Promise.resolve(rootFolders);
+    
+    // Sort by creation date descending (newest first)
+    const sortedFolders = searchFiltered.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    
+    // Apply pagination
+    const totalFolders = sortedFolders.length;
+    const totalPages = Math.ceil(totalFolders / limit);
+    const startIndex = (page - 1) * limit;
+    const paginatedFolders = sortedFolders.slice(startIndex, startIndex + limit);
+    
+    return {
+      folders: paginatedFolders,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalFiles: totalFolders,
+        filesPerPage: limit
+      }
+    };
   }
   getTags(): Promise<string[]> {
     return Promise.resolve(mockTags.map((tag) => tag.name));
@@ -63,7 +94,7 @@ export class MockProvider implements IFileManagerProvider {
     fileTypes?: FileType[],
     page?: number,
     limit?: number,
-    searchQuery?: string,
+    query?: string,
   ): Promise<{ files: FileMetaData[]; pagination: PaginationInfo }> {
     delay(500);
     let filteredFiles = [...mockFiles];
@@ -84,20 +115,25 @@ export class MockProvider implements IFileManagerProvider {
     }
 
     // Filter by searchQuery
-    if (searchQuery) {
-      const query = searchQuery?.toLowerCase();
+    if (query) {
+      const searchLower = query?.toLowerCase();
       filteredFiles = filteredFiles.filter((file) =>
-        file.name.toLowerCase().includes(query)
+        file.name.toLowerCase().includes(searchLower)
       );
     }
+
+    // Sort by creation date descending (newest first)
+    const sortedFiles = filteredFiles.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
 
     // Pagination
     const currentPage = page ?? 1;
     const filesPerPage = limit ?? 10;
-    const totalFiles = filteredFiles.length;
+    const totalFiles = sortedFiles.length;
     const totalPages = Math.ceil(totalFiles / filesPerPage);
     const startIndex = (currentPage - 1) * filesPerPage;
-    const paginatedFiles = filteredFiles.slice(
+    const paginatedFiles = sortedFiles.slice(
       startIndex,
       startIndex + filesPerPage
     );

@@ -9,7 +9,7 @@ import {
   MODE,
   PaginationInfo,
 } from "@/types/file-manager";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -29,6 +29,14 @@ export function useFileState(options: FileStateOptions) {
 
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  
+  // Read pagination from URL
+  const pageFromUrl = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+  const limitFromUrl = Math.max(1, parseInt(searchParams.get('limit') || '24', 10));
+  const queryFromUrl = searchParams.get('query') || '';
+
 
   // Determine folder from URL based on mode
   const folderId = useMemo<FolderId>(() => {
@@ -60,15 +68,62 @@ export function useFileState(options: FileStateOptions) {
   const [currentFolder, setCurrentFolder] = useState<Folder | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [pagination, setPagination] = useState<PaginationInfo>({
-    currentPage: 1,
+    currentPage: pageFromUrl,
     totalPages: 1,
     totalFiles: 0,
-    filesPerPage: 20,
+    filesPerPage: limitFromUrl,
+  });
+  
+  const [folderPagination, setFolderPagination] = useState<PaginationInfo>({
+    currentPage: pageFromUrl,
+    totalPages: 1,
+    totalFiles: 0,
+    filesPerPage: limitFromUrl,
   });
 
   // Use ref to track current folder without triggering re-renders
   const currentFolderRef = useRef<Folder | null>(null);
   currentFolderRef.current = currentFolder;
+  
+  // Search state
+  const [searchQuery, setSearchQuery] = useState(queryFromUrl);
+  
+  // Track previous folder to detect changes
+  const prevFolderIdRef = useRef<FolderId>(folderId);
+
+
+
+  // Update URL params helper
+  const updateUrlParams = useCallback((page: number, limit: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', page.toString());
+    params.set('limit', limit.toString());
+    
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [router, pathname, searchParams]);
+  
+  // Sync state when URL changes (browser back/forward)
+  useEffect(() => {
+    setPagination(prev => ({
+      ...prev,
+      currentPage: pageFromUrl,
+      filesPerPage: limitFromUrl,
+    }));
+    setFolderPagination(prev => ({
+      ...prev,
+      currentPage: pageFromUrl,
+      filesPerPage: limitFromUrl,
+    }));
+    setSearchQuery(queryFromUrl);
+  }, [pageFromUrl, limitFromUrl, queryFromUrl]);
+  
+  // Reset to page 1 when folder changes
+  useEffect(() => {
+    if (folderId !== prevFolderIdRef.current) {
+      updateUrlParams(1, limitFromUrl);
+      prevFolderIdRef.current = folderId;
+    }
+  }, [folderId, limitFromUrl, updateUrlParams]);
 
   // Consolidated useEffect: Sync current folder and load data
   // This replaces 4 separate useEffects to prevent re-render cascades
@@ -123,19 +178,26 @@ export function useFileState(options: FileStateOptions) {
         }
 
         // Load folders and files in parallel
-        const [foldersData, filesResult] = await Promise.all([
-          provider.getFolders(folder?.id ?? null),
+        const [foldersResult, filesResult] = await Promise.all([
+          provider.getFolders(
+            folder?.id ?? null,
+            folderPagination.currentPage,
+            folderPagination.filesPerPage,
+            searchQuery
+          ),
           provider.getFiles(
             folder?.id ?? null,
             fileTypes,
             pagination.currentPage,
-            pagination.filesPerPage
+            pagination.filesPerPage,
+            searchQuery
           ),
         ]);
 
         if (cancelled) return;
         
-        setFolders(foldersData);
+        setFolders(foldersResult.folders);
+        setFolderPagination(foldersResult.pagination);
         setFiles(filesResult.files);
         setPagination(filesResult.pagination);
       } catch (error) {
@@ -164,6 +226,7 @@ export function useFileState(options: FileStateOptions) {
     allowedFileTypes,
     pagination.currentPage,
     pagination.filesPerPage,
+    searchQuery,
   ]);
 
   // Clear selections when folder changes
@@ -185,8 +248,13 @@ export function useFileState(options: FileStateOptions) {
   // Manual reload functions for components that need to refresh data
   const loadFolders = useCallback(async () => {
     try {
-      const foldersData = await provider.getFolders(currentFolder?.id ?? null);
-      setFolders(foldersData);
+      const foldersResult = await provider.getFolders(
+        currentFolder?.id ?? null,
+        folderPagination.currentPage,
+        folderPagination.filesPerPage
+      );
+      setFolders(foldersResult.folders);
+      setFolderPagination(foldersResult.pagination);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to load folders";
       toast.error("Load Folders Failed", {
@@ -194,7 +262,7 @@ export function useFileState(options: FileStateOptions) {
       });
       console.error("Failed to load folders:", error);
     }
-  }, [currentFolder, provider]);
+  }, [currentFolder, provider, folderPagination, setFolders, setFolderPagination]);
 
   const loadFiles = useCallback(async () => {
     setIsLoading(true);
@@ -239,6 +307,29 @@ export function useFileState(options: FileStateOptions) {
   };
 
 
+
+  // Pagination change handler
+  const handlePageChange = useCallback((newPage: number) => {
+    setPagination(prev => ({ ...prev, currentPage: newPage }));
+    setFolderPagination(prev => ({ ...prev, currentPage: newPage }));
+    updateUrlParams(newPage, pagination.filesPerPage);
+  }, [updateUrlParams, pagination.filesPerPage]);
+  
+  // Update search query and sync with URL
+  const updateSearchQuery = useCallback((newQuery: string) => {
+    setSearchQuery(newQuery);
+    
+    const params = new URLSearchParams(searchParams.toString());
+    if (newQuery.trim()) {
+      params.set('query', newQuery);
+      params.set('page', '1'); // Reset to page 1 on new search
+    } else {
+      params.delete('query');
+    }
+    
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [router, pathname, searchParams]);
+
   return {
     // State
     files,
@@ -281,7 +372,13 @@ export function useFileState(options: FileStateOptions) {
     isInSelectionMode,
     getCurrentFolder,
     getSelectionState,
-
+    
+    // Pagination handlers
+    handlePageChange,
+    
+    // Search
+    searchQuery,
+    updateSearchQuery,
 
     // Config
     mode,

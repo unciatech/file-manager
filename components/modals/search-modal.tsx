@@ -17,8 +17,7 @@ import { toast } from "sonner";
 import { FileMetaData, Folder } from "@/types/file-manager";
 import { middleTruncate } from "@/lib/truncate-name";
 import {FolderIcon, SearchIcon} from "../icons";
-import { Icons } from "@/lib/icons";
-import { getIconType } from "@/lib/get-icon-type";
+import { getIconType, Icons } from "@/lib/file-utils";
 
 export default function SearchDialog() {
   const [searchQuery, setSearchQuery] = useState("");
