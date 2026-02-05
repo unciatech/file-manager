@@ -24,7 +24,7 @@ export default function SearchDialog() {
   const [fileResults, setFileResults] = useState<FileMetaData[]>([]);
   const [folderResults, setFolderResults] = useState<Folder[]>([]);
   const [loading, setLoading] = useState(false);
-  const { provider, handleFolderClick, handleClearSelection, isSearchModalOpen, setIsSearchModalOpen } = useFileManager();
+  const { provider, handleFolderClick, handleClearSelection, isSearchModalOpen, setIsSearchModalOpen, setFileDetailsModalFile } = useFileManager();
 
   // Debounce search query to reduce API calls
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
@@ -75,6 +75,16 @@ export default function SearchDialog() {
   const handleInputChange = (value: string) => {
     setSearchQuery(value);
   };
+  
+  const handleModalOpenChange = (open: boolean) => {
+    setIsSearchModalOpen(open);
+    if (!open) {
+      // Clear search when closing modal
+      setSearchQuery('');
+      setFileResults([]);
+      setFolderResults([]);
+    }
+  };
 
   return (
     <>
@@ -87,7 +97,7 @@ export default function SearchDialog() {
         <SearchIcon className="size-4 text-gray-700" />
         <span className="hidden">Search</span>
       </Button>
-      <CommandDialog open={isSearchModalOpen} onOpenChange={setIsSearchModalOpen} shouldFilter={false}>
+      <CommandDialog open={isSearchModalOpen} onOpenChange={handleModalOpenChange} shouldFilter={false}>
         <CommandInput
           placeholder="Type to search files or folders..."
           value={searchQuery}
@@ -118,7 +128,19 @@ export default function SearchDialog() {
           {fileResults.length > 0 && (
             <CommandGroup heading="Files">
               {fileResults.map((file) => (
-                <CommandItem key={file.id}>
+                <CommandItem 
+                  key={file.id}
+                  onSelect={() => {
+                    handleClearSelection();
+                    setIsSearchModalOpen(false);
+                    // Navigate to file's folder first, then open file details
+                    if (file.folderId) {
+                      handleFolderClick({ id: file.folderId } as Folder);
+                    }
+                    // Open file details modal
+                    setFileDetailsModalFile(file);
+                  }}
+                >
                   <Icons type={getIconType(file.mime, file.ext)} className="size-4 mr-2 shrink-0" />
                   <span>{middleTruncate(file.name, 60)}</span>
                 </CommandItem>

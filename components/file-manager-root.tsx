@@ -1,10 +1,8 @@
 'use client'
 import { FileManagerProvider } from "@/context/file-manager-context";
-import {
-  FileManagerFooter,
-  FileManagerHeader,
-  FileManagerOverlays,
-} from "./layout";
+import { FileManagerFooter } from "./layout/footer";
+import { FileManagerHeader } from "./layout/header";
+import { FileManagerOverlays } from "./layout/overlays";
 import { FileManagerPageProps, FileManagerModalProps, MODE, SELECTION_MODE } from "@/types/file-manager";
 import { ReactNode } from "react";
 

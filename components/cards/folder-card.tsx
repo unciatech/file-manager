@@ -97,13 +97,6 @@ export function FolderCard({
             `}>
             <div className="w-[75%] h-[75%] flex items-center justify-center transform ">
               <FolderIcon className="w-full h-full text-blue-400 fill-blue-400/20 drop-shadow-sm" strokeWidth={1.5} />
-              {/* {
-                (folder.fileCount ?? 0) === 0 ? (
-                  <Icons type="folder" />
-                ) : (
-                  <Icons type="folder-with-files" />
-                )
-              } */}
             </div>
 
             {(selectionMode === SELECTION_MODE.MULTIPLE || showCheckbox) && (

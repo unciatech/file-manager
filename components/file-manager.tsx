@@ -2,32 +2,33 @@
 
 import { FileManagerComposition } from "@/components/file-manager-root";
 import { FileManagerPageProps } from "@/types/file-manager";
-import {
-  BulkActionsFloating,
-  HeaderNavigation,
-  ResponsiveHeaderActions,
-} from "./layout";
+import { BulkActionsFloating } from "./layout/bulk-actions-bar";
+import { HeaderNavigation } from "./layout/header-navigation";
+import { ResponsiveHeaderActions } from "./layout/header-actions-responsive";
 import { UnifiedGrid } from "./grid/unified-grid";
+import { FileManagerErrorBoundary } from "./error-boundary";
 
 export function FileManager(props: FileManagerPageProps) {
   return (
-    <FileManagerComposition.Page {...props}>
-      <div className="flex h-full relative pb-12 overflow-hidden">
-        {/* Main Content */}
-        <div className="flex-1 flex w-full flex-col">
-          <FileManagerComposition.Header>
-            <div className="flex w-full justify-between gap-2">
-              <HeaderNavigation />
-              <ResponsiveHeaderActions />
-            </div>
-          </FileManagerComposition.Header>
-          <BulkActionsFloating className="-mb-1" />
-          <UnifiedGrid />
-          <FileManagerComposition.Footer className="pt-6 pb-10" />
-        </div>
+    <FileManagerErrorBoundary>
+      <FileManagerComposition.Page {...props}>
+        <div className="flex h-full relative pb-12 overflow-hidden">
+          {/* Main Content */}
+          <div className="flex-1 flex w-full flex-col">
+            <FileManagerComposition.Header>
+              <div className="flex w-full justify-between gap-2">
+                <HeaderNavigation />
+                <ResponsiveHeaderActions />
+              </div>
+            </FileManagerComposition.Header>
+            <BulkActionsFloating className="-mb-1" />
+            <UnifiedGrid />
+            <FileManagerComposition.Footer className="pt-6 pb-10" />
+          </div>
 
-        <FileManagerComposition.Overlays />
-      </div>
-    </FileManagerComposition.Page>
+          <FileManagerComposition.Overlays />
+        </div>
+      </FileManagerComposition.Page>
+    </FileManagerErrorBoundary>
   );
 }

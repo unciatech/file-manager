@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FileManagerModalProps } from "@/types/file-manager";
 import { useFileManager } from "@/context/file-manager-context";
-import { BulkActionsStatic, HeaderNavigation } from "./layout";
+import { BulkActionsStatic } from "./layout/bulk-actions-bar";
+import { HeaderNavigation } from "./layout/header-navigation";
 import { UnifiedGrid } from "./grid/unified-grid";
 import { ModalResponsiveHeaderActions } from "./layout/header-actions-responsive";
 import { CrossIcon, SearchIcon } from "./icons";
 import { useState, useRef, useEffect } from "react";
 import { Input } from "./ui/input";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 export function FileManagerModal({
   open,
@@ -27,9 +29,18 @@ export function FileManagerModal({
 }
 
 function ModalContent({ onClose }: { onClose: () => void }) {
-  const { searchQuery, updateSearchQuery } = useFileManager();
+  const { updateSearchQuery } = useFileManager();
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Debounce search input to reduce API calls
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
+
+  // Update actual search query when debounced value changes
+  useEffect(() => {
+    updateSearchQuery(debouncedSearch);
+  }, [debouncedSearch, updateSearchQuery]);
 
   // Focus search input when search becomes active
   useEffect(() => {
@@ -52,10 +63,11 @@ function ModalContent({ onClose }: { onClose: () => void }) {
                   type="text"
                   placeholder="Search files and folders..."
                   className="border-none shadow-none focus-visible:ring-0 h-auto p-0 text-base font-semibold"
-                  value={searchQuery}
-                  onChange={(e) => updateSearchQuery(e.target.value)}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Escape') {
+                      setSearchInput('');
                       updateSearchQuery('');
                       setIsSearchActive(false);
                     }
@@ -66,6 +78,7 @@ function ModalContent({ onClose }: { onClose: () => void }) {
                   size="icon"
                   radius="full"
                   onClick={() => {
+                    setSearchInput('');
                     updateSearchQuery('');
                     setIsSearchActive(false);
                   }}
@@ -111,11 +124,25 @@ function ModalContent({ onClose }: { onClose: () => void }) {
 }
 
 function FileManagerModalFooter({ onClose }: { onClose: () => void }) {
-  const { selectedFiles, onFilesSelected } = useFileManager();
+  const { 
+    selectedFiles, 
+    onFilesSelected, 
+    setSelectedFiles, 
+    setSelectedFolders,
+    updateSearchQuery,
+    handlePageChange 
+  } = useFileManager();
 
   const handleSelect = () => {
     if (onFilesSelected && selectedFiles.length > 0) {
       onFilesSelected(selectedFiles);
+      
+      // Clear everything after selection
+      setSelectedFiles([]);
+      setSelectedFolders([]);
+      updateSearchQuery('');
+      handlePageChange(1);
+      
       onClose();
     }
   };

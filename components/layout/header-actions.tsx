@@ -100,21 +100,3 @@ export function CreateFolderAction() {
     </Button>
   );
 }
-
-
-//need to create inline search action
-export function SearchActionModal() {
-  
-
-  return (
-    <Button
-      variant="outline"
-      size="icon"
-      radius="full"
-      className="border-gray-200 bg-white"
-    >
-      <SearchIcon className="size-5  text-gray-900" />
-      <span className="hidden">Search</span>
-    </Button>
-  );
-}

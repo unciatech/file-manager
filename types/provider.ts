@@ -21,8 +21,24 @@ export interface IFileManagerProvider {
       fileTypes?: FileType[] | null,
       page?: number,
       limit?: number,
-      searchQuery?: string,  
+      query?: string,  
     ) : Promise<{files: FileMetaData[], pagination: PaginationInfo}>;
+  
+  /**
+   * Get files and folders separately (folders always come first)
+   * Folders are returned for the current page, followed by files
+   */
+  getItems(
+    folderId: FolderId,
+    fileTypes?: FileType[],
+    page?: number,
+    limit?: number,
+    query?: string
+  ): Promise<{
+    folders: Folder[];
+    files: FileMetaData[];
+    pagination: PaginationInfo;
+  }>;
 
 
     //Create
