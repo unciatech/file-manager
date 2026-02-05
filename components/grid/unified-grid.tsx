@@ -16,7 +16,11 @@ export function UnifiedGrid() {
         isInSelectionMode,
         selectedFiles,
         selectedFolders,
-        currentFolder
+        currentFolder,
+        setSelectedFiles,
+        setSelectedFolders,
+        setIsMoveFileModalOpen,
+        setFileDetailsModalFile
     } = useFileManager();
 
     // Calculate expected item count for skeleton loading
@@ -63,7 +67,11 @@ export function UnifiedGrid() {
                     isSelected={selectedFolders.some(f => f.id === folder.id)}
                     onSelect={handleFolderClick}
                     onDelete={() => bulkDelete()}
-                    onMove={() => { }}
+                    onMove={(folder) => {
+                        setSelectedFolders([folder]);
+                        setSelectedFiles([]);
+                        setIsMoveFileModalOpen(true);
+                    }}
                     selectionMode={selectionMode}
                     mode={mode}
                     isInSelectionMode={isInSelectionMode()}
@@ -75,8 +83,15 @@ export function UnifiedGrid() {
                     file={file}
                     isSelected={selectedFiles.some(f => f.id === file.id)}
                     onSelect={handleFileClick}
-                    onDelete={() => bulkDelete()} // TODO: Implement single delete if needed
-                    onMove={() => { }} // TODO: Implement move
+                    onDelete={() => bulkDelete()}
+                    onMove={(file) => {
+                        setSelectedFiles([file]);
+                        setSelectedFolders([]);
+                        setIsMoveFileModalOpen(true);
+                    }}
+                    onViewMetadata={(file) => {
+                        setFileDetailsModalFile(file);
+                    }}
                     selectionMode={selectionMode}
                     mode={mode}
                     isInSelectionMode={isInSelectionMode()}

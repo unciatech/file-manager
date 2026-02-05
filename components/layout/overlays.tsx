@@ -10,31 +10,22 @@ import { AudioModal } from "../modals/audio-modal";
 import { FileModal } from "../modals/file-modal";
 import { useFileManager } from "@/context/file-manager-context";
 import { getFileTypeFromMime } from "@/lib/file-utils";
-import { FILE_TYPE } from "@/types/file-manager";
+import { FILE_TYPE, FileMetaData } from "@/types/file-manager";
 
 export function FileManagerOverlays({ className }: { className?: string }) {
   const {
     fileDetailsModalFile,
     setFileDetailsModalFile,
     updateFileMetadata,
-    bulkDelete,
   } = useFileManager();
 
   const handleClose = () => {
     setFileDetailsModalFile(null);
   };
 
-  const handleSave = async (updates: any) => {
+  const handleSave = async (updates: Partial<FileMetaData>) => {
     if (fileDetailsModalFile) {
       await updateFileMetadata(fileDetailsModalFile.id, updates);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (fileDetailsModalFile) {
-      // Temporarily select the file for deletion
-      await bulkDelete();
-      handleClose();
     }
   };
 
@@ -54,7 +45,6 @@ export function FileManagerOverlays({ className }: { className?: string }) {
             file={fileDetailsModalFile}
             onClose={handleClose}
             onSave={handleSave}
-            onDelete={handleDelete}
           />
         );
       case FILE_TYPE.VIDEO:
@@ -63,7 +53,6 @@ export function FileManagerOverlays({ className }: { className?: string }) {
             file={fileDetailsModalFile}
             onClose={handleClose}
             onSave={handleSave}
-            onDelete={handleDelete}
           />
         );
       case FILE_TYPE.AUDIO:
@@ -72,7 +61,6 @@ export function FileManagerOverlays({ className }: { className?: string }) {
             file={fileDetailsModalFile}
             onClose={handleClose}
             onSave={handleSave}
-            onDelete={handleDelete}
           />
         );
       case FILE_TYPE.FILE:
@@ -82,7 +70,6 @@ export function FileManagerOverlays({ className }: { className?: string }) {
             file={fileDetailsModalFile}
             onClose={handleClose}
             onSave={handleSave}
-            onDelete={handleDelete}
           />
         );
     }

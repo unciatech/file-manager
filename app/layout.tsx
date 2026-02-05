@@ -13,7 +13,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="en">
       <body className={cn("text-base antialiased", inter.className)} suppressHydrationWarning>
         <div className="isolate">{children}</div>
-        <Toaster position="top-right" richColors />
+        <Toaster position="bottom-center" richColors />
       </body>
     </html>
   );

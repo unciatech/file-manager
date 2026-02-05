@@ -25,8 +25,15 @@ function getPageNumbers(current: number, total: number) {
 }
 
 export function FileManagerFooter({ className }: { className?: string }) {
-  const { pagination, handlePageChange } = useFileManager();
+  const { pagination, handlePageChange, files, folders } = useFileManager();
   const { currentPage, totalPages } = pagination;
+  
+  // Hide pagination if there's only 1 page or no items
+  const totalItems = (files?.length || 0) + (folders?.length || 0);
+  if (totalPages <= 1 || totalItems === 0) {
+    return null;
+  }
+  
   const pageNumbers = getPageNumbers(currentPage, totalPages);
 
   return (

@@ -69,14 +69,14 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Size
           </p>
-          <p className="text-sm font-medium">{getFileSize(file.size)}</p>
+          <p className="text-xs font-bold text-blue-600">{getFileSize(file.size)}</p>
         </div>
 
         <div>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Duration
           </p>
-          <p className="text-sm font-medium">
+          <p className="text-xs font-bold text-blue-600">
             {audioMeta?.duration ? formatDuration(audioMeta.duration) : 'N/A'}
           </p>
         </div>
@@ -85,7 +85,7 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Bitrate
           </p>
-          <p className="text-sm font-medium">
+          <p className="text-xs font-bold text-blue-600">
             {audioMeta?.bitrate ? `${audioMeta.bitrate} kbps` : 'N/A'}
           </p>
         </div>
@@ -94,7 +94,7 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Date
           </p>
-          <p className="text-sm font-medium">
+          <p className="text-xs font-bold text-blue-600">
             {formatDate(file.createdAt)}
           </p>
         </div>
@@ -103,7 +103,7 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Extension
           </p>
-          <p className="text-sm font-medium">{file.ext?.replace('.', '') || 'N/A'}</p>
+          <p className="text-xs font-bold text-blue-600">{file.ext?.replace('.', '') || 'N/A'}</p>
         </div>
 
 

@@ -65,9 +65,9 @@ export class MockProvider implements IFileManagerProvider {
       );
     }
     
-    // Sort by creation date descending (newest first)
+    // Sort by creation date ascending (oldest first)
     const sortedFolders = searchFiltered.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
     
     // Apply pagination
@@ -89,14 +89,14 @@ export class MockProvider implements IFileManagerProvider {
   getTags(): Promise<string[]> {
     return Promise.resolve(mockTags.map((tag) => tag.name));
   }
-  getFiles(
+  async getFiles(
     folderId: FolderId,
     fileTypes?: FileType[],
     page?: number,
     limit?: number,
     query?: string,
   ): Promise<{ files: FileMetaData[]; pagination: PaginationInfo }> {
-    delay(500);
+    await delay(500);
     let filteredFiles = [...mockFiles];
 
     // Filter by folderId
@@ -122,9 +122,9 @@ export class MockProvider implements IFileManagerProvider {
       );
     }
 
-    // Sort by creation date descending (newest first)
+    // Sort by creation date ascending (oldest first)
     const sortedFiles = filteredFiles.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
 
     // Pagination
@@ -148,6 +148,101 @@ export class MockProvider implements IFileManagerProvider {
       },
     });
   }
+  
+  /**
+   * Get files and folders separately (folders always come first)
+   * Folders are not paginated (all folders in current directory are returned)
+   * Files are paginated after folders
+   */
+  async getItems(
+    folderId: FolderId,
+    fileTypes?: FileType[],
+    page: number = 1,
+    limit: number = 24,
+    query: string = ''
+  ): Promise<{
+    folders: Folder[];
+    files: FileMetaData[];
+    pagination: PaginationInfo;
+  }> {
+    await delay(300);
+    
+    // Fetch all folders in current directory
+    let filteredFolders = folderId !== null
+      ? mockFolders.filter((folder) => folder.parentId === folderId)
+      : mockFolders.filter((folder) => folder.parentId === null);
+    
+    // Fetch all files in current directory
+    let filteredFiles = folderId !== null
+      ? mockFiles.filter((file) => file.folderId === folderId)
+      : mockFiles.filter((file) => file.folderId === null);
+
+    // Filter by file types
+    if (fileTypes && fileTypes.length > 0) {
+      filteredFiles = filteredFiles.filter((file) => {
+        const fileType = getFileTypeFromMime(file.mime, file.ext);
+        return fileTypes.includes(fileType);
+      });
+    }
+    
+    // Apply search query to both folders and files
+    if (query && query.trim()) {
+      const searchLower = query.toLowerCase().trim();
+      
+      filteredFolders = filteredFolders.filter((folder) =>
+        folder.name.toLowerCase().includes(searchLower)
+      );
+      
+      filteredFiles = filteredFiles.filter((file) =>
+        file.name.toLowerCase().includes(searchLower) ||
+        (file.ext?.toLowerCase().includes(searchLower) ?? false)
+      );
+    }
+    
+    // Sort folders by createdAt ASC (oldest first)
+    const sortedFolders = filteredFolders.sort((a, b) => 
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+    
+    // Sort files by createdAt ASC (oldest first)
+    const sortedFiles = filteredFiles.sort((a, b) => 
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+    
+    // Pagination is based on total items (folders + files)
+    const totalItems = sortedFolders.length + sortedFiles.length;
+    const totalPages = Math.ceil(totalItems / limit) || 1;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    
+    // First, take folders from the start
+    const foldersToShow = sortedFolders.slice(
+      Math.max(0, startIndex),
+      Math.min(sortedFolders.length, endIndex)
+    );
+    
+    // Calculate how many file slots remain after folders
+    const foldersTaken = foldersToShow.length;
+    const fileSlots = limit - foldersTaken;
+    
+    // Calculate file offset taking into account folders on previous pages
+    const foldersOnPreviousPages = Math.min(sortedFolders.length, startIndex);
+    const fileStartIndex = Math.max(0, startIndex - sortedFolders.length);
+    
+    const filesToShow = sortedFiles.slice(fileStartIndex, fileStartIndex + fileSlots);
+    
+    return {
+      folders: foldersToShow,
+      files: filesToShow,
+      pagination: {
+        currentPage: page,
+        totalPages: totalPages,
+        totalFiles: totalItems,
+        filesPerPage: limit
+      }
+    };
+  }
+
 
   async createFolder(
     name: string,

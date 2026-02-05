@@ -73,13 +73,6 @@ export function useFileState(options: FileStateOptions) {
     totalFiles: 0,
     filesPerPage: limitFromUrl,
   });
-  
-  const [folderPagination, setFolderPagination] = useState<PaginationInfo>({
-    currentPage: pageFromUrl,
-    totalPages: 1,
-    totalFiles: 0,
-    filesPerPage: limitFromUrl,
-  });
 
   // Use ref to track current folder without triggering re-renders
   const currentFolderRef = useRef<Folder | null>(null);
@@ -100,16 +93,11 @@ export function useFileState(options: FileStateOptions) {
     params.set('limit', limit.toString());
     
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [router, pathname, searchParams]);
+  }, [router, pathname]); // Removed searchParams - it's read fresh on each call
   
   // Sync state when URL changes (browser back/forward)
   useEffect(() => {
     setPagination(prev => ({
-      ...prev,
-      currentPage: pageFromUrl,
-      filesPerPage: limitFromUrl,
-    }));
-    setFolderPagination(prev => ({
       ...prev,
       currentPage: pageFromUrl,
       filesPerPage: limitFromUrl,
@@ -120,10 +108,17 @@ export function useFileState(options: FileStateOptions) {
   // Reset to page 1 when folder changes
   useEffect(() => {
     if (folderId !== prevFolderIdRef.current) {
-      updateUrlParams(1, limitFromUrl);
+      // Only update URL params in PAGE mode, not MODAL mode
+      if (mode === MODE.PAGE) {
+        updateUrlParams(1, limitFromUrl);
+      }
       prevFolderIdRef.current = folderId;
     }
-  }, [folderId, limitFromUrl, updateUrlParams]);
+  }, [folderId, limitFromUrl, updateUrlParams, mode]);
+
+  // Extract primitive values for dependency array (prevents unnecessary re-renders)
+  const currentPage = pagination.currentPage;
+  const filesPerPage = pagination.filesPerPage;
 
   // Consolidated useEffect: Sync current folder and load data
   // This replaces 4 separate useEffects to prevent re-render cascades
@@ -149,7 +144,9 @@ export function useFileState(options: FileStateOptions) {
           console.error("Failed to fetch current folder", e);
           if (cancelled) return;
           setCurrentFolder(null);
-          setIsLoading(false);
+          if (!cancelled) {
+            setIsLoading(false);
+          }
         }
       } else if (folderId === null && currentFolderRef.current !== null) {
         // Navigate to root
@@ -177,29 +174,22 @@ export function useFileState(options: FileStateOptions) {
           fileTypes = allowedFileTypes;
         }
 
-        // Load folders and files in parallel
-        const [foldersResult, filesResult] = await Promise.all([
-          provider.getFolders(
-            folder?.id ?? null,
-            folderPagination.currentPage,
-            folderPagination.filesPerPage,
-            searchQuery
-          ),
-          provider.getFiles(
-            folder?.id ?? null,
-            fileTypes,
-            pagination.currentPage,
-            pagination.filesPerPage,
-            searchQuery
-          ),
-        ]);
+        // Use unified getItems method for combined pagination
+        const result = await provider.getItems(
+          folder?.id ?? null,
+          fileTypes,
+          currentPage,
+          filesPerPage,
+          searchQuery
+        );
 
         if (cancelled) return;
         
-        setFolders(foldersResult.folders);
-        setFolderPagination(foldersResult.pagination);
-        setFiles(filesResult.files);
-        setPagination(filesResult.pagination);
+        // Update state with combined results
+        setFolders(result.folders);
+        setFiles(result.files);
+        setPagination(result.pagination);
+        
       } catch (error) {
         const message = error instanceof Error ? error.message : "Failed to load data";
         toast.error("Load Data Failed", {
@@ -224,8 +214,8 @@ export function useFileState(options: FileStateOptions) {
     mode,
     acceptedFileTypesForModal,
     allowedFileTypes,
-    pagination.currentPage,
-    pagination.filesPerPage,
+    currentPage,
+    filesPerPage,
     searchQuery,
   ]);
 
@@ -250,11 +240,11 @@ export function useFileState(options: FileStateOptions) {
     try {
       const foldersResult = await provider.getFolders(
         currentFolder?.id ?? null,
-        folderPagination.currentPage,
-        folderPagination.filesPerPage
+        pagination.currentPage,
+        pagination.filesPerPage
       );
       setFolders(foldersResult.folders);
-      setFolderPagination(foldersResult.pagination);
+      setPagination(foldersResult.pagination);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to load folders";
       toast.error("Load Folders Failed", {
@@ -262,7 +252,7 @@ export function useFileState(options: FileStateOptions) {
       });
       console.error("Failed to load folders:", error);
     }
-  }, [currentFolder, provider, folderPagination, setFolders, setFolderPagination]);
+  }, [currentFolder, provider, pagination, setFolders]);
 
   const loadFiles = useCallback(async () => {
     setIsLoading(true);
@@ -294,26 +284,73 @@ export function useFileState(options: FileStateOptions) {
     }
   }, [currentFolder, acceptedFileTypesForModal, mode, allowedFileTypes, provider, pagination.currentPage, pagination.filesPerPage]);
 
+  /**
+   * Unified data loader that mirrors the main useEffect logic
+   * Uses getItems for consistent pagination of files + folders together
+   * @param silent - If true, skips showing loading state (for background refreshes)
+   */
+  const loadData = useCallback(async (silent = false) => {
+    if (!silent) {
+      setIsLoading(true);
+    }
+    try {
+      // Determine file types based on mode
+      let fileTypes: FileType[] | undefined = [];
+      if (mode === MODE.MODAL) {
+        fileTypes = acceptedFileTypesForModal;
+      } else {
+        fileTypes = allowedFileTypes;
+      }
+
+      // Use unified getItems method for combined pagination
+      const result = await provider.getItems(
+        currentFolder?.id ?? null,
+        fileTypes,
+        currentPage,
+        filesPerPage,
+        searchQuery
+      );
+
+      setFolders(result.folders);
+      setFiles(result.files);
+      setPagination(result.pagination);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to load data";
+      toast.error("Load Data Failed", {
+        description: message,
+      });
+      console.error("Failed to load data:", error);
+    } finally {
+      if (!silent) {
+        setIsLoading(false);
+      }
+    }
+  }, [currentFolder, mode, acceptedFileTypesForModal, allowedFileTypes, provider, currentPage, filesPerPage, searchQuery]);
+
   const isInSelectionMode = () => selectedFiles.length > 0 || selectedFolders.length > 0;
   const getCurrentFolder = () => currentFolder;
 
-  // Checkbox states
-  const getSelectionState = () => {
-    const totalItems = files.length + (mode === MODE.PAGE ? folders.length : 0);
-    const selectedItems = selectedFiles.length + selectedFolders.length;
-    if (selectedItems === 0) return false;
-    if (selectedItems === totalItems) return true;
-    return "indeterminate";
-  };
+  // Checkbox states - memoized to prevent recalculation on every render
+  const getSelectionState = useMemo(() => {
+    return () => {
+      const totalItems = files.length + (mode === MODE.PAGE ? folders.length : 0);
+      const selectedItems = selectedFiles.length + selectedFolders.length;
+      if (selectedItems === 0) return false;
+      if (selectedItems === totalItems) return true;
+      return "indeterminate";
+    };
+  }, [files.length, folders.length, selectedFiles.length, selectedFolders.length, mode]);
 
 
 
   // Pagination change handler
   const handlePageChange = useCallback((newPage: number) => {
     setPagination(prev => ({ ...prev, currentPage: newPage }));
-    setFolderPagination(prev => ({ ...prev, currentPage: newPage }));
-    updateUrlParams(newPage, pagination.filesPerPage);
-  }, [updateUrlParams, pagination.filesPerPage]);
+    // Only update URL in PAGE mode, not MODAL mode
+    if (mode === MODE.PAGE) {
+      updateUrlParams(newPage, filesPerPage);
+    }
+  }, [updateUrlParams, filesPerPage, mode]);
   
   // Update search query and sync with URL
   const updateSearchQuery = useCallback((newQuery: string) => {
@@ -328,7 +365,7 @@ export function useFileState(options: FileStateOptions) {
     }
     
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [router, pathname, searchParams]);
+  }, [router, pathname]); // Removed searchParams - it's read fresh on each call
 
   return {
     // State
@@ -365,6 +402,7 @@ export function useFileState(options: FileStateOptions) {
     // Loaders
     loadFolders,
     loadFiles,
+    loadData,
 
     setIsLoading,
 

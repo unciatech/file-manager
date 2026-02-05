@@ -3,16 +3,19 @@ import { Button } from "../ui/button";
 import { middleTruncate } from "@/lib/truncate-name";
 import { ChevronLeftIcon, HomeIcon } from "../icons";
 import { Skeleton } from "../ui/skeleton";
+import { useRouter } from "next/navigation";
 
 export function HeaderNavigation() {
   const {
     currentFolder,
     handleFolderClick,
-    isLoading
+    isLoading,
   } = useFileManager();
 
-  const handleBackClick = async () => {
-    window.history.back();
+  const router = useRouter();
+
+  const handleBackClick = () => {
+    router.back();
   };
 
   if(isLoading) {
@@ -52,12 +55,6 @@ export function HeaderNavigation() {
           <h1 className="text-lg flex-1 min-w-0 align-middle font-semibold">Home</h1>
         </div>
       )}
-
-      {/* <BreadcrumbNavigation
-        folders={folders}
-        currentFolder={currentFolder}
-        onFolderClick={handleFolderClick}
-      /> */}
     </>
   );
 }

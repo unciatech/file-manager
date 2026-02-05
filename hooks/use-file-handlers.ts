@@ -66,6 +66,7 @@ export function useFileHandlers(state: FileState) {
     setPagination,
     loadFiles,
     loadFolders,
+    loadData,
     isInSelectionMode,
     provider,
     onFilesSelected,
@@ -166,28 +167,34 @@ export function useFileHandlers(state: FileState) {
 
       // 3. Navigation (Regular Click)
       if (mode === MODE.PAGE) {
-        // Navigate immediately - let URL change trigger state updates
-        // useFileState's useEffect will handle clearing selections
-        setIsLoading(true); // Trigger loading explicitly for immediate feedback
+        // PAGE mode: Navigate via URL - let URL change trigger state updates
+        setIsLoading(true);
         const path = basePath ?? '/media';
         const newUrl = folderId === null ? path : `${path}/${folderId}`;
         router.push(newUrl);
       } else {
-        // Modal mode: Preserve existing URL params (fm, page, limit, etc.)
+        // MODAL mode: Update URL with folderId and let state sync from URL
         setIsLoading(true);
-        const params = new URLSearchParams(window.location.search);
         
+        // Clear selections when navigating
+        setSelectedFiles([]);
+        setSelectedFolders([]);
+        
+        // Update URL with folderId parameter
+        const params = new URLSearchParams(window.location.search);
         if (folderId === null) {
           params.delete('folderId');
         } else {
-          params.set('folderId', folderId.toString());
+          params.set('folderId', String(folderId));
         }
+        // Reset to page 1 when navigating folders
+        params.set('page', '1');
         
-        const newUrl = params.toString() ? `?${params.toString()}` : '?';
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
         router.push(newUrl, { scroll: false });
       }
     },
-    [isInSelectionMode, mode, router, setCurrentFolder, setSelectedFolders, setSelectedFiles, basePath, setIsLoading]
+    [isInSelectionMode, mode, router, setSelectedFolders, setSelectedFiles, basePath, setIsLoading]
   );
 
   /**
@@ -234,8 +241,17 @@ export function useFileHandlers(state: FileState) {
   );
 
   /**
+   * Refreshes all data by reloading using the unified data loader
+   * @param silent - If true, refreshes in background without showing loading state
+   */
+  const refreshData = useCallback(async (silent = false) => {
+    await loadData(silent);
+  }, [loadData]);
+
+  /**
    * Uploads files to the current folder
    * Clears selection after successful upload
+   * Uses silent refresh to avoid showing loading state for instant feel
    * 
    * @param fileUploadInput - Array of file upload data
    */
@@ -243,7 +259,8 @@ export function useFileHandlers(state: FileState) {
     async (fileUploadInput: FileUploadInput[]) => {
       try {
         await provider.uploadFiles(fileUploadInput, currentFolder?.id ?? null);
-        await loadFiles();
+        // Refresh data silently in background (no loading skeleton)
+        await refreshData(true);
         setSelectedFiles([]);
         toast.success("Upload Successful", {
           description: `${fileUploadInput.length} file(s) uploaded successfully`,
@@ -256,12 +273,13 @@ export function useFileHandlers(state: FileState) {
         console.error("Upload failed:", error);
       }
     },
-    [currentFolder, provider, loadFiles, setSelectedFiles]
+    [currentFolder, provider, refreshData, setSelectedFiles]
   );
 
   /**
    * Creates a new folder in the current directory
    * Clears selection after successful creation
+   * Uses silent refresh for instant feel
    * 
    * @param name - Name of the folder to create
    */
@@ -269,7 +287,7 @@ export function useFileHandlers(state: FileState) {
     async (name: string) => {
       try {
         await provider.createFolder(name, currentFolder?.id ?? null);
-        await loadFolders();
+        await refreshData(true); // Silent background refresh
         setSelectedFiles([]);
         toast.success("Folder Created", {
           description: `Folder "${name}" created successfully`,
@@ -282,7 +300,7 @@ export function useFileHandlers(state: FileState) {
         console.error("Failed to create folder:", error);
       }
     },
-    [currentFolder, provider, loadFolders, setSelectedFiles]
+    [currentFolder, provider, refreshData, setSelectedFiles]
   );
 
   /**
@@ -306,7 +324,7 @@ export function useFileHandlers(state: FileState) {
             targetFolderId
           );
         }
-        await Promise.all([loadFiles(), loadFolders()]);
+        await refreshData(true); // Silent background refresh
         setSelectedFiles([]);
         setSelectedFolders([]);
         const totalMoved = selectedFiles.length + selectedFolders.length;
@@ -325,8 +343,7 @@ export function useFileHandlers(state: FileState) {
       selectedFiles,
       selectedFolders,
       provider,
-      loadFiles,
-      loadFolders,
+      refreshData,
       setSelectedFiles,
       setSelectedFolders,
     ]
@@ -341,7 +358,7 @@ export function useFileHandlers(state: FileState) {
     async (folderId: string | number, newName: string) => {
       try {
         await provider.renameFolder(folderId, newName);
-        await loadFolders();
+        await refreshData(true); // Silent background refresh
         toast.success("Folder Renamed", {
           description: `Folder renamed to "${newName}"`,
         });
@@ -353,7 +370,7 @@ export function useFileHandlers(state: FileState) {
         console.error("Failed to rename folder:", error);
       }
     },
-    [provider, loadFolders]
+    [provider, refreshData]
   );
 
   /**
@@ -365,7 +382,7 @@ export function useFileHandlers(state: FileState) {
     async (fileId: string | number, metadata: Partial<FileMetaData>) => {
       try {
         await provider.updateFileMetaData(fileId, metadata);
-        await loadFiles();
+        await refreshData(true); // Silent background refresh
       } catch (error) {
         const message = error instanceof Error ? error.message : "Failed to update metadata";
         toast.error("Update Failed", {
@@ -374,7 +391,7 @@ export function useFileHandlers(state: FileState) {
         console.error("Failed to update metadata:", error);
       }
     },
-    [provider, loadFiles]
+    [provider, refreshData]
   );
 
   /**
@@ -389,7 +406,7 @@ export function useFileHandlers(state: FileState) {
       if (selectedFolders.length > 0) {
         await provider.deleteFolders(selectedFolders.map((f) => f.id));
       }
-      await Promise.all([loadFiles(), loadFolders()]);
+      await refreshData(true); // Silent background refresh
       setSelectedFiles([]);
       setSelectedFolders([]);
       const totalDeleted = selectedFiles.length + selectedFolders.length;
@@ -407,18 +424,12 @@ export function useFileHandlers(state: FileState) {
     selectedFiles,
     selectedFolders,
     provider,
-    loadFiles,
-    loadFolders,
+    refreshData,
     setSelectedFiles,
     setSelectedFolders,
   ]);
 
-  /**
-   * Refreshes all data by reloading folders and files
-   */
-  const refreshData = useCallback(async () => {
-    await Promise.all([loadFolders(), loadFiles()]);
-  }, [loadFolders, loadFiles]);
+
 
   return {
     // Selection handlers

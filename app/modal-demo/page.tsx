@@ -5,28 +5,21 @@ import { Button } from "@/components/ui/button";
 import { MockProvider } from "@/providers/mock-provider";
 import { FileMetaData, SELECTION_MODE } from "@/types/file-manager";
 import { IFileManagerProvider } from "@/types/provider";
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 
-export default function ModalDemoPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+function ModalDemoContent() {
   const [provider] = useState<IFileManagerProvider>(() => new MockProvider());
   
-  // Read modal state from URL
-  const isOpen = searchParams.get('fm') === 'true';
+  // Modal state managed via React state (not URL)
+  const [isOpen, setIsOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<FileMetaData[]>([]);
 
   const handleOpen = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('fm', 'true');
-    router.push(`?${params.toString()}`);
+    setIsOpen(true);
   };
 
   const handleClose = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete('fm');
-    router.push(`?${params.toString()}`);
+    setIsOpen(false);
   };
 
   const handleFilesSelected = (files: FileMetaData[]) => {
@@ -75,5 +68,13 @@ export default function ModalDemoPage() {
         onFilesSelected={handleFilesSelected}
       />
     </div>
+  );
+}
+
+export default function ModalDemoPage() {
+  return (
+    <Suspense fallback={<div className="p-10">Loading...</div>}>
+      <ModalDemoContent />
+    </Suspense>
   );
 }

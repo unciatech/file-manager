@@ -1,6 +1,7 @@
 "use client";
 
-import { useFileHandlers, useFileState } from "@/hooks";
+import { useFileHandlers } from "@/hooks/use-file-handlers";
+import { useFileState } from "@/hooks/use-file-state";
 import { EntityId, FileManagerRootProps, FileMetaData, FileType, FolderId, Folder, PaginationInfo, Mode, SelectionMode, SELECTION_MODE, MODE } from "@/types/file-manager";
 import { FileUploadInput, IFileManagerProvider } from "@/types/provider";
 import { createContext, useContext, useMemo } from "react";
@@ -149,7 +150,6 @@ export function FileManagerProvider({
     setIsRenameFolderModalOpen: state.setIsRenameFolderModalOpen,
     setFileDetailsModalFile: state.setFileDetailsModalFile,
 
-    // Handlers
     // Handlers
     handleFileClick: handlers.handleFileClick,
     handleFolderClick: handlers.handleFolderClick,

@@ -10,7 +10,7 @@ export default function MediaPage() {
 
   return (
     <FileManager
-      allowedFileTypes={["images", "videos", "audios", "files"]}
+      allowedFileTypes={["audios", "videos", "images", "files"]}
       viewMode="grid"
       provider={provider}
     />
