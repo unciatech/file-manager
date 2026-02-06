@@ -27,6 +27,7 @@ interface FileManagerContextType {
   isMoveFileModalOpen: boolean;
   isRenameFolderModalOpen: boolean;
   fileDetailsModalFile: FileMetaData | null;
+  folderToRename: Folder | null;
 
 
   mode: Mode;
@@ -51,6 +52,7 @@ interface FileManagerContextType {
   setIsMoveFileModalOpen: (isOpen: boolean) => void;
   setIsRenameFolderModalOpen: (isOpen: boolean) => void;
   setFileDetailsModalFile: (file: FileMetaData | null) => void;
+  setFolderToRename: (folder: Folder | null) => void;
 
   // Handlers
   handleFileClick: (file: FileMetaData, event?: React.MouseEvent, isCheckboxClick?: boolean) => void;
@@ -132,6 +134,7 @@ export function FileManagerProvider({
     isMoveFileModalOpen: state.isMoveFileModalOpen,
     isRenameFolderModalOpen: state.isRenameFolderModalOpen,
     fileDetailsModalFile: state.fileDetailsModalFile,
+    folderToRename: state.folderToRename,
     mode: state.mode,
     selectionMode: state.selectionMode,
     allowedFileTypes,
@@ -149,6 +152,7 @@ export function FileManagerProvider({
     setSelectedFolders: state.setSelectedFolders,
     setIsRenameFolderModalOpen: state.setIsRenameFolderModalOpen,
     setFileDetailsModalFile: state.setFileDetailsModalFile,
+    setFolderToRename: state.setFolderToRename,
 
     // Handlers
     handleFileClick: handlers.handleFileClick,

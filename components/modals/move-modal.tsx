@@ -253,11 +253,20 @@ export function MoveModal() {
 
   return (
     <Dialog open={isMoveFileModalOpen} onOpenChange={handleOpenChange} >
-      <DialogContent className="p-0 max-w-3xl max-h-full md:max-h-[90vh] flex flex-col" variant="default" showCloseButton={false}>
+      <DialogContent className="p-0 max-w-3xl max-h-full m-auto md:max-h-[80vh] flex flex-col" variant="fullscreen" showCloseButton={false}>
         <DialogHeader className="pt-5 pb-3 m-0 border-b border-border">
           <DialogTitle className="px-6 text-base">
             <div className="flex w-full items-center justify-between gap-2">
-            <span>Move Items</span>
+            <span className="w-full text-left">
+              Move Items
+              <p className="text-blue-600 text-xs">
+                Moving {selectedFiles.length} file
+                {selectedFiles.length === 1 ? "" : "s"} and{" "}
+                {selectedFolders.length} folder
+                {selectedFolders.length === 1 ? "" : "s"}.
+              </p>
+              </span>
+
               <Button
                 variant="outline"
                 size="icon"
@@ -272,16 +281,9 @@ export function MoveModal() {
           </DialogTitle>
           <DialogDescription />
         </DialogHeader>
-        <ScrollArea className="text-sm h-full my-3 ps-6 pe-5 me-1">
-          <div className="space-y-4">
-            <p className="text-blue-600 text-xs">
-              Moving {selectedFiles.length} file
-              {selectedFiles.length === 1 ? "" : "s"} and{" "}
-              {selectedFolders.length} folder
-              {selectedFolders.length === 1 ? "" : "s"}.
-            </p>
-
-            <div>
+        <div className="text-sm my-3 px-6 flex-1 flex flex-col min-h-0">
+          <div className="space-y-4 flex flex-col flex-1 min-h-0">
+            <div className="flex flex-col flex-1 min-h-0">
               <label className="block mb-2 font-medium text-gray-900">
                 Select destination folder:
               </label>
@@ -296,7 +298,7 @@ export function MoveModal() {
                   ))}
                 </div>
               ) : (
-                <ul className="border border-gray-200 rounded-lg p-2 bg-white min-h-[200px] overflow-scroll">
+                <ul className="border border-gray-200 rounded-lg p-2 bg-white overflow-y-auto flex-1 min-h-0">
                   {rootFolders.length === 0 ? (
                     <li className="text-gray-500 text-center py-8">
                       No folders available
@@ -318,7 +320,7 @@ export function MoveModal() {
               )}
             </div>
           </div>
-        </ScrollArea>
+        </div>
         <DialogFooter className="px-6 py-4 border-t border-border w-full sm:justify-between justify-center items-center flex-col sm:flex-row gap-2 ">
           <DialogClose asChild>
             <Button type="button" variant="outline" radius="full" className='w-full md:w-auto'>

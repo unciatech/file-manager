@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFileManager } from "@/context/file-manager-context";
 import {
   Dialog,
@@ -17,33 +17,70 @@ export function CreateFolderModal() {
   const {
     isCreateFolderModalOpen,
     setIsCreateFolderModalOpen,
-    createFolder
+    isRenameFolderModalOpen,
+    setIsRenameFolderModalOpen,
+    createFolder,
+    renameFolder,
+    folderToRename,
+    setFolderToRename
   } = useFileManager();
 
   const [folderName, setFolderName] = useState("");
+  
+  // Determine if we're in rename mode
+  const isRenameMode = isRenameFolderModalOpen;
+  const isOpen = isCreateFolderModalOpen || isRenameFolderModalOpen;
+  
+  // Pre-fill the folder name when in rename mode
+  useEffect(() => {
+    if (isRenameFolderModalOpen && folderToRename) {
+      setFolderName(folderToRename.name);
+    } else if (!isCreateFolderModalOpen) {
+      setFolderName("");
+    }
+  }, [isRenameFolderModalOpen, isCreateFolderModalOpen, folderToRename]);
 
-  const handleCreate = () => {
+  const handleSubmit = async () => {
     if (folderName.trim() !== "") {
-      createFolder(folderName.trim());
-      setIsCreateFolderModalOpen(false);
+      if (isRenameMode && folderToRename) {
+        const folderId = folderToRename.id;
+        if (folderId !== null) {
+          await renameFolder(folderId, folderName.trim());
+        }
+        setIsRenameFolderModalOpen(false);
+        setFolderToRename(null); // Clear the folder being renamed
+      } else {
+        createFolder(folderName.trim());
+        setIsCreateFolderModalOpen(false);
+      }
       setFolderName("");
     }
   };
+  
+  const handleClose = () => {
+    if (isRenameMode) {
+      setIsRenameFolderModalOpen(false);
+      setFolderToRename(null); // Clear the folder being renamed
+    } else {
+      setIsCreateFolderModalOpen(false);
+    }
+    setFolderName("");
+  };
 
-  if (!isCreateFolderModalOpen) return null;
+  if (!isOpen) return null;
 
   return (
-    <Dialog open={isCreateFolderModalOpen} onOpenChange={setIsCreateFolderModalOpen}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="p-0" variant="default" showCloseButton={false}>
         <DialogHeader className="pt-5 pb-3 m-0 border-b border-border flex w-full justify-between">
           <DialogTitle className="px-6 text-base">
             <div className="flex w-full items-center justify-between gap-2">
-            <span>Create New Folder</span>
+            <span>{isRenameMode ? "Rename Folder" : "Create New Folder"}</span>
               <Button
                 variant="outline"
                 size="icon"
                 radius="full"
-                onClick={() => setIsCreateFolderModalOpen(false)}
+                onClick={handleClose}
                 className="border-gray-200 bg-white hover:text-red-600 hover:border-red-200 hover:bg-red-50"
               >
                 <CrossIcon className="size-5" />
@@ -58,22 +95,27 @@ export function CreateFolderModal() {
             id="folder-name"
             name="folder-name"
             value={folderName}
-
             onChange={(e) => setFolderName(e.target.value)}
             placeholder="Enter folder name"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && folderName.trim() !== "") {
+                handleSubmit();
+              }
+            }}
           />
         </div>
         <DialogFooter className="px-6 py-4 border-t border-border w-full sm:justify-between justify-center items-center flex-col sm:flex-row gap-2 ">
           <DialogClose asChild>
-            <Button type="button" variant="outline" onClick={() => setIsCreateFolderModalOpen(false)} radius="full" className='w-full md:w-auto'>
+            <Button type="button" variant="outline" onClick={handleClose} radius="full" className='w-full md:w-auto'>
               Cancel
             </Button>
           </DialogClose>
           <Button
           type="button" 
           disabled={folderName.trim() === ""}
-          onClick={handleCreate} radius="full" className='w-full md:w-auto'>
-            Create
+          onClick={handleSubmit} radius="full" className='w-full md:w-auto'>
+            {isRenameMode ? "Rename" : "Create"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { getFileSize } from '@/lib/file-size';
 import { formatDate } from '@/lib/format-utils';
-import { Icons } from '@/lib/file-utils';
+import { getFileComponents } from '@/components/grid/file-component-registry';
 
 interface FileModalProps {
   file: FileMetaData;
@@ -36,6 +36,9 @@ export function FileModal({ file, onClose, onSave, onDelete }: FileModalProps) {
   };
 
   const ext = file.ext?.replace('.', '') || 'file';
+  
+  // Resolve components from registry (same as grid view)
+  const { component: FilePreviewComponent } = getFileComponents(file);
 
   const previewSection = (
     <div className="flex flex-col h-full">
@@ -48,8 +51,8 @@ export function FileModal({ file, onClose, onSave, onDelete }: FileModalProps) {
 
       {/* File Icon Preview */}
       <div className="flex-1 flex flex-col items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-lg p-8">
-        <div className="mb-4">
-          <Icons type={ext} className="w-32 h-32" />
+        <div className="mb-4 w-32 h-32 flex items-center justify-center">
+          <FilePreviewComponent file={file} metaData={file.metaData} />
         </div>
         <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
           {ext} File
