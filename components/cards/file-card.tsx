@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { Trash2, Move, Info } from "lucide-react";
+import { Trash2, Pencil, CheckCircle, Move } from "lucide-react";
 import { FileMetaData, MODE, Mode, SELECTION_MODE, SelectionMode } from "../../types/file-manager";
 
 import { Checkbox } from "../ui/checkbox";
@@ -17,6 +17,8 @@ import {
 
 import { getFileSize } from "../../lib/file-size";
 import { getFileComponents } from "../grid/file-component-registry";
+import { TrashIcon } from "../icons";
+import EditIcon from "../icons/edit";
 
 
 interface FileCardProps {
@@ -29,8 +31,8 @@ interface FileCardProps {
   ) => void;
   onRightClick?: (file: FileMetaData, event: React.MouseEvent) => void;
   onDelete: (fileId: string | number) => void;
+  onEdit: (file: FileMetaData) => void;
   onMove: (file: FileMetaData) => void;
-  onViewMetadata?: (file: FileMetaData) => void;
   selectionMode: SelectionMode;
   showCheckbox?: boolean;
   mode?: Mode;
@@ -42,8 +44,8 @@ export function FileCard({
   isSelected,
   onSelect,
   onDelete,
+  onEdit,
   onMove,
-  onViewMetadata,
   selectionMode,
   showCheckbox = false,
   mode = MODE.PAGE,
@@ -57,14 +59,19 @@ export function FileCard({
     }
   };
 
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit(file);
+  };
+
+  const handleSelectFile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect(file, undefined, true);
+  };
+
   const handleMove = (e: React.MouseEvent) => {
     e.stopPropagation();
     onMove(file);
-  };
-
-  const handleViewMetadata = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onViewMetadata?.(file);
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -95,7 +102,7 @@ export function FileCard({
              {/* Icon Container: Gray background, rounded, subtle shadow */}
              {/* When selected, often Finder darkens the icon slightly or adds a border. keeping it simple clean. */}
             <div className={`
-                relative w-full aspect-square flex items-center justify-center mb-1 overflow-hidden rounded-2xl hover:bg-gray-200/60
+                relative w-full aspect-square flex items-center justify-center mb-1 overflow-hidden rounded-2xl 
                 ${isSelected ? "bg-gray-200/60" : "group-hover:ring-black/10 transition-shadow"}
             `}>
                 <div className="w-[75%] h-[75%] flex items-center justify-center">
@@ -138,19 +145,23 @@ export function FileCard({
       </ContextMenuTrigger>
       
       {!isInSelectionMode && mode !== "modal" && (
-        <ContextMenuContent className="w-56 rounded-xl shadow-xl bg-white/95 backdrop-blur-xl border-gray-200">
-          <ContextMenuItem onClick={handleViewMetadata} className="text-sm font-medium">
-            <Info className="size-4 mr-2" />
-            Get Info
+        <ContextMenuContent className="w-56 rounded-2xl shadow-xl bg-white/50 backdrop-blur-2xl border-gray-200">
+          <ContextMenuItem onClick={handleEdit} className="text-sm font-medium rounded-t-xl">
+            <EditIcon className="size-6 " />
+            Edit
+          </ContextMenuItem>
+          <ContextMenuItem onClick={handleSelectFile} className="text-sm font-medium ">
+            <CheckCircle className="size-4 mr-2" />
+            Select File
           </ContextMenuItem>
           <ContextMenuItem onClick={handleMove} className="text-sm font-medium">
             <Move className="size-4 mr-2" />
             Move to...
           </ContextMenuItem>
           <ContextMenuSeparator className="bg-gray-200" />
-          <ContextMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-700 focus:bg-red-50 text-sm font-medium">
-            <Trash2 className="size-4 mr-2" />
-            Move to Trash
+          <ContextMenuItem onClick={handleDelete} className="text-red-600 rounded-b-xl focus:text-red-700 focus:bg-red-50 text-sm font-medium">
+            <TrashIcon className="size-5 mr-2 text-red-600" />
+            Delete
           </ContextMenuItem>
         </ContextMenuContent>
       )}

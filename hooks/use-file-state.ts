@@ -231,6 +231,7 @@ export function useFileState(options: FileStateOptions) {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isMoveFileModalOpen, setIsMoveFileModalOpen] = useState(false);
   const [isRenameFolderModalOpen, setIsRenameFolderModalOpen] = useState(false);
+  const [folderToRename, setFolderToRename] = useState<Folder | null>(null);
   
   // File Details Modal State
   const [fileDetailsModalFile, setFileDetailsModalFile] = useState<FileMetaData | null>(null);
@@ -382,6 +383,7 @@ export function useFileState(options: FileStateOptions) {
     isMoveFileModalOpen,
     isRenameFolderModalOpen,
     fileDetailsModalFile,
+    folderToRename,
 
     // Setters
     setFiles,
@@ -398,6 +400,7 @@ export function useFileState(options: FileStateOptions) {
     setIsMoveFileModalOpen,
     setIsRenameFolderModalOpen,
     setFileDetailsModalFile,
+    setFolderToRename,
 
     // Loaders
     loadFolders,

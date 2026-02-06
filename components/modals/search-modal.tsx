@@ -16,7 +16,7 @@ import { toast } from "sonner";
 
 import { FileMetaData, Folder } from "@/types/file-manager";
 import { middleTruncate } from "@/lib/truncate-name";
-import {FolderIcon, SearchIcon} from "../icons";
+import { FolderIcon, SearchIcon } from "../icons";
 import { getIconType, Icons } from "@/lib/file-utils";
 
 export default function SearchDialog() {
@@ -28,18 +28,6 @@ export default function SearchDialog() {
 
   // Debounce search query to reduce API calls
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
-
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setIsSearchModalOpen(!isSearchModalOpen);
-      }
-    };
-
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, [isSearchModalOpen, setIsSearchModalOpen]);
 
   const doSearch = useCallback(async (q: string) => {
     setLoading(true);
@@ -75,7 +63,7 @@ export default function SearchDialog() {
   const handleInputChange = (value: string) => {
     setSearchQuery(value);
   };
-  
+
   const handleModalOpenChange = (open: boolean) => {
     setIsSearchModalOpen(open);
     if (!open) {
@@ -89,11 +77,11 @@ export default function SearchDialog() {
   return (
     <>
       <Button
-      variant="outline"
-      size="icon"
-      radius="full"
-      className="border-gray-200 bg-white"
-      onClick={() => setIsSearchModalOpen(true)}>
+        variant="outline"
+        size="icon"
+        radius="full"
+        className="border-gray-200 bg-white"
+        onClick={() => setIsSearchModalOpen(true)}>
         <SearchIcon className="size-4 text-gray-700" />
         <span className="hidden">Search</span>
       </Button>
@@ -105,8 +93,23 @@ export default function SearchDialog() {
         />
         <CommandList>
           {loading && <CommandEmpty>Searching...</CommandEmpty>}
+          {!loading && fileResults.length === 0 && folderResults.length === 0 && !searchQuery && (
+            <CommandEmpty>
+              <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                <SearchIcon className="size-12 text-gray-300 mb-3" />
+                <p className="text-sm font-medium text-gray-900 mb-1">Search your files and folders</p>
+                <p className="text-xs text-gray-500">Start typing to find what you're looking for</p>
+              </div>
+            </CommandEmpty>
+          )}
           {!loading && fileResults.length === 0 && folderResults.length === 0 && searchQuery && (
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>
+              <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                <SearchIcon className="size-12 text-gray-300 mb-3" />
+                <p className="text-sm font-medium text-gray-900 mb-1">No results found</p>
+                <p className="text-xs text-gray-500">Try searching with different keywords</p>
+              </div>
+            </CommandEmpty>
           )}
           {folderResults.length > 0 && (
             <CommandGroup heading="Folders">
@@ -120,7 +123,7 @@ export default function SearchDialog() {
                   }}
                 >
                   <FolderIcon className="size-4  mr-2 shrink-0" strokeWidth={1.5} />
-                  <span>{ middleTruncate(folder.name, 60)}</span>
+                  <span>{middleTruncate(folder.name, 60)}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -128,16 +131,10 @@ export default function SearchDialog() {
           {fileResults.length > 0 && (
             <CommandGroup heading="Files">
               {fileResults.map((file) => (
-                <CommandItem 
+                <CommandItem
                   key={file.id}
                   onSelect={() => {
                     handleClearSelection();
-                    setIsSearchModalOpen(false);
-                    // Navigate to file's folder first, then open file details
-                    if (file.folderId) {
-                      handleFolderClick({ id: file.folderId } as Folder);
-                    }
-                    // Open file details modal
                     setFileDetailsModalFile(file);
                   }}
                 >

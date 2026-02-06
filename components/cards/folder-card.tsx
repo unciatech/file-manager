@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { Trash2, Move, Info } from "lucide-react";
+import { Trash2, Pencil, Move } from "lucide-react";
 import { Folder, FolderId, Mode, SELECTION_MODE, SelectionMode } from "../../types/file-manager";
 
 import { Checkbox } from "../ui/checkbox";
@@ -15,6 +15,8 @@ import {
 } from "../ui/context-menu";
 
 import FolderIcon from "../icons/folder";
+import { TrashIcon } from "../icons";
+import EditIcon from "../icons/edit";
 
 
 interface FolderCardProps {
@@ -27,8 +29,8 @@ interface FolderCardProps {
   ) => void;
   onRightClick?: (folder: Folder, event: React.MouseEvent) => void;
   onDelete: (folderId: FolderId) => void;
+  onRename: (folder: Folder) => void;
   onMove: (folder: Folder) => void;
-  onViewMetadata?: (folder: Folder) => void;
   selectionMode: SelectionMode;
   showCheckbox?: boolean;
   mode?: Mode;
@@ -41,8 +43,8 @@ export function FolderCard({
   onSelect,
   onRightClick,
   onDelete,
+  onRename,
   onMove,
-  onViewMetadata,
   selectionMode,
   showCheckbox,
   mode,
@@ -52,19 +54,19 @@ export function FolderCard({
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm(`Are you sure you want to delete "${folder.name}"?`)) {
+    if (confirm(`Are you sure you want to delete "${folder.name}"?\n\n⚠️ Warning: This will also delete all ${folder.fileCount} file(s) inside this folder.`)) {
       onDelete(folder.id);
     }
+  };
+
+  const handleRename = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onRename(folder);
   };
 
   const handleMove = (e: React.MouseEvent) => {
     e.stopPropagation();
     onMove(folder);
-  };
-
-  const handleViewMetadata = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onViewMetadata?.(folder);
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -129,19 +131,19 @@ export function FolderCard({
       </ContextMenuTrigger>
       {/* Action Menu - Hidden when in selection mode or in modal mode */}
       {!isInSelectionMode && mode !== "modal" && (
-        <ContextMenuContent className="w-56 rounded-xl shadow-xl bg-white/95 backdrop-blur-xl border-gray-200">
-          <ContextMenuItem onClick={handleViewMetadata} className="text-sm font-medium">
-            <Info className="size-4 mr-2" />
-            Get Info
+        <ContextMenuContent className="w-56 rounded-2xl shadow-xl bg-white/50 backdrop-blur-2xl border-gray-200">
+          <ContextMenuItem onClick={handleRename} className="text-sm font-medium rounded-t-xl">
+            <EditIcon className="size-6 " />
+            Rename
           </ContextMenuItem>
-          <ContextMenuItem onClick={handleMove} className="text-sm font-medium">
-            <Move className="size-4 mr-2" />
+          <ContextMenuItem onClick={handleMove} className="text-sm font-medium ">
+            <Move className="size-5 mr-1" />
             Move to...
           </ContextMenuItem>
           <ContextMenuSeparator className="bg-gray-200" />
-          <ContextMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-700 focus:bg-red-50 text-sm font-medium">
-            <Trash2 className="size-4 mr-2" />
-            Move to Trash
+          <ContextMenuItem onClick={handleDelete} className="text-red-600 rounded-b-xl focus:text-red-700 focus:bg-red-50 text-sm font-medium">
+            <TrashIcon className="size-5 mr-1 text-red-600" />
+            Delete
           </ContextMenuItem>
         </ContextMenuContent>
       )}

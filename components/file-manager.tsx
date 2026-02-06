@@ -7,11 +7,14 @@ import { HeaderNavigation } from "./layout/header-navigation";
 import { ResponsiveHeaderActions } from "./layout/header-actions-responsive";
 import { UnifiedGrid } from "./grid/unified-grid";
 import { FileManagerErrorBoundary } from "./error-boundary";
+import { KeyboardShortcuts } from "./keyboard-shortcuts";
 
 export function FileManager(props: FileManagerPageProps) {
   return (
     <FileManagerErrorBoundary>
       <FileManagerComposition.Page {...props}>
+        {/* Keyboard shortcuts - must be inside provider */}
+        <KeyboardShortcuts />
         <div className="flex h-full relative pb-12 overflow-hidden">
           {/* Main Content */}
           <div className="flex-1 flex w-full flex-col">
