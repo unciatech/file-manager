@@ -153,6 +153,7 @@ export function ImageModal({ file, onClose, onSave, onDelete }: ImageModalProps)
       </Button>
     </div>
   );
+  
 
   return (
     <DetailsLayout

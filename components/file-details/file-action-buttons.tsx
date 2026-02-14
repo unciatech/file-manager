@@ -8,6 +8,7 @@ import { DownloadIcon, FullscreenIcon, LinkIcon, TrashIcon } from '../icons';
 import { useState } from 'react';
 import { useFileManager } from '@/context/file-manager-context';
 import CheckIcon from '../icons/check';
+import { middleTruncate } from '@/lib/truncate-name';
 
 // Individual file action button components - composable and reusable
 
@@ -32,7 +33,7 @@ export function FileDeleteButton({ file }: FileButtonProps) {
       setFileDetailsModalFile(null);
       
       toast.success('File Deleted', {
-        description: `${file.name} has been deleted`,
+        description: `${middleTruncate(file.name, 20)} has been deleted`,
       });
     } catch (error) {
       toast.error('Delete failed');
@@ -71,7 +72,7 @@ export function FileDownloadButton({ file }: FileButtonProps) {
       link.download = file.name;
       link.click();
       toast.success('Download Started', {
-        description: `Downloading ${file.name}`,
+        description: `Downloading ${middleTruncate(file.name, 20)}`,
       });
     } catch (error) {
       toast.error('Download failed');

@@ -31,7 +31,7 @@ import { FileUploadInput } from '@/types/provider';
 import UploadCloudIcon from '../icons/upload-cloud';
 import { CrossIcon } from '../icons';
 import { getFileComponents } from '../grid/file-component-registry';
-
+import { KbdGroup, Kbd } from "../ui/kbd";
 
 
 export function UploadModal() {
@@ -111,7 +111,7 @@ export function UploadModal() {
   const handleUpload = () => {
     // Filter only completed files
     const completedFiles = uploadItems.filter((item) => item.status === 'completed');
-    
+
     if (completedFiles.length > 0) {
       // Convert to FileUploadInput format
       const fileInputs: FileUploadInput[] = completedFiles.map((item) => ({
@@ -164,7 +164,12 @@ export function UploadModal() {
         <DialogHeader className="pt-5 pb-3 m-0 border-b border-border">
           <DialogTitle className="px-6 text-base">
             <div className="flex w-full items-center justify-between gap-2">
-            <span>Upload Files</span>
+              <span>
+                Upload Files
+                <KbdGroup className="ml-2">
+                  <Kbd><span className="text-lg">⌘</span> + U</Kbd>
+                </KbdGroup>
+              </span>
               <Button
                 variant="outline"
                 size="icon"
@@ -172,10 +177,10 @@ export function UploadModal() {
                 onClick={() => setIsUploadModalOpen(false)}
                 className="border-gray-200 bg-white hover:text-red-600 hover:border-red-200 hover:bg-red-50"
               >
-            <CrossIcon className="size-5" />
-            <span className="hidden">Close</span>
-          </Button>
-        </div>
+                <CrossIcon className="size-5" />
+                <span className="hidden">Close</span>
+              </Button>
+            </div>
           </DialogTitle>
           <DialogDescription />
         </DialogHeader>
@@ -203,7 +208,7 @@ export function UploadModal() {
                   isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/25',
                 )}
               >
-                <UploadCloudIcon className='mb-3 text-zinc-400 dark:text-zinc-500'/>
+                <UploadCloudIcon className='mb-3 text-zinc-400 dark:text-zinc-500' />
               </div>
 
               <div className="space-y-2">
