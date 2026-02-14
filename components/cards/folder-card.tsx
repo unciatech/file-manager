@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { Trash2, Pencil, Move } from "lucide-react";
+import { Trash2, Pencil, Move, MoreVertical, CheckCircle } from "lucide-react";
 import { Folder, FolderId, Mode, SELECTION_MODE, SelectionMode } from "../../types/file-manager";
 
 import { Checkbox } from "../ui/checkbox";
@@ -13,10 +13,18 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "../ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 import FolderIcon from "../icons/folder";
 import { TrashIcon } from "../icons";
 import EditIcon from "../icons/edit";
+import { Button } from "../ui/button";
 
 
 interface FolderCardProps {
@@ -69,6 +77,11 @@ export function FolderCard({
     onMove(folder);
   };
 
+  const handleSelectFolder = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect(folder, undefined, true);
+  };
+
   const handleClick = (e: React.MouseEvent) => {
     onSelect(folder, e, false); // false = not checkbox click
   };
@@ -110,6 +123,41 @@ export function FolderCard({
                 />
               </div>
             )}
+
+            {/* Three-dot menu for mobile/tablet - only visible when not in selection mode and not in modal mode */}
+            {!isInSelectionMode && mode !== "modal" && (
+              <div className="absolute top-0 right-0 z-10 md:hidden" onClick={(e) => e.stopPropagation()}>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      radius="full" className="focus-visible:ring-0 focus-visible:ring-offset-0">
+                      <MoreVertical className="size-4 text-gray-700" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 rounded-2xl shadow-xl bg-white/50 backdrop-blur-2xl border-gray-200">
+                    <DropdownMenuItem onClick={handleRename} className="text-sm font-medium rounded-t-xl">
+                      <EditIcon className="size-6" />
+                      Rename
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSelectFolder} className="text-sm font-medium">
+                      <CheckCircle className="size-4 mr-2" />
+                      Select Folder
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleMove} className="text-sm font-medium">
+                      <Move className="size-5 mr-1" />
+                      Move to...
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-gray-200" />
+                    <DropdownMenuItem onClick={handleDelete} className="text-red-600 rounded-b-xl focus:text-red-700 focus:bg-red-50 text-sm font-medium">
+                      <TrashIcon className="size-5 mr-1 text-red-600" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
           </div>
 
           {/* Text Label: Selection highlights background in blue */}
@@ -135,6 +183,10 @@ export function FolderCard({
           <ContextMenuItem onClick={handleRename} className="text-sm font-medium rounded-t-xl">
             <EditIcon className="size-6 " />
             Rename
+          </ContextMenuItem>
+          <ContextMenuItem onClick={handleSelectFolder} className="text-sm font-medium">
+            <CheckCircle className="size-4 mr-2" />
+            Select Folder
           </ContextMenuItem>
           <ContextMenuItem onClick={handleMove} className="text-sm font-medium ">
             <Move className="size-5 mr-1" />

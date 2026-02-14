@@ -11,18 +11,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "../ui/button";
-import { FolderId, Folder } from "@/types/file-manager";
-import { ChevronRight } from 'lucide-react';
+import { FolderId, Folder, PaginationInfo } from "@/types/file-manager";
+import { ChevronRight, Loader2 } from 'lucide-react';
 import FolderIcon from "../icons/folder";
 import { middleTruncate } from "@/lib/truncate-name";
 import { CrossIcon } from "../icons";
+import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 
 type FolderTreeState = {
   folders: Map<FolderId, Folder[]>; // parentId -> children
-  loading: Set<FolderId>;
+  // IDs currently fetching data (including null for root)
+  // We can track which page is loading if needed, but simple boolean per folderId is often enough
+  loading: Set<FolderId>; 
   loaded: Set<FolderId>;
+  // Store pagination info per folderId (parentId)
+  pagination: Map<FolderId, PaginationInfo>;
 };
 
 function FolderTreeItem({
@@ -36,7 +40,7 @@ function FolderTreeItem({
   folder: Folder;
   selectedFolderId: FolderId;
   onSelect: (folderId: FolderId) => void;
-  onLoadChildren: (folderId: FolderId) => Promise<void>;
+  onLoadChildren: (folderId: FolderId, page?: number) => Promise<void>;
   disabledFolderIds?: FolderId[];
   treeState: FolderTreeState;
 }) {
@@ -47,6 +51,23 @@ function FolderTreeItem({
   const isLoading = treeState.loading.has(folder.id);
   const isLoaded = treeState.loaded.has(folder.id);
   const children = treeState.folders.get(folder.id) || [];
+  const pagination = treeState.pagination.get(folder.id);
+
+  // Intersection Observer for infinite scroll
+  const { ref: observerRef, entry } = useIntersectionObserver({
+    threshold: 0.1,
+    rootMargin: '100px',
+  });
+
+  const hasMore = pagination && pagination.currentPage < pagination.totalPages;
+
+  useEffect(() => {
+    if (isOpen && entry?.isIntersecting && hasMore && !isLoading) {
+      const nextPage = (pagination?.currentPage || 1) + 1;
+      onLoadChildren(folder.id, nextPage);
+    }
+  }, [entry?.isIntersecting, hasMore, isLoading, isOpen, pagination, folder.id, onLoadChildren]);
+
 
   const handleToggle = async () => {
     if (!hasChildren) return;
@@ -56,7 +77,7 @@ function FolderTreeItem({
 
     // Load children if opening and not yet loaded
     if (newIsOpen && !isLoaded && !isLoading) {
-      await onLoadChildren(folder.id);
+      await onLoadChildren(folder.id, 1);
     }
   };
 
@@ -101,15 +122,7 @@ function FolderTreeItem({
 
       {isOpen && (
         <ul className="pl-6">
-          {isLoading ? (
-            <li className="py-1">
-              <div className="flex items-center gap-1.5 px-2">
-                <div className="size-5 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
-                <span className="text-sm text-gray-500">Loading...</span>
-              </div>
-            </li>
-          ) : (
-            children.map((childFolder) => (
+          {children.map((childFolder) => (
               <FolderTreeItem
                 key={childFolder.id}
                 folder={childFolder}
@@ -119,8 +132,23 @@ function FolderTreeItem({
                 disabledFolderIds={disabledFolderIds}
                 treeState={treeState}
               />
-            ))
-          )}
+            ))}
+            
+            {/* Loading Indicator / Sentinel */}
+            {(isLoading || hasMore) && (
+              <li ref={observerRef} className="py-2 flex justify-center">
+                 <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+              </li>
+            )}
+
+             {/* Initial loading state specifically when no children loaded yet */}
+             {isLoading && children.length === 0 && (
+                 <li className="py-1">
+                  <div className="flex items-center gap-1.5 px-2">
+                    <span className="text-sm text-gray-500">Loading...</span>
+                  </div>
+                </li>
+             )}
         </ul>
       )}
     </li>
@@ -141,10 +169,19 @@ export function MoveModal() {
   const [treeState, setTreeState] = useState<FolderTreeState>({
     folders: new Map(),
     loading: new Set(),
-    loaded: new Set()
+    loaded: new Set(),
+    pagination: new Map()
   });
-  const [isLoadingRoot, setIsLoadingRoot] = useState(false);
-  const [hasLoadedRoot, setHasLoadedRoot] = useState(false);
+  
+  // Intersection Observer for Root list infinite scroll
+  const { ref: rootObserverRef, entry: rootEntry } = useIntersectionObserver({
+    threshold: 0.1,
+    rootMargin: '100px',
+  });
+
+  const rootPagination = treeState.pagination.get(null);
+  const rootHasMore = rootPagination && rootPagination.currentPage < rootPagination.totalPages;
+  const isRootLoading = treeState.loading.has(null);
 
   // Get list of folder IDs that should be disabled (can't move into themselves or their children)
   const disabledFolderIds = selectedFolders.map(f => f.id);
@@ -154,31 +191,24 @@ export function MoveModal() {
 
   // Load root folders when modal opens
   useEffect(() => {
-    if (isMoveFileModalOpen && !hasLoadedRoot && !isLoadingRoot) {
-      loadRootFolders();
+    if (isMoveFileModalOpen && !treeState.loaded.has(null) && !treeState.loading.has(null)) {
+      loadFolders(null, 1);
     }
   }, [isMoveFileModalOpen]);
 
-  const loadRootFolders = async () => {
-    if (hasLoadedRoot) return;
-
-    setIsLoadingRoot(true);
-    try {
-      const foldersResult = await provider.getFolders(null);
-      setTreeState(prev => ({
-        ...prev,
-        folders: new Map(prev.folders).set(null, foldersResult.folders)
-      }));
-      setHasLoadedRoot(true);
-    } catch (error) {
-      console.error('Failed to load root folders:', error);
-    } finally {
-      setIsLoadingRoot(false);
+   // Trigger load more for root
+   useEffect(() => {
+    if (isMoveFileModalOpen && rootEntry?.isIntersecting && rootHasMore && !isRootLoading) {
+        const nextPage = (rootPagination?.currentPage || 1) + 1;
+        loadFolders(null, nextPage);
     }
-  };
+  }, [rootEntry?.isIntersecting, rootHasMore, isRootLoading, rootPagination, isMoveFileModalOpen]);
 
-  // Load children for a specific folder
-  const loadChildren = async (folderId: FolderId) => {
+
+  const loadFolders = async (folderId: FolderId, page: number = 1) => {
+    // Prevent duplicate loading
+    if (treeState.loading.has(folderId)) return;
+
     // Mark as loading
     setTreeState(prev => ({
       ...prev,
@@ -186,7 +216,8 @@ export function MoveModal() {
     }));
 
     try {
-      const childrenResult = await provider.getFolders(folderId);
+      // Assuming 20 items per page for the modal list to be performant but substantial
+      const result = await provider.getFolders(folderId, page, 20);
 
       setTreeState(prev => {
         const newLoading = new Set(prev.loading);
@@ -196,16 +227,27 @@ export function MoveModal() {
         newLoaded.add(folderId);
 
         const newFolders = new Map(prev.folders);
-        newFolders.set(folderId, childrenResult.folders);
+        const existingFolders = newFolders.get(folderId) || [];
+        
+        // Append if page > 1, otherwise replace (shouldn't really happen with this logic but safer)
+        if (page > 1) {
+            newFolders.set(folderId, [...existingFolders, ...result.folders]);
+        } else {
+            newFolders.set(folderId, result.folders);
+        }
+
+        const newPagination = new Map(prev.pagination);
+        newPagination.set(folderId, result.pagination);
 
         return {
           folders: newFolders,
           loading: newLoading,
-          loaded: newLoaded
+          loaded: newLoaded,
+          pagination: newPagination
         };
       });
     } catch (error) {
-      console.error('Failed to load folder children:', error);
+      console.error(`Failed to load folders for ${folderId}:`, error);
 
       // Reset loading state on error
       setTreeState(prev => {
@@ -225,11 +267,11 @@ export function MoveModal() {
       bulkMove(targetFolderId);
       setIsMoveFileModalOpen(false);
       setTargetFolderId(null);
-      setHasLoadedRoot(false);
       setTreeState({
         folders: new Map(),
         loading: new Set(),
-        loaded: new Set()
+        loaded: new Set(),
+        pagination: new Map()
       });
     }
   };
@@ -237,14 +279,14 @@ export function MoveModal() {
   const handleOpenChange = (open: boolean) => {
     setIsMoveFileModalOpen(open);
     if (open) {
-      loadRootFolders();
+      loadFolders(null, 1);
     } else {
       setTargetFolderId(null);
-      setHasLoadedRoot(false);
       setTreeState({
         folders: new Map(),
         loading: new Set(),
-        loaded: new Set()
+        loaded: new Set(),
+        pagination: new Map()
       });
     }
   };
@@ -288,36 +330,33 @@ export function MoveModal() {
                 Select destination folder:
               </label>
 
-              {isLoadingRoot ? (
-                <div className="space-y-2 py-2">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center gap-2 px-2 py-1">
-                      <div className="size-5 bg-gray-200 rounded animate-pulse" />
-                      <div className="h-5 bg-gray-200 rounded w-32 animate-pulse" />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <ul className="border border-gray-200 rounded-lg p-2 bg-white overflow-y-auto flex-1 min-h-0">
-                  {rootFolders.length === 0 ? (
+              {/* Root List */}
+               <ul className="border border-gray-200 rounded-lg p-2 bg-white overflow-y-auto flex-1 min-h-0">
+                  {rootFolders.length === 0 && !isRootLoading ? (
                     <li className="text-gray-500 text-center py-8">
                       No folders available
                     </li>
                   ) : (
-                    rootFolders.map((folder) => (
+                    <>
+                    {rootFolders.map((folder) => (
                       <FolderTreeItem
                         key={folder.id}
                         folder={folder}
                         selectedFolderId={targetFolderId}
                         onSelect={setTargetFolderId}
-                        onLoadChildren={loadChildren}
+                        onLoadChildren={loadFolders}
                         disabledFolderIds={disabledFolderIds}
                         treeState={treeState}
                       />
-                    ))
+                    ))}
+                    {(isRootLoading || rootHasMore) && (
+                         <li ref={rootObserverRef} className="py-2 flex justify-center">
+                            <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                        </li>
+                    )}
+                    </>
                   )}
                 </ul>
-              )}
             </div>
           </div>
         </div>

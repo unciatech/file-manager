@@ -4,7 +4,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -12,6 +11,7 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { CrossIcon } from "../icons";
+import { KbdGroup, Kbd } from "../ui/kbd";
 
 export function CreateFolderModal() {
   const {
@@ -26,11 +26,11 @@ export function CreateFolderModal() {
   } = useFileManager();
 
   const [folderName, setFolderName] = useState("");
-  
+
   // Determine if we're in rename mode
   const isRenameMode = isRenameFolderModalOpen;
   const isOpen = isCreateFolderModalOpen || isRenameFolderModalOpen;
-  
+
   // Pre-fill the folder name when in rename mode
   useEffect(() => {
     if (isRenameFolderModalOpen && folderToRename) {
@@ -56,7 +56,7 @@ export function CreateFolderModal() {
       setFolderName("");
     }
   };
-  
+
   const handleClose = () => {
     if (isRenameMode) {
       setIsRenameFolderModalOpen(false);
@@ -71,11 +71,17 @@ export function CreateFolderModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="p-0" variant="default" showCloseButton={false}>
+      <DialogContent className="p-0 max-w-xl m-auto min-h-fit max-h-[80vh] flex flex-col" variant="fullscreen" showCloseButton={false}>
         <DialogHeader className="pt-5 pb-3 m-0 border-b border-border flex w-full justify-between">
           <DialogTitle className="px-6 text-base">
             <div className="flex w-full items-center justify-between gap-2">
-            <span>{isRenameMode ? "Rename Folder" : "Create New Folder"}</span>
+              <span>{isRenameMode ? "Rename Folder" : "Create New Folder"}
+
+                {!isRenameMode && <span className="ml-4"><KbdGroup>
+                  <Kbd><span className="text-lg">⌘</span> + F</Kbd>
+                </KbdGroup></span>}
+              </span>
+              
               <Button
                 variant="outline"
                 size="icon"
@@ -112,9 +118,9 @@ export function CreateFolderModal() {
             </Button>
           </DialogClose>
           <Button
-          type="button" 
-          disabled={folderName.trim() === ""}
-          onClick={handleSubmit} radius="full" className='w-full md:w-auto'>
+            type="button"
+            disabled={folderName.trim() === ""}
+            onClick={handleSubmit} radius="full" className='w-full md:w-auto'>
             {isRenameMode ? "Rename" : "Create"}
           </Button>
         </DialogFooter>
