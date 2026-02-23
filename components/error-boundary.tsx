@@ -2,6 +2,7 @@
 
 import React, { Component, ReactNode } from 'react';
 import { Button } from './ui/button';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -40,10 +41,9 @@ export class FileManagerErrorBoundary extends Component<ErrorBoundaryProps, Erro
   }
 
   handleReset = (): void => {
-    this.setState({
-      hasError: false,
-      error: null,
-    });
+    // A hard reload is the safest way to clear corrupted React state
+    // for an application-level failure boundary.
+    window.location.reload();
   };
 
   render(): ReactNode {
@@ -54,26 +54,32 @@ export class FileManagerErrorBoundary extends Component<ErrorBoundaryProps, Erro
       }
 
       return (
-        <div className="flex items-center justify-center min-h-[400px] p-8">
-          <div className="text-center max-w-md">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+        <div className="flex items-center justify-center min-h-[400px] p-8 w-full h-full bg-slate-50/50 rounded-lg border border-dashed border-slate-200">
+          <div className="text-center max-w-md flex flex-col items-center">
+            <div className="bg-red-100 p-3 rounded-full mb-4">
+              <AlertCircle className="size-8 text-red-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-slate-900 mb-2">
               Something went wrong
             </h2>
-            <p className="text-gray-600 mb-6">
-              An error occurred in the file manager. Please try again.
+            <p className="text-sm text-slate-500 mb-6">
+              The file manager encountered an unexpected error. Refreshing the page usually resolves this issue.
             </p>
             {this.state.error && (
-              <details className="mb-6 text-left">
-                <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
-                  Error details
+              <details className="mb-6 text-left w-full border border-slate-200 rounded-lg overflow-hidden flex-col group">
+                <summary className="cursor-pointer text-xs font-mono bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 transition-colors">
+                  View Technical Details
                 </summary>
-                <pre className="mt-2 p-4 bg-gray-100 rounded text-xs overflow-auto">
-                  {this.state.error.toString()}
-                </pre>
+                <div className="p-3 bg-white">
+                  <pre className="text-[10px] text-slate-600 font-mono whitespace-pre-wrap word-break-all max-h-40 overflow-auto">
+                    {this.state.error.toString()}
+                  </pre>
+                </div>
               </details>
             )}
-            <Button onClick={this.handleReset} radius="full">
-              Try Again
+            <Button onClick={this.handleReset} radius="full" className="gap-2">
+              <RefreshCw className="size-4" />
+              Reload Application
             </Button>
           </div>
         </div>

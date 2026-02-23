@@ -38,7 +38,7 @@ function FolderTreeItem({
   treeState
 }: {
   folder: Folder;
-  selectedFolderId: FolderId;
+  selectedFolderId: FolderId | undefined;
   onSelect: (folderId: FolderId) => void;
   onLoadChildren: (folderId: FolderId, page?: number) => Promise<void>;
   disabledFolderIds?: FolderId[];
@@ -168,7 +168,7 @@ export function MoveModal() {
     provider
   } = useFileManager();
 
-  const [targetFolderId, setTargetFolderId] = useState<FolderId>(null);
+  const [targetFolderId, setTargetFolderId] = useState<FolderId | undefined>(undefined);
   const [treeState, setTreeState] = useState<FolderTreeState>({
     folders: new Map(),
     loading: new Set(),
@@ -266,10 +266,10 @@ export function MoveModal() {
   };
 
   const handleMove = () => {
-    if (targetFolderId) {
+    if (targetFolderId !== undefined) {
       bulkMove(targetFolderId);
       setIsMoveFileModalOpen(false);
-      setTargetFolderId(null);
+      setTargetFolderId(undefined);
       setTreeState({
         folders: new Map(),
         loading: new Set(),
@@ -284,7 +284,7 @@ export function MoveModal() {
     if (open) {
       loadFolders(null, 1);
     } else {
-      setTargetFolderId(null);
+      setTargetFolderId(undefined);
       setTreeState({
         folders: new Map(),
         loading: new Set(),
@@ -333,31 +333,47 @@ export function MoveModal() {
                 Select destination folder:
               </label>
 
-              {/* Root List */}
+               {/* Root List */}
                <ul className="border  rounded-xl  p-2 shadow-inner overflow-y-auto flex-1 min-h-0">
-                  {rootFolders.length === 0 && !isRootLoading ? (
-                    <li className="text-gray-500 text-center py-8">
-                      No folders available
+                  {/* Root selection item */}
+                  <li>
+                    <div className="flex items-center gap-1.5 py-1">
+                      <div className="w-4" />
+                      <button
+                        onClick={() => setTargetFolderId(null)}
+                        className={`flex items-center gap-1.5 px-2 py-1 rounded-xl flex-1 text-left transition-colors min-w-0 ${targetFolderId === null
+                            ? 'bg-blue-100 text-blue-600 font-semibold'
+                            : 'hover:bg-gray-100'
+                          }`}
+                      >
+                        <FolderIcon className="size-8 text-white shrink-0" strokeWidth={1.5} />
+                        <div className="flex flex-col gap-1">
+                          <span className="truncate min-w-0">Root Directory</span>
+                        </div>
+                      </button>
+                    </div>
+                  </li>
+                  
+                  {rootFolders.map((folder) => (
+                    <FolderTreeItem
+                      key={folder.id}
+                      folder={folder}
+                      selectedFolderId={targetFolderId}
+                      onSelect={(id) => setTargetFolderId(id)}
+                      onLoadChildren={loadFolders}
+                      disabledFolderIds={disabledFolderIds}
+                      treeState={treeState}
+                    />
+                  ))}
+                  {(isRootLoading || rootHasMore) && (
+                        <li ref={rootObserverRef} className="py-2 pl-6 flex justify-start">
+                          <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                      </li>
+                  )}
+                  {rootFolders.length === 0 && !isRootLoading && !rootHasMore && (
+                    <li className="text-gray-500 text-sm text-center py-4">
+                      No nested folders available
                     </li>
-                  ) : (
-                    <>
-                    {rootFolders.map((folder) => (
-                      <FolderTreeItem
-                        key={folder.id}
-                        folder={folder}
-                        selectedFolderId={targetFolderId}
-                        onSelect={setTargetFolderId}
-                        onLoadChildren={loadFolders}
-                        disabledFolderIds={disabledFolderIds}
-                        treeState={treeState}
-                      />
-                    ))}
-                    {(isRootLoading || rootHasMore) && (
-                         <li ref={rootObserverRef} className="py-2 pl-6 flex justify-start">
-                            <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
-                        </li>
-                    )}
-                    </>
                   )}
                 </ul>
             </div>
@@ -369,7 +385,7 @@ export function MoveModal() {
               Cancel
             </Button>
           </DialogClose>
-          <Button type="button" onClick={handleMove} disabled={!targetFolderId} radius="full" className='w-full md:w-auto'>
+          <Button type="button" onClick={handleMove} disabled={targetFolderId === undefined} radius="full" className='w-full md:w-auto'>
             Move
           </Button>
         </DialogFooter>
