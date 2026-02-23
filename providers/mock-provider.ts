@@ -345,13 +345,23 @@ export class MockProvider implements IFileManagerProvider {
 
   updateFileMetaData(
     fileId: EntityId,
-    metaData: Partial<FileMetaData>
+    updates: Partial<FileMetaData>
   ): Promise<FileMetaData> {
     const file = mockFiles.find((f) => f.id === fileId);
     if (!file) {
       return Promise.reject(new Error("File not found"));
     }
-    file.metaData = { ...file.metaData, ...metaData };
+    
+    const { metaData, ...rootUpdates } = updates;
+    
+    // Update root properties like name, caption, altText
+    Object.assign(file, rootUpdates);
+    
+    // Merge nested metadata properties (e.g. description) if present
+    if (metaData) {
+      file.metaData = { ...file.metaData, ...metaData };
+    }
+    
     file.updatedAt = new Date();
     return Promise.resolve(file);
   }

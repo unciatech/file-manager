@@ -3,18 +3,25 @@ import { FileMetaData } from "@/types/file-manager";
 import ImageIcon from "../icons/image";
 import { useState } from "react";
 
+/** Props for the ImageCard component. */
 interface ImageCardProps {
+    /** The image file metadata to display. */
     file: FileMetaData;
-    // metaData prop is no longer needed/typed for images
 }
 
+/**
+ * A grid card item tailored for optimal image display.
+ * Falls back to an SVG icon if the image URL or previewUrl fails to load.
+ */
 export function ImageCard({ file }: ImageCardProps) {
     const [hasError, setHasError] = useState(false);
 
-    if (file.url && !hasError) {
+    const imageSrc = file.previewUrl || file.url;
+
+    if (imageSrc && !hasError) {
         return (
             <img
-                src={file.url}
+                src={imageSrc}
                 alt={file?.name?.substring(0, 10) || "image"}
                 className="w-full h-full object-contain rounded-md drop-shadow-md"
                 onError={() => setHasError(true)}
@@ -24,6 +31,10 @@ export function ImageCard({ file }: ImageCardProps) {
     return <ImageIcon />;
 }
 
+/**
+ * Renders image-specific metadata in the grid card footer.
+ * Displays the intrinsic dimensions (WxH) of the image.
+ */
 export function ImageCardMetadata({ file }: { file: FileMetaData }) {
     if (!file.caption) return null;
     return (

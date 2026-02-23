@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, ChangeEvent } from 'react';
-import { DocumentMetaData, FileMetaData } from '@/types/file-manager';
+import { Loader2 } from 'lucide-react';
+import { FileMetaData } from '@/types/file-manager';
 import { DetailsLayout } from '@/components/file-details/details-layout';
 import { FileDeleteButton, FileDownloadButton, FileCopyLinkButton } from '@/components/file-details/file-action-buttons';
 import { Button } from '@/components/ui/button';
@@ -11,28 +12,34 @@ import { Label } from '@/components/ui/label';
 import { getFileSize } from '@/lib/file-size';
 import { formatDate } from '@/lib/format-utils';
 import { getFileComponents } from '@/components/grid/file-component-registry';
+import { Field, FieldLabel } from '../ui/field';
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '../ui/input-group';
 
 interface FileModalProps {
   file: FileMetaData;
   onClose: () => void;
-  onSave?: (updates: Partial<FileMetaData>) => void;
-  onDelete?: () => void;
+  onSave?: (updates: Partial<FileMetaData>) => Promise<void> | void;
 }
 
-export function FileModal({ file, onClose, onSave, onDelete }: FileModalProps) {
+export function FileModal({ file, onClose, onSave }: FileModalProps) {
+  const [isSaving, setIsSaving] = useState(false);
   const [fileName, setFileName] = useState(file.name);
-  const [description, setDescription] = useState('');
-  const documentMeta = file.metaData as DocumentMetaData;
+  const [description, setDescription] = useState(file.metaData?.description || '');
 
-  const handleSave = () => {
-    onSave?.({
-      name: fileName,
-      metaData: {
-        ...file.metaData,
-        description,
-      },
-    });
-    onClose();
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await onSave?.({
+        name: fileName,
+        metaData: {
+          ...file.metaData,
+          description,
+        },
+      });
+      onClose();
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const ext = file.ext?.replace('.', '') || 'file';
@@ -88,21 +95,21 @@ export function FileModal({ file, onClose, onSave, onDelete }: FileModalProps) {
           <p className="text-xs font-bold text-blue-600">{ext}</p>
         </div>
 
-        {documentMeta?.pageCount && (
+        {file.metaData?.pageCount && (
           <div>
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
               Page Count
             </p>
-            <p className="text-xs font-bold text-blue-600">{documentMeta.pageCount}</p>
+            <p className="text-xs font-bold text-blue-600">{file.metaData.pageCount}</p>
           </div>
         )}
 
-        {documentMeta?.author && (
+        {file.metaData?.author && (
           <div>
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
               Author
             </p>
-            <p className="text-xs font-bold text-blue-600">{documentMeta.author}</p>
+            <p className="text-xs font-bold text-blue-600">{file.metaData.author}</p>
           </div>
         )}
 
@@ -111,14 +118,16 @@ export function FileModal({ file, onClose, onSave, onDelete }: FileModalProps) {
 
       {/* Editable Fields */}
       <div className="space-y-4 pt-4 border-t">
-        <div className="space-y-2">
-          <Label htmlFor="fileName">File name</Label>
-          <Input
-            id="fileName"
-            value={fileName}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setFileName(e.target.value)}
-            placeholder="Enter file name"
-          />
+         <div className="space-y-2">
+          <Field className='gap-0'>
+            <FieldLabel htmlFor="fileName">File name</FieldLabel>
+            <InputGroup>
+              <InputGroupInput id="fileName" placeholder="Enter file name" value={fileName.replace(file.ext || '', '')} onChange={(e: ChangeEvent<HTMLInputElement>) => setFileName(e.target.value)} />
+              <InputGroupAddon align="inline-end" className='pr-1'>
+                <InputGroupText className='font-bold bg-gray-200 rounded-lg py-1 px-3'>{file.ext}</InputGroupText>
+              </InputGroupAddon>
+            </InputGroup>
+          </Field>
         </div>
 
         <div className="space-y-2">
@@ -137,10 +146,11 @@ export function FileModal({ file, onClose, onSave, onDelete }: FileModalProps) {
 
   const footer = (
     <div className="flex w-full justify-between items-center flex-col sm:flex-row gap-2 ">
-      <Button className='w-full md:w-auto' variant="outline" onClick={onClose} radius="full">
+      <Button className='w-full md:w-auto' variant="outline" onClick={onClose} radius="full" disabled={isSaving}>
         Cancel
       </Button>
-      <Button className='w-full md:w-auto' onClick={handleSave} radius="full">
+      <Button className='w-full md:w-auto' onClick={handleSave} radius="full" disabled={isSaving}>
+        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Save
       </Button>
     </div>
