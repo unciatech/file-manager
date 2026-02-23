@@ -60,7 +60,6 @@ interface FileManagerContextType {
   handleClearSelection: () => void;
   handleSelectAllGlobal: (checked: boolean) => void;
 
-  setCurrentPage: (page: number) => void;
   handlePageChange: (page: number) => void;
   
   // Search
@@ -160,7 +159,6 @@ export function FileManagerProvider({
     handleClearSelection: handlers.handleClearSelection,
     handleSelectAllGlobal: handlers.handleSelectAllGlobal,
 
-    setCurrentPage: handlers.setCurrentPage,
     handlePageChange: state.handlePageChange,
     
     // Search

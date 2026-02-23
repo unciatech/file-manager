@@ -63,9 +63,9 @@ export function useFileHandlers(state: FileState) {
     setSelectedFiles,
     setSelectedFolders,
     setCurrentFolder,
+    setFiles,
+    setFolders,
     setPagination,
-    loadFiles,
-    loadFolders,
     loadData,
     isInSelectionMode,
     provider,
@@ -227,18 +227,7 @@ export function useFileHandlers(state: FileState) {
 
 
 
-  /**
-   * Updates the current page number
-   * @param page - The new page number
-   */
-  const setCurrentPage = useCallback(
-    (page: number) => {
-      //update the provider pagination state if applicable
 
-      setPagination((prev) => ({ ...prev, currentPage: page }));
-    },
-    [setPagination]
-  );
 
   /**
    * Refreshes all data by reloading using the unified data loader
@@ -357,8 +346,13 @@ export function useFileHandlers(state: FileState) {
   const renameFolder = useCallback(
     async (folderId: string | number, newName: string) => {
       try {
+        // Optimistic UI update: rename immediately in local state
+        setFolders((prev) =>
+          prev.map((f) => (f.id === folderId ? { ...f, name: newName } : f))
+        );
+        
         await provider.renameFolder(folderId, newName);
-        await refreshData(true); // Silent background refresh
+        await refreshData(true); // Silent background refresh to sync with server
         toast.success("Folder Renamed", {
           description: `Folder renamed to "${newName}"`,
         });
@@ -381,6 +375,21 @@ export function useFileHandlers(state: FileState) {
   const updateFileMetadata = useCallback(
     async (fileId: string | number, metadata: Partial<FileMetaData>) => {
       try {
+        // Optimistic UI update: apply visual metadata changes immediately
+        setFiles((prev) =>
+          prev.map((f) => {
+            if (f.id === fileId) {
+              const { metaData, ...rootUpdates } = metadata;
+              return {
+                ...f,
+                ...rootUpdates,
+                metaData: metaData ? { ...f.metaData, ...metaData } : f.metaData,
+              } as FileMetaData;
+            }
+            return f;
+          })
+        );
+        
         await provider.updateFileMetaData(fileId, metadata);
         await refreshData(true); // Silent background refresh
       } catch (error) {
@@ -438,7 +447,7 @@ export function useFileHandlers(state: FileState) {
     handleClearSelection,
     handleSelectAllGlobal,
 
-    setCurrentPage,
+
 
     // CRUD
     uploadFiles,

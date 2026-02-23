@@ -80,6 +80,15 @@ export function useFileState(options: FileStateOptions) {
   
   // Search state
   const [searchQuery, setSearchQuery] = useState(queryFromUrl);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(queryFromUrl);
+
+  // Debounce the search query to prevent rapid API calls
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
   
   // Track previous folder to detect changes
   const prevFolderIdRef = useRef<FolderId>(folderId);
@@ -180,7 +189,7 @@ export function useFileState(options: FileStateOptions) {
           fileTypes,
           currentPage,
           filesPerPage,
-          searchQuery
+          debouncedSearchQuery
         );
 
         if (cancelled) return;
@@ -216,7 +225,7 @@ export function useFileState(options: FileStateOptions) {
     allowedFileTypes,
     currentPage,
     filesPerPage,
-    searchQuery,
+    debouncedSearchQuery,
   ]);
 
   // Clear selections when folder changes
@@ -235,55 +244,6 @@ export function useFileState(options: FileStateOptions) {
   
   // File Details Modal State
   const [fileDetailsModalFile, setFileDetailsModalFile] = useState<FileMetaData | null>(null);
-
-  // Manual reload functions for components that need to refresh data
-  const loadFolders = useCallback(async () => {
-    try {
-      const foldersResult = await provider.getFolders(
-        currentFolder?.id ?? null,
-        pagination.currentPage,
-        pagination.filesPerPage
-      );
-      setFolders(foldersResult.folders);
-      setPagination(foldersResult.pagination);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to load folders";
-      toast.error("Load Folders Failed", {
-        description: message,
-      });
-      console.error("Failed to load folders:", error);
-    }
-  }, [currentFolder, provider, pagination, setFolders]);
-
-  const loadFiles = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      let fileTypes: FileType[] | undefined = [];
-      if (mode === MODE.MODAL) {
-        fileTypes = acceptedFileTypesForModal;
-      } else {
-        fileTypes = allowedFileTypes;
-      }
-
-      const result = await provider.getFiles(
-        currentFolder?.id ?? null,
-        fileTypes,
-        pagination.currentPage,
-        pagination.filesPerPage
-      );
-
-      setFiles(result.files);
-      setPagination(result.pagination);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to load files";
-      toast.error("Load Files Failed", {
-        description: message,
-      });
-      console.error("Failed to load files:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentFolder, acceptedFileTypesForModal, mode, allowedFileTypes, provider, pagination.currentPage, pagination.filesPerPage]);
 
   /**
    * Unified data loader that mirrors the main useEffect logic
@@ -309,7 +269,7 @@ export function useFileState(options: FileStateOptions) {
         fileTypes,
         currentPage,
         filesPerPage,
-        searchQuery
+        debouncedSearchQuery
       );
 
       setFolders(result.folders);
@@ -326,7 +286,7 @@ export function useFileState(options: FileStateOptions) {
         setIsLoading(false);
       }
     }
-  }, [currentFolder, mode, acceptedFileTypesForModal, allowedFileTypes, provider, currentPage, filesPerPage, searchQuery]);
+  }, [currentFolder, mode, acceptedFileTypesForModal, allowedFileTypes, provider, currentPage, filesPerPage, debouncedSearchQuery]);
 
   const isInSelectionMode = () => selectedFiles.length > 0 || selectedFolders.length > 0;
   const getCurrentFolder = () => currentFolder;
@@ -357,6 +317,7 @@ export function useFileState(options: FileStateOptions) {
   const updateSearchQuery = useCallback((newQuery: string) => {
     setSearchQuery(newQuery);
     
+    // Update URL param dynamically based on input length
     const params = new URLSearchParams(searchParams.toString());
     if (newQuery.trim()) {
       params.set('query', newQuery);
@@ -365,8 +326,9 @@ export function useFileState(options: FileStateOptions) {
       params.delete('query');
     }
     
+    // We intentionally ignore scroll updates for smooth inline typing
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [router, pathname]); // Removed searchParams - it's read fresh on each call
+  }, [router, pathname, searchParams]); // Now searchParams is intentionally tracked
 
   return {
     // State
@@ -403,10 +365,7 @@ export function useFileState(options: FileStateOptions) {
     setFolderToRename,
 
     // Loaders
-    loadFolders,
-    loadFiles,
     loadData,
-
     setIsLoading,
 
     // Computed
