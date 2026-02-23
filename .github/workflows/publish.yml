@@ -1,0 +1,36 @@
+name: Publish to NPM
+
+on:
+  release:
+    types: [published] # Triggers when you publish a new Release on GitHub
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Required for NPM Trusted Publishing
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9 # Matches what you're using locally
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Package
+        run: pnpm run build:pkg
+
+      - name: Publish to NPM
+        run: npm publish
