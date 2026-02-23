@@ -97,7 +97,7 @@ function FolderTreeItem({
             aria-label={isOpen ? "Collapse folder" : "Expand folder"}
           >
             <ChevronRight
-              className={`size-4 text-gray-500 transition-transform ${isOpen ? 'rotate-90' : ''}`}
+              className={`size-4 text-gray-500 transition-transform ${!isDisabled && isOpen ? 'rotate-90' : ''}`}
             />
           </button>
         ) : (
@@ -108,19 +108,22 @@ function FolderTreeItem({
           onClick={handleSelect}
           disabled={isDisabled}
           title={folder.name}
-          className={`flex items-center gap-1.5 px-2 py-1 rounded flex-1 text-left transition-colors min-w-0 ${isSelected
-              ? 'bg-blue-100 text-blue-900'
+          className={`flex items-center gap-1.5 px-2 py-1 rounded-xl flex-1 text-left transition-colors min-w-0 ${isSelected
+              ? 'bg-blue-100 text-blue-600 font-semibold'
               : isDisabled
                 ? 'opacity-50 cursor-not-allowed'
                 : 'hover:bg-gray-100'
             }`}
         >
-          <FolderIcon className="size-5 text-sky-500 shrink-0" strokeWidth={1.5} />
-          <span className="truncate min-w-0">{ middleTruncate(folder.name, 15)} {isDisabled ? <span className="text-xs font-medium text-gray-900">(Already selected)</span> : ''}</span>
+          <FolderIcon className="size-8 text-white shrink-0" strokeWidth={1.5} />
+          <div className="flex flex-col gap-1">
+            <span className="truncate min-w-0">{ middleTruncate(folder.name, 15)}</span>
+            {isDisabled ? <span className="text-[0.6rem] text-left font-medium text-gray-900">(Already selected)</span> : ''}
+          </div>
         </button>
       </div>
 
-      {isOpen && (
+      {!isDisabled && isOpen && (
         <ul className="pl-6">
           {children.map((childFolder) => (
               <FolderTreeItem
@@ -136,7 +139,7 @@ function FolderTreeItem({
             
             {/* Loading Indicator / Sentinel */}
             {(isLoading || hasMore) && (
-              <li ref={observerRef} className="py-2 flex justify-center">
+              <li ref={observerRef} className="py-2 pl-6 flex justify-start">
                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
               </li>
             )}
@@ -301,7 +304,7 @@ export function MoveModal() {
             <div className="flex w-full items-center justify-between gap-2">
             <span className="w-full text-left">
               Move Items
-              <p className="text-blue-600 text-xs">
+              <p className="text-gray-400 text-xs">
                 Moving {selectedFiles.length} file
                 {selectedFiles.length === 1 ? "" : "s"} and{" "}
                 {selectedFolders.length} folder
@@ -331,7 +334,7 @@ export function MoveModal() {
               </label>
 
               {/* Root List */}
-               <ul className="border border-gray-200 rounded-lg p-2 bg-white overflow-y-auto flex-1 min-h-0">
+               <ul className="border  rounded-xl  p-2 shadow-inner overflow-y-auto flex-1 min-h-0">
                   {rootFolders.length === 0 && !isRootLoading ? (
                     <li className="text-gray-500 text-center py-8">
                       No folders available
@@ -350,7 +353,7 @@ export function MoveModal() {
                       />
                     ))}
                     {(isRootLoading || rootHasMore) && (
-                         <li ref={rootObserverRef} className="py-2 flex justify-center">
+                         <li ref={rootObserverRef} className="py-2 pl-6 flex justify-start">
                             <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
                         </li>
                     )}

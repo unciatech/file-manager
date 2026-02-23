@@ -44,7 +44,20 @@ export const VIDEO_SOURCE = {
 export const VIDEO_SOURCES = Object.values(VIDEO_SOURCE);
 export type VideoSource = (typeof VIDEO_SOURCE)[keyof typeof VIDEO_SOURCE];
 
-export type MetaDataType = VideoMetaData | DocumentMetaData | AudioMetaData | OtherMetaData;
+export interface MetaDataType {
+  /** Video or Audio duration in seconds. */
+  duration?: number;
+  /** Provider source for video content (e.g., 'local', 'youtube'). */
+  videoSource?: VideoSource;
+  /** Audio bitrate in kbps. */
+  bitrate?: number;
+  /** Total number of pages for document file types. */
+  pageCount?: number;
+  /** Original creator or author of the document. */
+  author?: string;
+  /** General description text used across multiple asset types. */
+  description?: string;
+}
 
 // Type aliases for ID types
 export type EntityId = string | number;
@@ -89,55 +102,63 @@ export interface FormatDetails {
 }
 
 
+/**
+ * Core interface representing a File entity in the file manager.
+ * Supports various formats (images, videos, audio, documents) via common fields
+ * and nested metadata structures.
+ */
 export interface FileMetaData{
+    /** Unique identifier for the file. */
     id: EntityId;
+    /** Human-readable name of the file (including extension). */
     name: string;
+    /** ID of the folder containing this file. Null represents the root directory. */
     folderId: FolderId;
-    folderPath?: string; // e.g. "/1/156"
+    /** Path representation of the file's location (e.g., "/1/156"). */
+    folderPath?: string; 
     
     // Core details
-    size: number; //bytes
+    /** Size of the file in bytes. */
+    size: number;
+    /** Direct URL path to access or download the full asset. */
     url: string;
-    mime: string; // e.g. "image/jpeg"
-    ext?: string; // e.g. ".jpg"
+    /** URL to an optimized, lightweight thumbnail or preview of the asset. */
+    previewUrl?: string;
+    /** Content-Type HTTP header representation (e.g., "image/jpeg"). */
+    mime: string;
+    /** File extension including the dot (e.g., ".jpg"). */
+    ext?: string;
+    /** Content hash for deduplication and cache busting. */
     hash?: string;
     
     // Additional CMS fields
+    /** Accessible alt text for images to display when images are disabled. */
     alternativeText?: string;
+    /** Caption text commonly used in images and videos. */
     caption?: string;
-    width?: number; // for images/videos
-    height?: number; // for images/videos
+    /** Intrinsic width in pixels for image/video assets. */
+    width?: number;
+    /** Intrinsic height in pixels for image/video assets. */
+    height?: number;
     
     // Rich formats (responsive images)
-    formats?: Record<string, FormatDetails>; // e.g. { "small": { ... }, "thumbnail": { ... } }
+    /** Collection of generated optimized formats for images. */
+    formats?: Record<string, FormatDetails>;
 
-    metaData: MetaDataType; // Legacy/Specific data can still live here if not covered above
+    /** Dynamic metadata payload containing properties specific to the asset type. */
+    metaData: MetaDataType;
     
+    /** Timestamp of file creation. */
     createdAt: Date;
+    /** Timestamp of last file modification. */
     updatedAt: Date;
+    /** Categorization tags for sorting and discovery. */
     tags?: string[];
 }
 
 
 
-export interface VideoMetaData{
-    duration: number; // in seconds
-    videoSource: VideoSource;
-}
 
-export interface DocumentMetaData{
-    pageCount?: number;
-    author?: string;
-}
-
-export interface AudioMetaData{
-    duration: number; // in seconds
-    bitrate?: number; // in kbps
-}
-
-export interface OtherMetaData{
-    description?: string;
-}
 
 export interface Tag {
   id: EntityId

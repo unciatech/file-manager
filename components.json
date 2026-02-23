@@ -22,6 +22,6 @@
     "types": "@/types"
   },
   "registries": {
-    "@reui": "https://reui.io/r/{name}.json"
+    "@reui": "https://reui.io/r/{style}/{name}.json"
   }
 }

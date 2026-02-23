@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, ChangeEvent } from 'react';
-import { AudioMetaData, FileMetaData } from '@/types/file-manager';
+import { Loader2 } from 'lucide-react';
+import { FileMetaData } from '@/types/file-manager';
 import { DetailsLayout } from '@/components/file-details/details-layout';
 import { FileDeleteButton, FileDownloadButton, FileCopyLinkButton } from '@/components/file-details/file-action-buttons';
 import { Button } from '@/components/ui/button';
@@ -11,25 +12,47 @@ import { Label } from '@/components/ui/label';
 import { getFileSize } from '@/lib/file-size';
 import { formatDate, formatDuration } from '@/lib/format-utils';
 import { Music } from 'lucide-react';
+import { Field, FieldLabel } from '../ui/field';
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '../ui/input-group';
 
+/**
+ * Props for the AudioModal component.
+ */
 interface AudioModalProps {
+  /** The audio file data object to display and edit. */
   file: FileMetaData;
+  /** Callback fired when the modal is closed without saving or after a successful save. */
   onClose: () => void;
-  onSave?: (updates: Partial<FileMetaData>) => void;
+  /**
+   * Asynchronous callback fired when the user saves their changes.
+   * Receives a partial metadata object containing the requested updates.
+   */
+  onSave?: (updates: Partial<FileMetaData>) => Promise<void> | void;
+  /** Optional callback fired when the user chooses to delete the audio file. */
   onDelete?: () => void;
 }
 
+/**
+ * A modal component tailored for viewing and editing audio assets.
+ * Displays an audio player along with audio-specific metadata (duration, bitrate).
+ * Supports updating the file name and caption.
+ */
 export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps) {
+  const [isSaving, setIsSaving] = useState(false);
   const [fileName, setFileName] = useState(file.name);
   const [caption, setCaption] = useState(file.caption || '');
-  const audioMeta = file.metaData as AudioMetaData;
 
-  const handleSave = () => {
-    onSave?.({
-      name: fileName,
-      caption,
-    });
-    onClose();
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await onSave?.({
+        name: fileName,
+        caption,
+      });
+      onClose();
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const previewSection = (
@@ -77,7 +100,7 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
             Duration
           </p>
           <p className="text-xs font-bold text-blue-600">
-            {audioMeta?.duration ? formatDuration(audioMeta.duration) : 'N/A'}
+            {file.metaData?.duration ? formatDuration(file.metaData.duration) : 'N/A'}
           </p>
         </div>
 
@@ -86,7 +109,7 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
             Bitrate
           </p>
           <p className="text-xs font-bold text-blue-600">
-            {audioMeta?.bitrate ? `${audioMeta.bitrate} kbps` : 'N/A'}
+            {file.metaData?.bitrate ? `${file.metaData.bitrate} kbps` : 'N/A'}
           </p>
         </div>
 
@@ -112,13 +135,15 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
       {/* Editable Fields */}
       <div className="space-y-4 pt-4 border-t">
         <div className="space-y-2">
-          <Label htmlFor="fileName">File name</Label>
-          <Input
-            id="fileName"
-            value={fileName}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setFileName(e.target.value)}
-            placeholder="Enter file name"
-          />
+          <Field className='gap-0'>
+            <FieldLabel htmlFor="fileName">File name</FieldLabel>
+            <InputGroup>
+              <InputGroupInput id="fileName" placeholder="Enter file name" value={fileName.replace(file.ext || '', '')} onChange={(e: ChangeEvent<HTMLInputElement>) => setFileName(e.target.value)} />
+              <InputGroupAddon align="inline-end" className='pr-1'>
+                <InputGroupText className='font-bold bg-gray-200 rounded-lg py-1 px-3'>{file.ext}</InputGroupText>
+              </InputGroupAddon>
+            </InputGroup>
+          </Field>
         </div>
 
         <div className="space-y-2">
@@ -137,10 +162,11 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
 
   const footer = (
     <div className="flex gap-2 w-full sm:justify-between justify-center items-center flex-col sm:flex-row ">
-      <Button variant="outline" onClick={onClose} radius="full" className='w-full md:w-auto'>
+      <Button variant="outline" onClick={onClose} radius="full" className='w-full md:w-auto' disabled={isSaving}>
         Cancel
       </Button>
-      <Button onClick={handleSave} radius="full" className='w-full md:w-auto'>
+      <Button onClick={handleSave} radius="full" className='w-full md:w-auto' disabled={isSaving}>
+        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Finish
       </Button>
     </div>
