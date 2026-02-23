@@ -1,36 +1,25 @@
-name: Publish to NPM
+name: Publish Package
 
 on:
-  release:
-    types: [published] # Triggers when you publish a new Release on GitHub
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
 
 jobs:
-  build-and-publish:
+  publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write # Required for NPM Trusted Publishing
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+      - uses: actions/setup-node@v4
         with:
-          version: 9 # Matches what you're using locally
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Build Package
-        run: pnpm run build:pkg
-
-      - name: Publish to NPM
-        run: npm publish --access public
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm test
+      - run: npm publish
