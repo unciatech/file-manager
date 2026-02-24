@@ -9,8 +9,11 @@
     "README.md"
   ],
   "publishConfig": {
-    "provenance": true
+    "provenance": true,
+    "registry": "https://npm.pkg.github.com"
   },
+  "author": "Avi",
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
