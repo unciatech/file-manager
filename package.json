@@ -1,6 +1,6 @@
 {
   "name": "@unciatech/file-manager",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -9,8 +9,7 @@
     "README.md"
   ],
   "publishConfig": {
-    "provenance": true,
-    "registry": "https://npm.pkg.github.com"
+    "provenance": true
   },
   "author": "Avi",
   "license": "MIT",
