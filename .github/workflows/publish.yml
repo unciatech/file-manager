@@ -4,10 +4,6 @@ on:
   release:
     types: [published] # Triggers when you publish a new Release on GitHub
 
-permissions:
-  id-token: write  # Required for OIDC
-  contents: read
-
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
