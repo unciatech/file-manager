@@ -19,6 +19,9 @@ It supports deep folder nesting, drag-and-drop file uploads, metadata management
 - **Icons**: Lucide React
 - **Notifications**: Sonner
 
+> [!WARNING]
+> This library is currently in **BETA**. Please report any bugs or feature requests on the GitHub issues page.
+
 ## 🚀 How to Install and Use in Your Project
 
 If you want to integrate this File Manager into your own Next.js or React application, follow this step-by-step guide.
@@ -30,11 +33,19 @@ Install the library via NPM:
 npm install @unciatech/file-manager
 ```
 
-**(Optional) Quick Start Scaffolding**
-Instead of setting everything up manually, you can run our initialization script to immediately generate a working `FileManagerDemo.tsx` file inside your project!
+**(Optional) ⚡ Magic Quick Start Scaffolding**
+Instead of setting everything up manually, our incredibly powerful init script can generate files for you!
+
+**A) If you just want the component inside your CURRENT project:**
 ```bash
 npx @unciatech/file-manager init
 ```
+
+**B) If you want to spawn a brand new full-stack application instantly:**
+```bash
+npx @unciatech/file-manager init my-media-app
+```
+*It will ask if you want Next.js or Vite (React), install Tailwind, install the package, and set everything up for you!*
 
 **(CRITICAL) Configure Tailwind CSS:**
 Because this library uses Tailwind CSS, you MUST tell your Tailwind compiler to scan the library components for utility classes, otherwise it will render with zero styles!
