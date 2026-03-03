@@ -5,7 +5,7 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "bin": {
-    "file-manager": "./dist/cli.js"
+    "file-manager": "dist/cli.js"
   },
   "exports": {
     ".": {
@@ -19,14 +19,11 @@
     "dist",
     "README.md"
   ],
-  "publishConfig": {
-    "provenance": true
-  },
   "author": "Avi",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/unciatech/file-manager.git"
+    "url": "git+https://github.com/unciatech/file-manager.git"
   },
   "scripts": {
     "dev": "next dev",
