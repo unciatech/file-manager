@@ -23,12 +23,46 @@ It supports deep folder nesting, drag-and-drop file uploads, metadata management
 
 If you want to integrate this File Manager into your own Next.js or React application, follow this step-by-step guide.
 
-### Step 1: Copy the Core Files
-Copy the `components`, `types`, `hooks`, `context`, and `providers` folders related to the file manager into your project's source directory (e.g., `src/`).
+### Step 1: Install the Package
+
+Install the library via NPM:
+```bash
+npm install @unciatech/file-manager
+```
+
+**(Optional) Quick Start Scaffolding**
+Instead of setting everything up manually, you can run our initialization script to immediately generate a working `FileManagerDemo.tsx` file inside your project!
+```bash
+npx @unciatech/file-manager init
+```
+
+**(CRITICAL) Configure Tailwind CSS:**
+Because this library uses Tailwind CSS, you MUST tell your Tailwind compiler to scan the library components for utility classes, otherwise it will render with zero styles!
+
+**For Tailwind v3 (`tailwind.config.ts`):**
+```typescript
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  content: [
+    // Your existing paths...
+    "./node_modules/@unciatech/file-manager/dist/**/*.js",
+    "./node_modules/@unciatech/file-manager/dist/**/*.mjs",
+  ],
+  // ...
+};
+export default config;
+```
+
+**For Tailwind v4 (`globals.css`):**
+```css
+@import "tailwindcss";
+@source "../node_modules/@unciatech/file-manager/dist";
+```
 
 ### Step 2: Create your Custom API Provider
 
-The file manager is completely agnostic to your backend database. You simply need to create a class that implements the `IFileManagerProvider` interface. 
+The file manager is completely agnostic to your backend database. You simply need to create a class that implements the `IFileManagerProvider` interface.
 
 Here is an example of what your custom provider might look like, making real API calls to your backend using `fetch`:
 
