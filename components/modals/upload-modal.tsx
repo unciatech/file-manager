@@ -249,7 +249,7 @@ export function UploadModal() {
                     {/* Wrapper */}
                     <div className="relative overflow-hidden rounded-lg border bg-card transition-colors">
                       {/* File preview area - uses component registry */}
-                      <div className="relative aspect-square bg-muted border-b border-border">
+                      <div className="relative aspect-square bg-muted border-b border-slate-200">
                         <div className="flex h-full items-center justify-center p-4">
                           <div className="w-[75%] h-[75%] flex items-center justify-center">
                             {fileItem.status === 'uploading' ? (

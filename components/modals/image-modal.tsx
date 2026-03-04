@@ -128,7 +128,7 @@ export function ImageModal({ file, onClose, onSave, onDelete }: ImageModalProps)
       </div>
 
       {/* Editable Fields */}
-      <div className="space-y-4 pt-4 border-t">
+      <div className="space-y-4 pt-4 border-t border-slate-200">
         <div className="space-y-2">
           <Field className='gap-0'>
             <FieldLabel htmlFor="fileName">File name</FieldLabel>
