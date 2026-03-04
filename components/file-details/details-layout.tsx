@@ -55,7 +55,7 @@ export function DetailsLayout({
           {/* Content */}
           <div className="grid grid-cols-1 lg:grid-cols-2 min-h-full max-h-[65vh] overflow-scroll">
             {/* Preview Section - Left side on desktop, top on mobile */}
-            <div className="p-6 border-b lg:border-b-0 lg:border-r">
+            <div className="p-6 border-b lg:border-b-0 lg:border-r border-slate-200 ">
               {previewSection}
             </div>
 
