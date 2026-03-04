@@ -71,7 +71,7 @@ export function CreateFolderModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="p-0 max-w-xl m-auto min-h-fit max-h-[80vh] flex flex-col" variant="fullscreen" showCloseButton={false}>
+      <DialogContent className="p-0 max-w-xl m-auto max-h-[32vh] flex flex-col" variant="fullscreen" showCloseButton={false}>
         <DialogHeader className="pt-5 pb-3 m-0 border-b border-border flex w-full justify-between">
           <DialogTitle className="px-6 text-base">
             <div className="flex w-full items-center justify-between gap-2">

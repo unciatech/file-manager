@@ -45,9 +45,11 @@ export function VideoCard({ file, className }: VideoCardProps) {
             <div className="relative w-full h-full">
                 {/* Video element for thumbnail */}
                 <video
-                    src={file.url}
+                    src={`${file.url}#t=0.001`}
                     className="w-full h-full object-contain rounded-md"
                     preload="metadata"
+                    muted
+                    playsInline
                     onError={() => setHasError(true)}
                 />
                 {/* Play button overlay */}

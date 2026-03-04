@@ -32,7 +32,7 @@ export function DetailsLayout({
 }: DetailsLayoutProps) {
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()} >
-      <DialogContent className="p-0 max-w-6xl m-auto xl:min-h-fit max-h-[85vh] flex flex-col" variant="fullscreen" showCloseButton={false}>
+      <DialogContent className="p-0 max-w-6xl w-full mx-auto flex flex-col" variant="fullscreen" showCloseButton={false}>
         <DialogHeader className="pt-5 pb-3 m-0 border-b border-border">
           <DialogTitle className="px-6 text-base">
             <div className="flex w-full justify-between gap-2">
@@ -51,16 +51,16 @@ export function DetailsLayout({
           </DialogTitle>
           <DialogDescription />
         </DialogHeader>
-        <ScrollArea className="flex-1 min-h-0">
+        <ScrollArea className="flex-1 h-0">
           {/* Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 min-h-full max-h-[65vh] overflow-scroll">
+          <div className="grid grid-cols-1 lg:grid-cols-2 min-h-full">
             {/* Preview Section - Left side on desktop, top on mobile */}
             <div className="p-6 border-b lg:border-b-0 lg:border-r border-slate-200 ">
               {previewSection}
             </div>
 
             {/* Metadata Section - Right side on desktop, bottom on mobile */}
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto">
               {metadataSection}
             </div>
           </div>
