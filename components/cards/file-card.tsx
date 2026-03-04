@@ -97,12 +97,12 @@ export function FileCard({
     },
     {
       label: "Move to...",
-      icon: <MoveIcon className="size-4 mr-2" />,
+      icon: <MoveIcon className="size-6" />,
       onClick: handleMove,
     },
     {
       label: "Delete",
-      icon: <TrashIcon className="size-5 mr-2 text-red-600" />,
+      icon: <TrashIcon className="size-6 text-red-600" />,
       onClick: handleDelete,
       variant: "destructive",
     },
