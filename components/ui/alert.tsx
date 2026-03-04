@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { X } from 'lucide-react';
+import { CrossIcon } from '@/components/icons';
 
 const alertVariants = cva('flex items-stretch w-full gap-2 group-[.toaster]:w-(--width)', {
   variants: {
@@ -208,7 +208,7 @@ function Alert({ className, variant, size, icon, appearance, close = false, onCl
           data-slot="alert-close"
           className={cn('group shrink-0 size-4 cursor-pointer')}
         >
-          <X className="opacity-60 group-hover:opacity-100 size-4" />
+          <CrossIcon className="opacity-60 group-hover:opacity-100 size-4" />
         </button>
       )}
     </div>

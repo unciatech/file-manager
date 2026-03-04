@@ -1,7 +1,7 @@
 'use client';
 
 import { FileMetaData } from '@/types/file-manager';
-import { Loader2 } from 'lucide-react';
+import { Loader2Icon } from '../icons';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { DownloadIcon, FullscreenIcon, LinkIcon, TrashIcon } from '../icons';
@@ -52,7 +52,7 @@ export function FileDeleteButton({ file }: FileButtonProps) {
       disabled={deleting}
     >
       {deleting ? (
-        <Loader2 className="size-5 animate-spin" />
+        <Loader2Icon className="size-5 animate-spin" />
       ) : (
         <TrashIcon className="size-5" />
       )}
@@ -92,7 +92,7 @@ export function FileDownloadButton({ file }: FileButtonProps) {
       disabled={downloading}
     >
       {downloading ? (
-        <Loader2 className="size-5 animate-spin" />
+        <Loader2Icon className="size-5 animate-spin" />
       ) : (
         <DownloadIcon className="size-5" strokeWidth={2.5} />
       )}

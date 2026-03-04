@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, ChangeEvent } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2Icon } from '../icons';
 import { FileMetaData } from '@/types/file-manager';
 import { DetailsLayout } from '@/components/file-details/details-layout';
 import { FileDeleteButton, FileDownloadButton, FileCopyLinkButton } from '@/components/file-details/file-action-buttons';
@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { getFileSize } from '@/lib/file-size';
 import { formatDate, formatDuration } from '@/lib/format-utils';
-import { Music } from 'lucide-react';
+import { MusicIcon } from '../icons';
 import { Field, FieldLabel } from '../ui/field';
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '../ui/input-group';
 
@@ -68,7 +68,7 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
       <div className="flex-1 flex flex-col items-center justify-center bg-linear-to-br from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 rounded-lg p-8">
         <div className="mb-8">
           <div className="w-32 h-32 rounded-full bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center">
-            <Music className="w-16 h-16 text-purple-600 dark:text-purple-400" />
+            <MusicIcon className="w-16 h-16 text-purple-600 dark:text-purple-400" />
           </div>
         </div>
         <div className="w-full max-w-md">
@@ -166,7 +166,7 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
         Cancel
       </Button>
       <Button onClick={handleSave} radius="full" className='w-full md:w-auto' disabled={isSaving}>
-        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {isSaving && <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />}
         Finish
       </Button>
     </div>

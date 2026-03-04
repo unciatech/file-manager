@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, ChangeEvent } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2Icon } from '../icons';
 import { FileMetaData } from '@/types/file-manager';
 import { DetailsLayout } from '@/components/file-details/details-layout';
 import { FileDeleteButton, FileDownloadButton, FileCopyLinkButton, FileFullscreenButton } from '@/components/file-details/file-action-buttons';
@@ -175,7 +175,7 @@ export function ImageModal({ file, onClose, onSave, onDelete }: ImageModalProps)
         Cancel
       </Button>
       <Button className='w-full md:w-auto' onClick={handleSave} radius="full" disabled={isSaving}>
-        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {isSaving && <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />}
         Finish
       </Button>
     </div>

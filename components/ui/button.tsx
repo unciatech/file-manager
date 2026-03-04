@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { ChevronDown, LucideIcon } from 'lucide-react';
+import { ChevronDownIcon } from '../icons';
 import { Slot as SlotPrimitive } from 'radix-ui';
 import { cn } from '@/lib/utils';
 
@@ -413,10 +413,10 @@ function Button({
 }
 
 interface ButtonArrowProps extends React.SVGProps<SVGSVGElement> {
-  icon?: LucideIcon; // Allows passing any Lucide icon
+  icon?: React.FC<React.SVGProps<SVGSVGElement>>;
 }
 
-function ButtonArrow({ icon: Icon = ChevronDown, className, ...props }: ButtonArrowProps) {
+function ButtonArrow({ icon: Icon = ChevronDownIcon, className, ...props }: ButtonArrowProps) {
   return <Icon data-slot="button-arrow" className={cn('ms-auto -me-1', className)} {...props} />;
 }
 

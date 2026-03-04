@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { MoreVertical } from "lucide-react";
+import { MoveVerticalIcon } from '../icons';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -97,7 +97,7 @@ export function CardContextMenu({
                     radius="full"
                     className="focus-visible:ring-0 focus-visible:ring-offset-0"
                   >
-                    <MoreVertical className="size-4 text-gray-700" />
+                    <MoveVerticalIcon className="size-4 text-gray-700" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 rounded-2xl shadow-xl bg-white/50 backdrop-blur-2xl border-gray-200">

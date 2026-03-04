@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { type DialogProps } from '@radix-ui/react-dialog';
 import { Command as CommandPrimitive } from 'cmdk';
-import { Check, LucideIcon, Search } from 'lucide-react';
+import { CheckIcon, SearchIcon } from '../icons';
 
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
   return (
@@ -40,7 +40,7 @@ const CommandDialog = ({ children, className, shouldFilter, ...props }: CommandD
 function CommandInput({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.Input>) {
   return (
     <div className="flex items-center border-border border-b px-3" cmdk-input-wrapper="" data-slot="command-input">
-      <Search className="me-2 h-4 w-4 shrink-0 opacity-50" />
+      <SearchIcon className="me-2 h-4 w-4 shrink-0 opacity-50" />
       <CommandPrimitive.Input
         className={cn(
           'flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-hidden text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
@@ -114,10 +114,10 @@ const CommandShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanE
 };
 
 interface ButtonArrowProps extends React.SVGProps<SVGSVGElement> {
-  icon?: LucideIcon; // Allows passing any Lucide icon
+  icon?: React.FC<React.SVGProps<SVGSVGElement>>;
 }
 
-function CommandCheck({ icon: Icon = Check, className, ...props }: ButtonArrowProps) {
+function CommandCheck({ icon: Icon = CheckIcon, className, ...props }: ButtonArrowProps) {
   return (
     <Icon
       data-slot="command-check"

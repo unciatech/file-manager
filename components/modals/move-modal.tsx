@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
 import { FolderId, Folder, PaginationInfo } from "@/types/file-manager";
-import { ChevronRight, Loader2 } from 'lucide-react';
+import { ChevronRightIcon, Loader2Icon } from '../icons';
 import FolderIcon from "../icons/folder";
 import { middleTruncate } from "@/lib/truncate-name";
 import { CrossIcon } from "../icons";
@@ -96,7 +96,7 @@ function FolderTreeItem({
             className="p-1 -m-1 hover:bg-gray-100 rounded transition-colors"
             aria-label={isOpen ? "Collapse folder" : "Expand folder"}
           >
-            <ChevronRight
+            <ChevronRightIcon
               className={`size-4 text-gray-500 transition-transform ${!isDisabled && isOpen ? 'rotate-90' : ''}`}
             />
           </button>
@@ -140,7 +140,7 @@ function FolderTreeItem({
             {/* Loading Indicator / Sentinel */}
             {(isLoading || hasMore) && (
               <li ref={observerRef} className="py-2 pl-6 flex justify-start">
-                 <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                 <Loader2Icon className="h-4 w-4 animate-spin text-blue-500" />
               </li>
             )}
 
@@ -367,7 +367,7 @@ export function MoveModal() {
                   ))}
                   {(isRootLoading || rootHasMore) && (
                         <li ref={rootObserverRef} className="py-2 pl-6 flex justify-start">
-                          <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                          <Loader2Icon className="h-5 w-5 animate-spin text-blue-500" />
                       </li>
                   )}
                   {rootFolders.length === 0 && !isRootLoading && !rootHasMore && (

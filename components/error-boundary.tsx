@@ -2,7 +2,7 @@
 
 import React, { Component, ReactNode } from 'react';
 import { Button } from './ui/button';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertCircleIcon, RefreshCwIcon } from './icons';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -57,7 +57,7 @@ export class FileManagerErrorBoundary extends Component<ErrorBoundaryProps, Erro
         <div className="flex items-center justify-center min-h-[400px] p-8 w-full h-full bg-slate-50/50 rounded-lg border border-dashed border-slate-200">
           <div className="text-center max-w-md flex flex-col items-center">
             <div className="bg-red-100 p-3 rounded-full mb-4">
-              <AlertCircle className="size-8 text-red-600" />
+              <AlertCircleIcon className="size-8 text-red-600" />
             </div>
             <h2 className="text-xl font-semibold text-slate-900 mb-2">
               Something went wrong
@@ -78,7 +78,7 @@ export class FileManagerErrorBoundary extends Component<ErrorBoundaryProps, Erro
               </details>
             )}
             <Button onClick={this.handleReset} radius="full" className="gap-2">
-              <RefreshCw className="size-4" />
+              <RefreshCwIcon className="size-4" />
               Reload Application
             </Button>
           </div>
