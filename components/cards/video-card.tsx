@@ -1,6 +1,6 @@
 import { FileMetaData } from "@/types/file-manager";
 import { Icons } from "@/lib/file-utils";
-import { Play } from "lucide-react";
+import { PlayIcon } from '../icons';
 import { useState } from "react";
 
 /** Props for the VideoCard component. */
@@ -32,7 +32,7 @@ export function VideoCard({ file, className }: VideoCardProps) {
                 />
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="bg-black/60 rounded-full p-2 backdrop-blur-xs">
-                        <Play className="size-5 text-white fill-white" />
+                        <PlayIcon className="size-5 text-white fill-white" />
                     </div>
                 </div>
             </div>
@@ -53,7 +53,7 @@ export function VideoCard({ file, className }: VideoCardProps) {
                 {/* Play button overlay */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="bg-black/60 rounded-full p-2 backdrop-blur-xs">
-                        <Play className="size-5 text-white fill-white" />
+                        <PlayIcon className="size-5 text-white fill-white" />
                     </div>
                 </div>
             </div>

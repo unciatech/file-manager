@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal } from "lucide-react";
+import { MoveHorizontalIcon } from '../icons';
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -43,7 +43,7 @@ export function ResponsiveHeaderActions() {
               radius="full"
               className="border-gray-200 bg-white"
             >
-              <MoreHorizontal className="size-5" />
+              <MoveHorizontalIcon className="size-5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 rounded-2xl shadow-xl bg-white/50 backdrop-blur-2xl border-gray-200">
@@ -110,7 +110,7 @@ export function ModalResponsiveHeaderActions({ onSearchClick }: { onSearchClick?
               radius="full"
               className="border-gray-200 bg-white"
             >
-              <MoreHorizontal className="size-5" />
+              <MoveHorizontalIcon className="size-5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">

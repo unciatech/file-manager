@@ -20,13 +20,22 @@ export { default as SearchIcon } from "./search";
 export { default as MoveIcon } from "./move";
 export { default as UploadFileIcon } from "./upload-file";
 export { default as UploadFolderIcon } from "./upload-folder";
-export { default as ChevronLeftIcon } from "./chevron-left";
 export { default as ChevronRightIcon } from "./chevron-right";
+export { default as ChevronLeftIcon } from "./chevron-left";
 export { default as PlusIcon } from "./plus";
 export { default as TrashIcon } from "./trash";
 export { default as CrossIcon } from "./cross";
 export { default as DownloadIcon } from "./download";
 export { default as LinkIcon } from "./link";
 export { default as FullscreenIcon } from "./fullscreen";
-
-
+export { default as CheckIcon } from "./check";
+export { default as SelectIcon } from "./select";
+export { default as EditIcon } from "./edit";
+export { default as MoveHorizontalIcon } from "./move-horizontal";
+export { default as MoveVerticalIcon } from "./move-vertical";
+export { default as MinusIcon } from "./minus";
+export { default as Loader2Icon } from "./loader-2";
+export { default as PlayIcon } from "./play";
+export { default as AlertCircleIcon } from "./alert-circle";
+export { default as RefreshCwIcon } from "./refresh-cw";
+export { default as ChevronDownIcon } from "./chevron-down";

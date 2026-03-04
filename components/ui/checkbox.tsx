@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { cva, VariantProps } from 'class-variance-authority';
-import { Check, Minus } from 'lucide-react';
+import { CheckIcon, MinusIcon } from '../icons';
 import { Checkbox as CheckboxPrimitive } from 'radix-ui';
 
 // Define the variants for the Checkbox using cva.
@@ -37,8 +37,8 @@ function Checkbox({
   return (
     <CheckboxPrimitive.Root data-slot="checkbox" className={cn(checkboxVariants({ size }), className)} {...props}>
       <CheckboxPrimitive.Indicator className={cn('flex items-center justify-center text-current')}>
-        <Check className="group-data-[state=indeterminate]:hidden" />
-        <Minus className="hidden group-data-[state=indeterminate]:block" />
+        <CheckIcon className="group-data-[state=indeterminate]:hidden" />
+        <MinusIcon className="hidden group-data-[state=indeterminate]:block" />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   );

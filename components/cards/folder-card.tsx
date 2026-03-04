@@ -2,14 +2,13 @@
 
 import React from "react";
 
-import { Move } from "lucide-react";
 import { Folder, FolderId, Mode, SELECTION_MODE, SelectionMode } from "../../types/file-manager";
 
 import { Checkbox } from "../ui/checkbox";
 import { CardContextMenu, CardMenuItem } from "./card-context-menu";
 
 import FolderIcon from "../icons/folder";
-import { TrashIcon } from "../icons";
+import { TrashIcon, MoveIcon } from "../icons";
 import EditIcon from "../icons/edit";
 import SelectIcon from "../icons/select";
 
@@ -94,7 +93,7 @@ export function FolderCard({
     },
     {
       label: "Move to...",
-      icon: <Move className="size-5 mr-1" />,
+      icon: <MoveIcon className="size-5 mr-1" />,
       onClick: handleMove,
     },
     {
@@ -141,7 +140,7 @@ export function FolderCard({
         {/* Text Label: Selection highlights background in blue */}
         <div className="w-full text-center px-0.5 flex flex-col items-center">
           <span className={`
-                  text-[13px] font-medium leading-[1.3] tracking-tight line-clamp-2 px-2.5 pb-[2px] rounded-[6px] transition-colors duration-100 break-words max-w-full
+                  text-[13px] font-semibold leading-[1.3] tracking-tight line-clamp-2 px-2.5 pb-[2px] rounded-[6px] transition-colors duration-100 break-words max-w-full
                   ${isSelected
               ? "bg-[#2563EB] text-white antialiased shadow-sm"
               : "text-[#374151] group-hover:text-black"}

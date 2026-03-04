@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 import * as ContextMenuPrimitive from '@radix-ui/react-context-menu';
-import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react';
+import { CircleIcon } from 'lucide-react';
+import { CheckIcon, ChevronRightIcon } from '../icons';
 import { cn } from '@/lib/utils';
 
 function ContextMenu({ ...props }: React.ComponentProps<typeof ContextMenuPrimitive.Root>) {
@@ -48,7 +49,7 @@ function ContextMenuSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto" />
+      <ChevronRightIcon className="ml-auto size-4" />
     </ContextMenuPrimitive.SubTrigger>
   );
 }
