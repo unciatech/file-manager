@@ -16,7 +16,7 @@ It supports deep folder nesting, drag-and-drop file uploads, metadata management
 ## 🛠️ Tech Stack
 - **Framework**: Next.js / React
 - **Styling**: Tailwind CSS
-- **Icons**: Lucide React
+- **Icons**: Custom SVG Icons
 - **Notifications**: Sonner
 
 > [!WARNING]
@@ -34,18 +34,17 @@ npm install @unciatech/file-manager
 ```
 
 **(Optional) ⚡ Magic Quick Start Scaffolding**
-Instead of setting everything up manually, our incredibly powerful init script can generate files for you!
-
-**A) If you just want the component inside your CURRENT project:**
-```bash
-npx @unciatech/file-manager init
-```
-
-**B) If you want to spawn a brand new full-stack application instantly:**
+Instead of setting everything up manually, our init script can spawn a brand new full-stack application instantly:
 ```bash
 npx @unciatech/file-manager init my-media-app
 ```
-*It will ask if you want Next.js or Vite (React), install Tailwind, install the package, and set everything up for you!*
+*It will ask if you want Next.js or Vite (React), install Tailwind, install the package, and set everything up including styles!*
+
+**(CRITICAL) Import the styles:**
+The init script includes this automatically, but if you are installing manually, add this import to your root layout / entry file:
+```ts
+import '@unciatech/file-manager/styles';
+```
 
 **(CRITICAL) Configure Tailwind CSS:**
 Because this library uses Tailwind CSS, you MUST tell your Tailwind compiler to scan the library components for utility classes, otherwise it will render with zero styles!
