@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import e from"fs";import r from"path";import{execSync as s}from"child_process";import v from"readline";var m=process.argv.slice(2),y=m[0],t=m[1],g=v.createInterface({input:process.stdin,output:process.stdout}),w=n=>new Promise(o=>g.question(n,o)),p=`"use client";
+import e from'fs';import r from'path';import {execSync}from'child_process';import v from'readline';var m=process.argv.slice(2),y=m[0],t=m[1],g=v.createInterface({input:process.stdin,output:process.stdout}),w=n=>new Promise(o=>g.question(n,o)),p=`"use client";
 
 import React, { Suspense } from "react";
 import { FileManager, MockProvider } from "@unciatech/file-manager";
@@ -19,14 +19,14 @@ export default function FileManagerDemo() {
     </div>
   );
 }
-`;async function h(){if(y!=="init"&&(console.log("Usage: npx @unciatech/file-manager init [project-name]"),process.exit(0)),!t){console.log("\u{1F680} Generating <FileManagerDemo /> component in the current project...");let i=process.cwd();e.existsSync(r.join(process.cwd(),"components"))?i=r.join(process.cwd(),"components"):e.existsSync(r.join(process.cwd(),"src","components"))&&(i=r.join(process.cwd(),"src","components"));let c=r.join(i,"FileManagerDemo.tsx");e.existsSync(c)&&(console.error(`\u274C Error: ${c} already exists.`),process.exit(1)),e.writeFileSync(c,p,"utf-8"),console.log(`\u2705 Success! Created ${c}`),console.log(""),console.log("You can now import and render <FileManagerDemo /> anywhere in your application."),console.log("Don't forget to configure your Tailwind CSS content to scan the library for styles!"),process.exit(0)}console.log(`
+`;async function h(){if(y!=="init"&&(console.log("Usage: npx @unciatech/file-manager init [project-name]"),process.exit(0)),!t){console.log("\u{1F680} Generating <FileManagerDemo /> component in the current project...");let i=process.cwd();e.existsSync(r.join(process.cwd(),"components"))?i=r.join(process.cwd(),"components"):e.existsSync(r.join(process.cwd(),"src","components"))&&(i=r.join(process.cwd(),"src","components"));let c=r.join(i,"FileManagerDemo.tsx");e.existsSync(c)&&(console.error(`\u274C Error: ${c} already exists.`),process.exit(1)),e.writeFileSync(c,p,"utf-8"),console.log(`\u2705 Success! Created ${c}`),console.log(""),console.log("You can now import and render <FileManagerDemo /> anywhere in your application."),console.log("Don't forget to configure your Tailwind CSS content to scan the library for styles!"),process.exit(0);}console.log(`
 \u{1F680} Initializing a new application: ${t}
 `),console.log("Which framework would you like to use?"),console.log("  1) Next.js (App Router, Tailwind v4)"),console.log("  2) Vite (React, Tailwind v4)"),console.log("  3) Cancel");let n=await w(`
 Select an option (1-3): `),o=r.join(process.cwd(),t);e.existsSync(o)&&(console.error(`
-\u274C Error: Directory "${t}" already exists in ${process.cwd()}.`),console.error("   Please choose a different project name or delete the existing directory first."),g.close(),process.exit(1));try{n==="1"?await x(t,o):n==="2"?await b(t,o):(console.log("Canceled."),process.exit(0))}catch(i){console.error(`
-\u274C Scaffolding failed:`,i),process.exit(1)}process.exit(0)}async function x(n,o){console.log(`
-\u{1F4E6} Creating Next.js application (this may take a minute)...`),s(`npx create-next-app@latest ${n} --ts --tailwind --eslint --app --src-dir --import-alias "@/*" --use-npm`,{stdio:"inherit"}),console.log(`
-\u{1F4E6} Installing dependencies (@unciatech/file-manager, tailwindcss-animate)...`),s("npm install @unciatech/file-manager tailwindcss-animate",{cwd:o,stdio:"inherit"});let i=r.join(o,"src","components");e.existsSync(i)||e.mkdirSync(i,{recursive:!0}),e.writeFileSync(r.join(i,"FileManagerDemo.tsx"),p,"utf-8");let c=r.join(o,"src","app","page.tsx");e.writeFileSync(c,`import FileManagerDemo from "@/components/FileManagerDemo";
+\u274C Error: Directory "${t}" already exists in ${process.cwd()}.`),console.error("   Please choose a different project name or delete the existing directory first."),g.close(),process.exit(1));try{n==="1"?await x(t,o):n==="2"?await b(t,o):(console.log("Canceled."),process.exit(0));}catch(i){console.error(`
+\u274C Scaffolding failed:`,i),process.exit(1);}process.exit(0);}async function x(n,o){console.log(`
+\u{1F4E6} Creating Next.js application (this may take a minute)...`),execSync(`npx create-next-app@latest ${n} --ts --tailwind --eslint --app --src-dir --import-alias "@/*" --use-npm`,{stdio:"inherit"}),console.log(`
+\u{1F4E6} Installing dependencies (@unciatech/file-manager, tailwindcss-animate)...`),execSync("npm install @unciatech/file-manager tailwindcss-animate",{cwd:o,stdio:"inherit"});let i=r.join(o,"src","components");e.existsSync(i)||e.mkdirSync(i,{recursive:true}),e.writeFileSync(r.join(i,"FileManagerDemo.tsx"),p,"utf-8");let c=r.join(o,"src","app","page.tsx");e.writeFileSync(c,`import FileManagerDemo from "@/components/FileManagerDemo";
 
 export default function Home() {
   return (
@@ -35,7 +35,7 @@ export default function Home() {
     </main>
   );
 }
-`);let l=r.join(o,"src","app","media","[[...path]]");e.mkdirSync(l,{recursive:!0}),e.writeFileSync(r.join(l,"page.tsx"),`import FileManagerDemo from "@/components/FileManagerDemo";
+`);let l=r.join(o,"src","app","media","[[...path]]");e.mkdirSync(l,{recursive:true}),e.writeFileSync(r.join(l,"page.tsx"),`import FileManagerDemo from "@/components/FileManagerDemo";
 
 export default function MediaPage() {
   return (
@@ -45,7 +45,7 @@ export default function MediaPage() {
   );
 }
 `);let a=r.join(o,"src","app","layout.tsx");if(e.existsSync(a)){let d=e.readFileSync(a,"utf8");d.includes("@unciatech/file-manager/styles")||(d=d.replace(/^(import type)/m,`import '@unciatech/file-manager/styles';
-$1`),e.writeFileSync(a,d))}let u=r.join(o,"src","app","globals.css");e.writeFileSync(u,`@import 'tailwindcss';
+$1`),e.writeFileSync(a,d));}let u=r.join(o,"src","app","globals.css");e.writeFileSync(u,`@import 'tailwindcss';
 @import 'tw-animate-css';
 @source "../../node_modules/@unciatech/file-manager/dist";
 
@@ -152,9 +152,9 @@ $1`),e.writeFileSync(a,d))}let u=r.join(o,"src","app","globals.css");e.writeFile
 html {
   scroll-behavior: smooth;
 }
-`),f(n)}async function b(n,o){console.log(`
-\u{1F4E6} Creating Vite React application...`),s(`npm create vite@latest ${n} -- --template react-ts`,{stdio:"inherit"}),console.log(`
-\u{1F4E6} Installing dependencies (Tailwind + File Manager)...`),s("npm install",{cwd:o,stdio:"inherit"}),s("npm install tailwindcss @tailwindcss/vite @unciatech/file-manager",{cwd:o,stdio:"inherit"});let i=r.join(o,"vite.config.ts");e.writeFileSync(i,`import { defineConfig } from 'vite'
+`),f(n);}async function b(n,o){console.log(`
+\u{1F4E6} Creating Vite React application...`),execSync(`npm create vite@latest ${n} -- --template react-ts`,{stdio:"inherit"}),console.log(`
+\u{1F4E6} Installing dependencies (Tailwind + File Manager)...`),execSync("npm install",{cwd:o,stdio:"inherit"}),execSync("npm install tailwindcss @tailwindcss/vite @unciatech/file-manager",{cwd:o,stdio:"inherit"});let i=r.join(o,"vite.config.ts");e.writeFileSync(i,`import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -166,7 +166,7 @@ export default defineConfig({
 })
 `);let l=r.join(o,"src","index.css");e.writeFileSync(l,`@import "tailwindcss";
 @source "../../node_modules/@unciatech/file-manager/dist";
-`);let a=r.join(o,"src","components");e.existsSync(a)||e.mkdirSync(a,{recursive:!0}),e.writeFileSync(r.join(a,"FileManagerDemo.tsx"),p,"utf-8");let u=r.join(o,"src","App.tsx");e.writeFileSync(u,`import FileManagerDemo from "./components/FileManagerDemo";
+`);let a=r.join(o,"src","components");e.existsSync(a)||e.mkdirSync(a,{recursive:true}),e.writeFileSync(r.join(a,"FileManagerDemo.tsx"),p,"utf-8");let u=r.join(o,"src","App.tsx");e.writeFileSync(u,`import FileManagerDemo from "./components/FileManagerDemo";
 
 function App() {
   return (
@@ -177,8 +177,8 @@ function App() {
 }
 
 export default App;
-`),f(n,"npm run dev")}function f(n,o="npm run dev"){console.log(`
+`),f(n,"npm run dev");}function f(n,o="npm run dev"){console.log(`
 =========================================`),console.log("\u{1F389} Your Media Library application is ready!"),console.log("========================================="),console.log(`
 Next steps:`),console.log(`  cd ${n}`),console.log(`  ${o}`),console.log(`
 Enjoy building! \u{1F5C2}\uFE0F
-`)}h();
+`);}h();

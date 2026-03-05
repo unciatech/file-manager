@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-"use strict";var h=Object.create;var g=Object.defineProperty;var x=Object.getOwnPropertyDescriptor;var b=Object.getOwnPropertyNames;var S=Object.getPrototypeOf,F=Object.prototype.hasOwnProperty;var M=(e,o,i,c)=>{if(o&&typeof o=="object"||typeof o=="function")for(let a of b(o))!F.call(e,a)&&a!==i&&g(e,a,{get:()=>o[a],enumerable:!(c=x(o,a))||c.enumerable});return e};var p=(e,o,i)=>(i=e!=null?h(S(e)):{},M(o||!e||!e.__esModule?g(i,"default",{value:e,enumerable:!0}):i,e));var r=p(require("fs")),n=p(require("path")),l=require("child_process"),f=p(require("readline")),v=process.argv.slice(2),j=v[0],s=v[1],y=f.default.createInterface({input:process.stdin,output:process.stdout}),k=e=>new Promise(o=>y.question(e,o)),m=`"use client";
+'use strict';var e=require('fs'),r=require('path'),child_process=require('child_process'),v=require('readline');function _interopDefault(e){return e&&e.__esModule?e:{default:e}}var e__default=/*#__PURE__*/_interopDefault(e);var r__default=/*#__PURE__*/_interopDefault(r);var v__default=/*#__PURE__*/_interopDefault(v);var m=process.argv.slice(2),y=m[0],t=m[1],g=v__default.default.createInterface({input:process.stdin,output:process.stdout}),w=n=>new Promise(o=>g.question(n,o)),p=`"use client";
 
 import React, { Suspense } from "react";
 import { FileManager, MockProvider } from "@unciatech/file-manager";
@@ -19,14 +19,14 @@ export default function FileManagerDemo() {
     </div>
   );
 }
-`;async function z(){if(j!=="init"&&(console.log("Usage: npx @unciatech/file-manager init [project-name]"),process.exit(0)),!s){console.log("\u{1F680} Generating <FileManagerDemo /> component in the current project...");let i=process.cwd();r.default.existsSync(n.default.join(process.cwd(),"components"))?i=n.default.join(process.cwd(),"components"):r.default.existsSync(n.default.join(process.cwd(),"src","components"))&&(i=n.default.join(process.cwd(),"src","components"));let c=n.default.join(i,"FileManagerDemo.tsx");r.default.existsSync(c)&&(console.error(`\u274C Error: ${c} already exists.`),process.exit(1)),r.default.writeFileSync(c,m,"utf-8"),console.log(`\u2705 Success! Created ${c}`),console.log(""),console.log("You can now import and render <FileManagerDemo /> anywhere in your application."),console.log("Don't forget to configure your Tailwind CSS content to scan the library for styles!"),process.exit(0)}console.log(`
-\u{1F680} Initializing a new application: ${s}
-`),console.log("Which framework would you like to use?"),console.log("  1) Next.js (App Router, Tailwind v4)"),console.log("  2) Vite (React, Tailwind v4)"),console.log("  3) Cancel");let e=await k(`
-Select an option (1-3): `),o=n.default.join(process.cwd(),s);r.default.existsSync(o)&&(console.error(`
-\u274C Error: Directory "${s}" already exists in ${process.cwd()}.`),console.error("   Please choose a different project name or delete the existing directory first."),y.close(),process.exit(1));try{e==="1"?await C(s,o):e==="2"?await P(s,o):(console.log("Canceled."),process.exit(0))}catch(i){console.error(`
-\u274C Scaffolding failed:`,i),process.exit(1)}process.exit(0)}async function C(e,o){console.log(`
-\u{1F4E6} Creating Next.js application (this may take a minute)...`),(0,l.execSync)(`npx create-next-app@latest ${e} --ts --tailwind --eslint --app --src-dir --import-alias "@/*" --use-npm`,{stdio:"inherit"}),console.log(`
-\u{1F4E6} Installing dependencies (@unciatech/file-manager, tailwindcss-animate)...`),(0,l.execSync)("npm install @unciatech/file-manager tailwindcss-animate",{cwd:o,stdio:"inherit"});let i=n.default.join(o,"src","components");r.default.existsSync(i)||r.default.mkdirSync(i,{recursive:!0}),r.default.writeFileSync(n.default.join(i,"FileManagerDemo.tsx"),m,"utf-8");let c=n.default.join(o,"src","app","page.tsx");r.default.writeFileSync(c,`import FileManagerDemo from "@/components/FileManagerDemo";
+`;async function h(){if(y!=="init"&&(console.log("Usage: npx @unciatech/file-manager init [project-name]"),process.exit(0)),!t){console.log("\u{1F680} Generating <FileManagerDemo /> component in the current project...");let i=process.cwd();e__default.default.existsSync(r__default.default.join(process.cwd(),"components"))?i=r__default.default.join(process.cwd(),"components"):e__default.default.existsSync(r__default.default.join(process.cwd(),"src","components"))&&(i=r__default.default.join(process.cwd(),"src","components"));let c=r__default.default.join(i,"FileManagerDemo.tsx");e__default.default.existsSync(c)&&(console.error(`\u274C Error: ${c} already exists.`),process.exit(1)),e__default.default.writeFileSync(c,p,"utf-8"),console.log(`\u2705 Success! Created ${c}`),console.log(""),console.log("You can now import and render <FileManagerDemo /> anywhere in your application."),console.log("Don't forget to configure your Tailwind CSS content to scan the library for styles!"),process.exit(0);}console.log(`
+\u{1F680} Initializing a new application: ${t}
+`),console.log("Which framework would you like to use?"),console.log("  1) Next.js (App Router, Tailwind v4)"),console.log("  2) Vite (React, Tailwind v4)"),console.log("  3) Cancel");let n=await w(`
+Select an option (1-3): `),o=r__default.default.join(process.cwd(),t);e__default.default.existsSync(o)&&(console.error(`
+\u274C Error: Directory "${t}" already exists in ${process.cwd()}.`),console.error("   Please choose a different project name or delete the existing directory first."),g.close(),process.exit(1));try{n==="1"?await x(t,o):n==="2"?await b(t,o):(console.log("Canceled."),process.exit(0));}catch(i){console.error(`
+\u274C Scaffolding failed:`,i),process.exit(1);}process.exit(0);}async function x(n,o){console.log(`
+\u{1F4E6} Creating Next.js application (this may take a minute)...`),child_process.execSync(`npx create-next-app@latest ${n} --ts --tailwind --eslint --app --src-dir --import-alias "@/*" --use-npm`,{stdio:"inherit"}),console.log(`
+\u{1F4E6} Installing dependencies (@unciatech/file-manager, tailwindcss-animate)...`),child_process.execSync("npm install @unciatech/file-manager tailwindcss-animate",{cwd:o,stdio:"inherit"});let i=r__default.default.join(o,"src","components");e__default.default.existsSync(i)||e__default.default.mkdirSync(i,{recursive:true}),e__default.default.writeFileSync(r__default.default.join(i,"FileManagerDemo.tsx"),p,"utf-8");let c=r__default.default.join(o,"src","app","page.tsx");e__default.default.writeFileSync(c,`import FileManagerDemo from "@/components/FileManagerDemo";
 
 export default function Home() {
   return (
@@ -35,7 +35,7 @@ export default function Home() {
     </main>
   );
 }
-`);let a=n.default.join(o,"src","app","media","[[...path]]");r.default.mkdirSync(a,{recursive:!0}),r.default.writeFileSync(n.default.join(a,"page.tsx"),`import FileManagerDemo from "@/components/FileManagerDemo";
+`);let l=r__default.default.join(o,"src","app","media","[[...path]]");e__default.default.mkdirSync(l,{recursive:true}),e__default.default.writeFileSync(r__default.default.join(l,"page.tsx"),`import FileManagerDemo from "@/components/FileManagerDemo";
 
 export default function MediaPage() {
   return (
@@ -44,8 +44,8 @@ export default function MediaPage() {
     </main>
   );
 }
-`);let t=n.default.join(o,"src","app","layout.tsx");if(r.default.existsSync(t)){let d=r.default.readFileSync(t,"utf8");d.includes("@unciatech/file-manager/styles")||(d=d.replace(/^(import type)/m,`import '@unciatech/file-manager/styles';
-$1`),r.default.writeFileSync(t,d))}let u=n.default.join(o,"src","app","globals.css");r.default.writeFileSync(u,`@import 'tailwindcss';
+`);let a=r__default.default.join(o,"src","app","layout.tsx");if(e__default.default.existsSync(a)){let d=e__default.default.readFileSync(a,"utf8");d.includes("@unciatech/file-manager/styles")||(d=d.replace(/^(import type)/m,`import '@unciatech/file-manager/styles';
+$1`),e__default.default.writeFileSync(a,d));}let u=r__default.default.join(o,"src","app","globals.css");e__default.default.writeFileSync(u,`@import 'tailwindcss';
 @import 'tw-animate-css';
 @source "../../node_modules/@unciatech/file-manager/dist";
 
@@ -152,9 +152,9 @@ $1`),r.default.writeFileSync(t,d))}let u=n.default.join(o,"src","app","globals.c
 html {
   scroll-behavior: smooth;
 }
-`),w(e)}async function P(e,o){console.log(`
-\u{1F4E6} Creating Vite React application...`),(0,l.execSync)(`npm create vite@latest ${e} -- --template react-ts`,{stdio:"inherit"}),console.log(`
-\u{1F4E6} Installing dependencies (Tailwind + File Manager)...`),(0,l.execSync)("npm install",{cwd:o,stdio:"inherit"}),(0,l.execSync)("npm install tailwindcss @tailwindcss/vite @unciatech/file-manager",{cwd:o,stdio:"inherit"});let i=n.default.join(o,"vite.config.ts");r.default.writeFileSync(i,`import { defineConfig } from 'vite'
+`),f(n);}async function b(n,o){console.log(`
+\u{1F4E6} Creating Vite React application...`),child_process.execSync(`npm create vite@latest ${n} -- --template react-ts`,{stdio:"inherit"}),console.log(`
+\u{1F4E6} Installing dependencies (Tailwind + File Manager)...`),child_process.execSync("npm install",{cwd:o,stdio:"inherit"}),child_process.execSync("npm install tailwindcss @tailwindcss/vite @unciatech/file-manager",{cwd:o,stdio:"inherit"});let i=r__default.default.join(o,"vite.config.ts");e__default.default.writeFileSync(i,`import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -164,9 +164,9 @@ export default defineConfig({
     tailwindcss(),
   ],
 })
-`);let a=n.default.join(o,"src","index.css");r.default.writeFileSync(a,`@import "tailwindcss";
+`);let l=r__default.default.join(o,"src","index.css");e__default.default.writeFileSync(l,`@import "tailwindcss";
 @source "../../node_modules/@unciatech/file-manager/dist";
-`);let t=n.default.join(o,"src","components");r.default.existsSync(t)||r.default.mkdirSync(t,{recursive:!0}),r.default.writeFileSync(n.default.join(t,"FileManagerDemo.tsx"),m,"utf-8");let u=n.default.join(o,"src","App.tsx");r.default.writeFileSync(u,`import FileManagerDemo from "./components/FileManagerDemo";
+`);let a=r__default.default.join(o,"src","components");e__default.default.existsSync(a)||e__default.default.mkdirSync(a,{recursive:true}),e__default.default.writeFileSync(r__default.default.join(a,"FileManagerDemo.tsx"),p,"utf-8");let u=r__default.default.join(o,"src","App.tsx");e__default.default.writeFileSync(u,`import FileManagerDemo from "./components/FileManagerDemo";
 
 function App() {
   return (
@@ -177,8 +177,8 @@ function App() {
 }
 
 export default App;
-`),w(e,"npm run dev")}function w(e,o="npm run dev"){console.log(`
+`),f(n,"npm run dev");}function f(n,o="npm run dev"){console.log(`
 =========================================`),console.log("\u{1F389} Your Media Library application is ready!"),console.log("========================================="),console.log(`
-Next steps:`),console.log(`  cd ${e}`),console.log(`  ${o}`),console.log(`
+Next steps:`),console.log(`  cd ${n}`),console.log(`  ${o}`),console.log(`
 Enjoy building! \u{1F5C2}\uFE0F
-`)}z();
+`);}h();

@@ -40,3 +40,4 @@ export { default as AlertCircleIcon } from "./alert-circle";
 export { default as RefreshCwIcon } from "./refresh-cw";
 export { default as ChevronDownIcon } from "./chevron-down";
 export { default as TriangleAlertIcon } from "./triangle-alert";
+export { default as CircleIcon } from "./circle";
