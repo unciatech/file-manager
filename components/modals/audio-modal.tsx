@@ -91,14 +91,14 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Size
           </p>
-          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{getFileSize(file.size)}</p>
+          <p className="text-xs font-bold text-primary">{getFileSize(file.size)}</p>
         </div>
 
         <div>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Duration
           </p>
-          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
+          <p className="text-xs font-bold text-primary">
             {file.metaData?.duration ? formatDuration(file.metaData.duration) : 'N/A'}
           </p>
         </div>
@@ -107,7 +107,7 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Bitrate
           </p>
-          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
+          <p className="text-xs font-bold text-primary">
             {file.metaData?.bitrate ? `${file.metaData.bitrate} kbps` : 'N/A'}
           </p>
         </div>
@@ -116,7 +116,7 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Date
           </p>
-          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
+          <p className="text-xs font-bold text-primary">
             {formatDate(file.createdAt)}
           </p>
         </div>
@@ -125,21 +125,21 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Extension
           </p>
-          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{file.ext?.replace('.', '') || 'N/A'}</p>
+          <p className="text-xs font-bold text-primary">{file.ext?.replace('.', '') || 'N/A'}</p>
         </div>
 
 
       </div>
 
       {/* Editable Fields */}
-      <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-zinc-700">
+      <div className="space-y-4 pt-4 border-t border-border">
         <div className="space-y-2">
           <Field className='gap-0'>
             <FieldLabel htmlFor="fileName">File name</FieldLabel>
             <InputGroup>
               <InputGroupInput id="fileName" placeholder="Enter file name" value={fileName.replace(file.ext || '', '')} onChange={(e: ChangeEvent<HTMLInputElement>) => setFileName(e.target.value)} />
               <InputGroupAddon align="inline-end" className='pr-1'>
-                <InputGroupText className='font-bold bg-gray-200 dark:bg-zinc-700 rounded-lg py-1 px-3'>{file.ext}</InputGroupText>
+                <InputGroupText className='font-bold bg-accent rounded-lg py-1 px-3'>{file.ext}</InputGroupText>
               </InputGroupAddon>
             </InputGroup>
           </Field>

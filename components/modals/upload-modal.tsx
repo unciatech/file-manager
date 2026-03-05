@@ -177,7 +177,7 @@ export function UploadModal() {
           {/* Upload Area */}
           <div
             className={cn(
-              'relative rounded-lg border-dashed border-[2.5px] bg-gray-100 dark:bg-zinc-800 border-gray-300 dark:border-zinc-600 px-6 py-16 text-center transition-colors mb-4',
+              'relative rounded-lg border-dashed border-[2.5px] bg-muted border-border px-6 py-16 text-center transition-colors mb-4',
               isDragging
                 ? 'border-primary bg-primary/5'
                 : 'border-muted-foreground/25 hover:border-muted-foreground/50',
@@ -196,7 +196,7 @@ export function UploadModal() {
                   isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/25',
                 )}
               >
-                <UploadCloudIcon className='mb-3 text-zinc-400 dark:text-zinc-500' />
+                <UploadCloudIcon className='mb-3 text-muted-foreground' />
               </div>
 
               <div className="space-y-2">
@@ -205,7 +205,7 @@ export function UploadModal() {
                   <button
                     type="button"
                     onClick={openFileDialog}
-                    className="cursor-pointer text-blue-600 dark:text-blue-400 underline-offset-4 underline"
+                    className="cursor-pointer text-primary underline-offset-4 underline"
                   >
                     browse files
                   </button>
@@ -234,7 +234,7 @@ export function UploadModal() {
                     {/* Wrapper */}
                     <div className="relative overflow-hidden rounded-lg border bg-card transition-colors">
                       {/* File preview area - uses component registry */}
-                      <div className="relative aspect-square bg-muted border-b border-slate-200 dark:border-zinc-800">
+                      <div className="relative aspect-square bg-muted border-b border-border">
                         <div className="flex h-full items-center justify-center p-4">
                           <div className="w-[75%] h-[75%] flex items-center justify-center">
                             {fileItem.status === 'uploading' ? (
@@ -276,7 +276,7 @@ export function UploadModal() {
                         <div className="space-y-1">
                           <p className="truncate text-xs font-medium">{fileItem.file.name}</p>
                           <div className="relative flex items-center justify-between gap-2">
-                            <span className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold tracking-tight">{getFileSize(fileItem.file.size)}</span>
+                            <span className="text-[11px] text-primary font-semibold tracking-tight">{getFileSize(fileItem.file.size)}</span>
 
                             {fileItem.status === 'error' && fileItem.error && (
                               <Tooltip>
