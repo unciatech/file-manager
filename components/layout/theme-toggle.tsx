@@ -14,10 +14,9 @@ export function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    // Determine initial state: localStorage override or system preference
+    // Determine initial state: localStorage override or default light
     const saved = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const shouldBeDark = saved ? saved === "dark" : prefersDark;
+    const shouldBeDark = saved === "dark";
 
     setIsDark(shouldBeDark);
     document.documentElement.classList.toggle("dark", shouldBeDark);
