@@ -83,6 +83,14 @@ async function main() {
   
   const targetDir = path.join(process.cwd(), projectName);
 
+  // Pre-flight: abort early if the target directory already exists
+  if (fs.existsSync(targetDir)) {
+    console.error(`\n❌ Error: Directory "${projectName}" already exists in ${process.cwd()}.`);
+    console.error(`   Please choose a different project name or delete the existing directory first.`);
+    rl.close();
+    process.exit(1);
+  }
+
   try {
     if (choice === '1') {
       await scaffoldNextjs(projectName, targetDir);
@@ -118,6 +126,27 @@ async function scaffoldNextjs(projectName: string, targetDir: string) {
   // Replace default Home page
   const pagePath = path.join(targetDir, 'src', 'app', 'page.tsx');
   fs.writeFileSync(pagePath, `import FileManagerDemo from "@/components/FileManagerDemo";\n\nexport default function Home() {\n  return (\n    <main className="min-h-screen bg-neutral-50">\n      <FileManagerDemo />\n    </main>\n  );\n}\n`);
+
+  // Create catch-all route for folder navigation (/media, /media/[folderId])
+  const mediaRouteDir = path.join(targetDir, 'src', 'app', 'media', '[[...path]]');
+  fs.mkdirSync(mediaRouteDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(mediaRouteDir, 'page.tsx'),
+    `import FileManagerDemo from "@/components/FileManagerDemo";\n\nexport default function MediaPage() {\n  return (\n    <main className="min-h-screen bg-neutral-50">\n      <FileManagerDemo />\n    </main>\n  );\n}\n`
+  );
+
+  // Inject package styles import into layout.tsx
+  const layoutPath = path.join(targetDir, 'src', 'app', 'layout.tsx');
+  if (fs.existsSync(layoutPath)) {
+    let layoutContent = fs.readFileSync(layoutPath, 'utf8');
+    if (!layoutContent.includes('@unciatech/file-manager/styles')) {
+      layoutContent = layoutContent.replace(
+        /^(import type)/m,
+        `import '@unciatech/file-manager/styles';\n$1`
+      );
+      fs.writeFileSync(layoutPath, layoutContent);
+    }
+  }
 
   // Append Tailwind source rule to globals.css (Tailwind v4 Next.js default)
   const cssPath = path.join(targetDir, 'src', 'app', 'globals.css');
@@ -165,13 +194,13 @@ async function scaffoldVite(projectName: string, targetDir: string) {
 }
 
 function printSuccess(projectName: string, devCmd = 'npm run dev') {
-  console.log('\\n=========================================');
+  console.log('\n=========================================');
   console.log('🎉 Your Media Library application is ready!');
   console.log('=========================================');
-  console.log('\\nNext steps:');
+  console.log('\nNext steps:');
   console.log(`  cd ${projectName}`);
   console.log(`  ${devCmd}`);
-  console.log('\\nEnjoy building! 🗂️\\n');
+  console.log('\nEnjoy building! 🗂️\n');
 }
 
 main();
