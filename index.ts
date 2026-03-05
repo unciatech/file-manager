@@ -17,5 +17,4 @@ export type {
 export { FileManagerProvider, useFileManager } from './context/file-manager-context';
 
 // Providers
-export { MockProvider } from './providers/mock-provider';
 export type { IFileManagerProvider } from './types/provider';

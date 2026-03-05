@@ -2,8 +2,7 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { Circle } from 'lucide-react';
-import { CheckIcon, ChevronRightIcon } from '../icons';
+import { CheckIcon, ChevronRightIcon, CircleIcon } from '../icons';
 import { DropdownMenu as DropdownMenuPrimitive } from 'radix-ui';
 
 function DropdownMenu({ ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
@@ -154,7 +153,7 @@ function DropdownMenuRadioItem({
     >
       <span className="absolute start-1.5 flex h-3.5 w-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <Circle className="h-1.5 w-1.5 fill-primary stroke-primary" />
+          <CircleIcon className="h-1.5 w-1.5 fill-primary stroke-primary" />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}

@@ -1,13 +1,23 @@
 import { defineConfig } from 'tsup';
+import pkg from './package.json';
 
 export default defineConfig({
-  entry: ['index.ts', 'cli.ts'],
-  format: ['cjs', 'esm'], // Build for commonJS and ESmodules
-  dts: true, // Generate declaration file (.d.ts)
-  splitting: false,
-  sourcemap: false, // Disabled to significantly reduce package size
+  entry: {
+    index: 'index.ts',
+    cli: 'cli.ts',
+    mock: 'providers/mock-provider.ts'
+  },
+  format: ['cjs', 'esm'],
+  dts: true,
+  splitting: true,
+  treeshake: true,
+  sourcemap: false,
   clean: true,
-  external: ['react', 'react-dom', 'next', 'lucide-react'], // Don't bundle these
+  // Treat all dependencies and peerDependencies as external
+  external: [
+    ...Object.keys(pkg.dependencies || {}),
+    ...Object.keys(pkg.peerDependencies || {}),
+  ],
   minify: true,
   tsconfig: 'tsconfig.build.json',
 });

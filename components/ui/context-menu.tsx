@@ -2,8 +2,7 @@
 
 import * as React from 'react';
 import * as ContextMenuPrimitive from '@radix-ui/react-context-menu';
-import { CircleIcon } from 'lucide-react';
-import { CheckIcon, ChevronRightIcon } from '../icons';
+import { CheckIcon, ChevronRightIcon, CircleIcon } from '../icons';
 import { cn } from '@/lib/utils';
 
 function ContextMenu({ ...props }: React.ComponentProps<typeof ContextMenuPrimitive.Root>) {
