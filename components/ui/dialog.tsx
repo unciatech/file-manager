@@ -73,7 +73,7 @@ function DialogContent({
         {children}
         {showCloseButton && (
           <DialogClose className="cursor-pointer outline-0 absolute end-5 top-5 rounded-full opacity-60 ring-offset-background transition-opacity hover:opacity-100 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-            <CrossIcon className="size-4" />
+            <CrossIcon className="size-4 text-gray-600 dark:text-zinc-400" />
             <span className="sr-only">Close</span>
           </DialogClose>
         )}

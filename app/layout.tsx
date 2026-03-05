@@ -11,7 +11,21 @@ const inter = Inter({ subsets: ["latin"] });
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
-      <body className={cn("text-base antialiased", inter.className)} suppressHydrationWarning>
+      <head>
+        {/* Blocking script: applies .dark before first paint to prevent flash in all browsers including Safari */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            try {
+              var saved = localStorage.getItem('theme');
+              var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+              if (saved === 'dark' || (!saved && prefersDark)) {
+                document.documentElement.classList.add('dark');
+              }
+            } catch(e) {}
+          })();
+        `}} />
+      </head>
+      <body className={cn("text-base antialiased bg-background text-foreground", inter.className)} suppressHydrationWarning>
         <div className="isolate">{children}</div>
         <Toaster position="bottom-center" richColors />
       </body>

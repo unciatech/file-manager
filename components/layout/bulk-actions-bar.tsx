@@ -13,7 +13,7 @@ export function MoveButton() {
       size="lg"
       radius="full"
       onClick={() => setIsMoveFileModalOpen(true)}
-      className="text-md font-medium bg-white hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 border-gray-200 shadow-sm"
+      className="text-md font-medium bg-white dark:bg-zinc-900 hover:bg-blue-50 dark:hover:bg-blue-950 hover:text-blue-600 hover:border-blue-200 border-gray-200 dark:border-zinc-700 shadow-sm"
     >
       <MoveIcon className="size-5" />
       <span className="hidden sm:inline">Move</span>
@@ -30,7 +30,7 @@ export function DeleteButton() {
       size="lg"
       radius="full"
       onClick={bulkDelete}
-      className="text-md font-medium bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 border-gray-200 shadow-sm"
+      className="text-md font-medium bg-white dark:bg-zinc-900 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-600 hover:border-red-200 border-gray-200 dark:border-zinc-700 shadow-sm"
     >
       <TrashIcon className="size-5" />
       <span className="hidden">Delete</span>
@@ -90,7 +90,7 @@ export function BulkActionsFloating({ className }: { className?: string }) {
   if (totalSelected === 0) return null;
 
   return (
-    <div className={`fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-t border-gray-200 shadow-lg ${className || ''}`}>
+    <div className={`fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border-t border-gray-200 dark:border-zinc-700 shadow-lg ${className || ''}`}>
       <div className="px-4 sm:px-6 py-3 mx-auto">
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-2 flex-1 sm:flex-initial">

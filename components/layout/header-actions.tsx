@@ -22,7 +22,7 @@ export function MoveAction() {
     <Button
       variant="outline"
       size="lg"
-      className="border-gray-200 bg-white"
+      className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900"
       onClick={() => setIsMoveFileModalOpen(true)}
     >
       <MoveIcon className="size-5" />
@@ -75,10 +75,10 @@ export function UploadFileAction() {
       variant="outline"
       size="md"
       radius="full"
-      className="border-gray-200 bg-white text-md font-medium"
+      className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-md font-medium"
       onClick={() => setIsUploadModalOpen(true)}
     >
-      <PlusIcon className="size-5 text-gray-900" stroke="black" strokeWidth="1" />
+      <PlusIcon className="size-5 text-gray-900 dark:text-zinc-100" />
       <span className="hidden sm:inline">Upload File</span>
     </Button>
   );
@@ -92,10 +92,10 @@ export function CreateFolderAction() {
       variant="outline"
       size="icon"
       radius="full"
-      className="border-gray-200 bg-white"
+      className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900"
       onClick={() => setIsCreateFolderModalOpen(true)}
     >
-      <UploadFolderIcon className="size-5  text-gray-900" />
+      <UploadFolderIcon className="size-5 text-gray-900 dark:text-zinc-100" />
       <span className="hidden">Create Folder</span>
     </Button>
   );

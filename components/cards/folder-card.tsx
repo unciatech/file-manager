@@ -118,11 +118,11 @@ export function FolderCard({
         {/* Icon Container: Gray background, rounded, subtle shadow */}
         {/* When selected, usually just the label is highlighted in Finder. */}
         <div className={`
-              relative w-full aspect-square flex items-center justify-center mb-1 overflow-hidden rounded-2xl hover:bg-gray-200/60
+              relative w-full aspect-square flex items-center justify-center mb-1 overflow-hidden rounded-2xl hover:bg-gray-200/60 dark:hover:bg-zinc-700/60
               
-              ${isSelected ? "bg-gray-200/60 " : ""}
+              ${isSelected ? "bg-gray-200/60 dark:bg-zinc-700/60" : ""}
           `}>
-          <div className="w-[75%] h-[75%] flex items-center justify-center transform ">
+          <div className="w-[75%] h-[75%] flex items-center justify-center transform dark:brightness-[2]">
             <FolderIcon className="w-full h-full text-blue-400 fill-blue-400/20 drop-shadow-sm" strokeWidth={1.5} />
           </div>
 
@@ -131,7 +131,7 @@ export function FolderCard({
               <Checkbox
                 checked={isSelected}
                 onCheckedChange={handleCheckboxChange}
-                className="bg-white/90 border-gray-300 shadow-sm data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 rounded-full h-5 w-5"
+                className="bg-white/90 dark:bg-zinc-900/90 border-gray-300 dark:border-zinc-600 shadow-sm data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 rounded-full h-5 w-5"
               />
             </div>
           )}
@@ -143,7 +143,7 @@ export function FolderCard({
                   text-[13px] font-semibold leading-[1.3] tracking-tight line-clamp-2 px-2.5 pb-[2px] rounded-[6px] transition-colors duration-100 break-words max-w-full
                   ${isSelected
               ? "bg-[#2563EB] text-white antialiased shadow-sm"
-              : "text-[#374151] group-hover:text-black"}
+              : "text-[#374151] dark:text-zinc-300 group-hover:text-black dark:group-hover:text-white"}
               `}>
             {folder.name}
           </span>
