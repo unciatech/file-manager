@@ -10,7 +10,10 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   splitting: true,
-  treeshake: true,
+  treeshake: {
+    preset: 'safest',
+    moduleSideEffects: false,
+  },
   sourcemap: false,
   clean: true,
   // Treat all dependencies and peerDependencies as external
@@ -18,6 +21,19 @@ export default defineConfig({
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.peerDependencies || {}),
   ],
-  minify: true,
+  minify: 'terser',
+  terserOptions: {
+    compress: {
+      drop_console: true,
+      drop_debugger: true,
+      pure_funcs: ['console.log', 'console.info', 'console.debug'],
+    },
+    mangle: true,
+  },
+  esbuildOptions(options) {
+    options.drop = ['debugger'];
+    options.pure = ['console.log', 'console.info', 'console.debug'];
+    options.treeShaking = true;
+  },
   tsconfig: 'tsconfig.build.json',
 });

@@ -1,6 +1,6 @@
 {
   "name": "@unciatech/file-manager",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -27,6 +27,9 @@
     "styles.css",
     "README.md"
   ],
+  "sideEffects": [
+    "*.css"
+  ],
   "author": "Avi",
   "license": "MIT",
   "repository": {
@@ -40,9 +43,10 @@
     "dev": "next dev",
     "build": "next build",
     "build:pkg": "tsup && cp styles.css dist/styles.css",
-    "start": "next start",
+    "clean": "rm -rf dist .next",
+    "prepublishOnly": "npm run build:pkg",
     "release": "npm run build:pkg && npm publish",
-    "lint": "eslint"
+    "lint": "next lint"
   },
   "dependencies": {
     "@radix-ui/react-context-menu": "^2.2.16",
@@ -70,6 +74,7 @@
     "eslint": "^9.39.3",
     "eslint-config-next": "16.1.0",
     "tailwindcss": "^4.2.1",
+    "terser": "^5.46.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   }
