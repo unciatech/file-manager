@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-"use strict";var h=Object.create;var g=Object.defineProperty;var S=Object.getOwnPropertyDescriptor;var F=Object.getOwnPropertyNames;var v=Object.getPrototypeOf,j=Object.prototype.hasOwnProperty;var M=(i,e,s,t)=>{if(e&&typeof e=="object"||typeof e=="function")for(let c of F(e))!j.call(i,c)&&c!==s&&g(i,c,{get:()=>e[c],enumerable:!(t=S(e,c))||t.enumerable});return i};var d=(i,e,s)=>(s=i!=null?h(v(i)):{},M(e||!i||!i.__esModule?g(s,"default",{value:i,enumerable:!0}):s,i));var n=d(require("fs")),o=d(require("path")),p=require("child_process"),f=d(require("readline")),y=process.argv.slice(2),P=y[0],l=y[1],w=f.default.createInterface({input:process.stdin,output:process.stdout}),C=i=>new Promise(e=>w.question(i,e)),u=`"use client";
+"use strict";var h=Object.create;var g=Object.defineProperty;var x=Object.getOwnPropertyDescriptor;var b=Object.getOwnPropertyNames;var S=Object.getPrototypeOf,F=Object.prototype.hasOwnProperty;var M=(e,o,i,c)=>{if(o&&typeof o=="object"||typeof o=="function")for(let a of b(o))!F.call(e,a)&&a!==i&&g(e,a,{get:()=>o[a],enumerable:!(c=x(o,a))||c.enumerable});return e};var p=(e,o,i)=>(i=e!=null?h(S(e)):{},M(o||!e||!e.__esModule?g(i,"default",{value:e,enumerable:!0}):i,e));var r=p(require("fs")),n=p(require("path")),l=require("child_process"),f=p(require("readline")),v=process.argv.slice(2),j=v[0],s=v[1],y=f.default.createInterface({input:process.stdin,output:process.stdout}),k=e=>new Promise(o=>y.question(e,o)),m=`"use client";
 
 import React, { Suspense } from "react";
 import { FileManager, MockProvider } from "@unciatech/file-manager";
@@ -19,14 +19,14 @@ export default function FileManagerDemo() {
     </div>
   );
 }
-`;async function k(){if(P!=="init"&&(console.log("Usage: npx @unciatech/file-manager init [project-name]"),process.exit(0)),!l){console.log("\u{1F680} Generating <FileManagerDemo /> component in the current project...");let s=process.cwd();n.default.existsSync(o.default.join(process.cwd(),"components"))?s=o.default.join(process.cwd(),"components"):n.default.existsSync(o.default.join(process.cwd(),"src","components"))&&(s=o.default.join(process.cwd(),"src","components"));let t=o.default.join(s,"FileManagerDemo.tsx");n.default.existsSync(t)&&(console.error(`\u274C Error: ${t} already exists.`),process.exit(1)),n.default.writeFileSync(t,u,"utf-8"),console.log(`\u2705 Success! Created ${t}`),console.log(""),console.log("You can now import and render <FileManagerDemo /> anywhere in your application."),console.log("Don't forget to configure your Tailwind CSS content to scan the library for styles!"),process.exit(0)}console.log(`
-\u{1F680} Initializing a new application: ${l}
-`),console.log("Which framework would you like to use?"),console.log("  1) Next.js (App Router, Tailwind v4)"),console.log("  2) Vite (React, Tailwind v4)"),console.log("  3) Cancel");let i=await C(`
-Select an option (1-3): `),e=o.default.join(process.cwd(),l);n.default.existsSync(e)&&(console.error(`
-\u274C Error: Directory "${l}" already exists in ${process.cwd()}.`),console.error("   Please choose a different project name or delete the existing directory first."),w.close(),process.exit(1));try{i==="1"?await D(l,e):i==="2"?await b(l,e):(console.log("Canceled."),process.exit(0))}catch(s){console.error(`
-\u274C Scaffolding failed:`,s),process.exit(1)}process.exit(0)}async function D(i,e){console.log(`
-\u{1F4E6} Creating Next.js application (this may take a minute)...`),(0,p.execSync)(`npx create-next-app@latest ${i} --ts --tailwind --eslint --app --src-dir --import-alias "@/*" --use-npm`,{stdio:"inherit"}),console.log(`
-\u{1F4E6} Installing dependencies (@unciatech/file-manager, tailwindcss-animate)...`),(0,p.execSync)("npm install @unciatech/file-manager tailwindcss-animate",{cwd:e,stdio:"inherit"});let s=o.default.join(e,"src","components");n.default.existsSync(s)||n.default.mkdirSync(s,{recursive:!0}),n.default.writeFileSync(o.default.join(s,"FileManagerDemo.tsx"),u,"utf-8");let t=o.default.join(e,"src","app","page.tsx");n.default.writeFileSync(t,`import FileManagerDemo from "@/components/FileManagerDemo";
+`;async function z(){if(j!=="init"&&(console.log("Usage: npx @unciatech/file-manager init [project-name]"),process.exit(0)),!s){console.log("\u{1F680} Generating <FileManagerDemo /> component in the current project...");let i=process.cwd();r.default.existsSync(n.default.join(process.cwd(),"components"))?i=n.default.join(process.cwd(),"components"):r.default.existsSync(n.default.join(process.cwd(),"src","components"))&&(i=n.default.join(process.cwd(),"src","components"));let c=n.default.join(i,"FileManagerDemo.tsx");r.default.existsSync(c)&&(console.error(`\u274C Error: ${c} already exists.`),process.exit(1)),r.default.writeFileSync(c,m,"utf-8"),console.log(`\u2705 Success! Created ${c}`),console.log(""),console.log("You can now import and render <FileManagerDemo /> anywhere in your application."),console.log("Don't forget to configure your Tailwind CSS content to scan the library for styles!"),process.exit(0)}console.log(`
+\u{1F680} Initializing a new application: ${s}
+`),console.log("Which framework would you like to use?"),console.log("  1) Next.js (App Router, Tailwind v4)"),console.log("  2) Vite (React, Tailwind v4)"),console.log("  3) Cancel");let e=await k(`
+Select an option (1-3): `),o=n.default.join(process.cwd(),s);r.default.existsSync(o)&&(console.error(`
+\u274C Error: Directory "${s}" already exists in ${process.cwd()}.`),console.error("   Please choose a different project name or delete the existing directory first."),y.close(),process.exit(1));try{e==="1"?await C(s,o):e==="2"?await P(s,o):(console.log("Canceled."),process.exit(0))}catch(i){console.error(`
+\u274C Scaffolding failed:`,i),process.exit(1)}process.exit(0)}async function C(e,o){console.log(`
+\u{1F4E6} Creating Next.js application (this may take a minute)...`),(0,l.execSync)(`npx create-next-app@latest ${e} --ts --tailwind --eslint --app --src-dir --import-alias "@/*" --use-npm`,{stdio:"inherit"}),console.log(`
+\u{1F4E6} Installing dependencies (@unciatech/file-manager, tailwindcss-animate)...`),(0,l.execSync)("npm install @unciatech/file-manager tailwindcss-animate",{cwd:o,stdio:"inherit"});let i=n.default.join(o,"src","components");r.default.existsSync(i)||r.default.mkdirSync(i,{recursive:!0}),r.default.writeFileSync(n.default.join(i,"FileManagerDemo.tsx"),m,"utf-8");let c=n.default.join(o,"src","app","page.tsx");r.default.writeFileSync(c,`import FileManagerDemo from "@/components/FileManagerDemo";
 
 export default function Home() {
   return (
@@ -35,7 +35,7 @@ export default function Home() {
     </main>
   );
 }
-`);let c=o.default.join(e,"src","app","media","[[...path]]");n.default.mkdirSync(c,{recursive:!0}),n.default.writeFileSync(o.default.join(c,"page.tsx"),`import FileManagerDemo from "@/components/FileManagerDemo";
+`);let a=n.default.join(o,"src","app","media","[[...path]]");r.default.mkdirSync(a,{recursive:!0}),r.default.writeFileSync(n.default.join(a,"page.tsx"),`import FileManagerDemo from "@/components/FileManagerDemo";
 
 export default function MediaPage() {
   return (
@@ -44,14 +44,117 @@ export default function MediaPage() {
     </main>
   );
 }
-`);let a=o.default.join(e,"src","app","layout.tsx");if(n.default.existsSync(a)){let r=n.default.readFileSync(a,"utf8");r.includes("@unciatech/file-manager/styles")||(r=r.replace(/^(import type)/m,`import '@unciatech/file-manager/styles';
-$1`),n.default.writeFileSync(a,r))}let m=o.default.join(e,"src","app","globals.css");if(n.default.existsSync(m)){let r=n.default.readFileSync(m,"utf8");r.includes("@source")||(r=`@import "tailwindcss";
-@plugin "tailwindcss-animate";
+`);let t=n.default.join(o,"src","app","layout.tsx");if(r.default.existsSync(t)){let d=r.default.readFileSync(t,"utf8");d.includes("@unciatech/file-manager/styles")||(d=d.replace(/^(import type)/m,`import '@unciatech/file-manager/styles';
+$1`),r.default.writeFileSync(t,d))}let u=n.default.join(o,"src","app","globals.css");r.default.writeFileSync(u,`@import 'tailwindcss';
+@import 'tw-animate-css';
 @source "../../node_modules/@unciatech/file-manager/dist";
 
-`+r.replace('@import "tailwindcss";',""),n.default.writeFileSync(m,r))}x(i)}async function b(i,e){console.log(`
-\u{1F4E6} Creating Vite React application...`),(0,p.execSync)(`npm create vite@latest ${i} -- --template react-ts`,{stdio:"inherit"}),console.log(`
-\u{1F4E6} Installing dependencies (Tailwind + File Manager)...`),(0,p.execSync)("npm install",{cwd:e,stdio:"inherit"}),(0,p.execSync)("npm install tailwindcss @tailwindcss/vite @unciatech/file-manager",{cwd:e,stdio:"inherit"});let s=o.default.join(e,"vite.config.ts");n.default.writeFileSync(s,`import { defineConfig } from 'vite'
+/** Dark Mode Variant **/
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: 'Geist', 'Geist Fallback', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+/** Colors **/
+:root {
+  --background: var(--color-white);
+  --foreground: var(--color-zinc-950);
+  --card: var(--color-white);
+  --card-foreground: var(--color-zinc-950);
+  --popover: var(--color-white);
+  --popover-foreground: var(--color-zinc-950);
+  --primary: var(--color-blue-500);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--color-zinc-100);
+  --secondary-foreground: var(--color-zinc-900);
+  --muted: var(--color-zinc-100);
+  --muted-foreground: var(--color-zinc-500);
+  --accent: var(--color-zinc-100);
+  --accent-foreground: var(--color-zinc-900);
+  --destructive: var(--color-red-600);
+  --destructive-foreground: var(--color-white);
+  --border: oklch(94% 0.004 286.32);
+  --input: var(--color-zinc-200);
+  --ring: var(--color-zinc-400);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: var(--color-zinc-950);
+  --foreground: var(--color-zinc-50);
+  --card: var(--color-zinc-950);
+  --card-foreground: var(--color-zinc-50);
+  --popover: var(--color-zinc-950);
+  --popover-foreground: var(--color-zinc-50);
+  --primary: var(--color-blue-600);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--color-zinc-800);
+  --secondary-foreground: var(--color-zinc-50);
+  --muted: var(--color-zinc-900);
+  --muted-foreground: var(--color-zinc-500);
+  --accent: var(--color-zinc-900);
+  --accent-foreground: var(--color-zinc-50);
+  --destructive: var(--color-red-600);
+  --destructive-foreground: var(--color-white);
+  --border: var(--color-zinc-800);
+  --input: var(--color-zinc-800);
+  --ring: var(--color-zinc-600);
+}
+
+/** Theme Setup **/
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+/** Global Styles **/
+@layer base {
+  * {
+    @apply border-border;
+  }
+  *:focus-visible {
+    @apply outline-ring rounded-xs shadow-none outline-2 outline-offset-3 transition-none!;
+  }
+}
+
+/** Custom Scrollbar **/
+@layer base {
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--input); border-radius: 5px; }
+  * { scrollbar-width: thin; scrollbar-color: var(--input) transparent; }
+}
+
+/** Smooth scroll **/
+html {
+  scroll-behavior: smooth;
+}
+`),w(e)}async function P(e,o){console.log(`
+\u{1F4E6} Creating Vite React application...`),(0,l.execSync)(`npm create vite@latest ${e} -- --template react-ts`,{stdio:"inherit"}),console.log(`
+\u{1F4E6} Installing dependencies (Tailwind + File Manager)...`),(0,l.execSync)("npm install",{cwd:o,stdio:"inherit"}),(0,l.execSync)("npm install tailwindcss @tailwindcss/vite @unciatech/file-manager",{cwd:o,stdio:"inherit"});let i=n.default.join(o,"vite.config.ts");r.default.writeFileSync(i,`import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -61,9 +164,9 @@ export default defineConfig({
     tailwindcss(),
   ],
 })
-`);let c=o.default.join(e,"src","index.css");n.default.writeFileSync(c,`@import "tailwindcss";
+`);let a=n.default.join(o,"src","index.css");r.default.writeFileSync(a,`@import "tailwindcss";
 @source "../../node_modules/@unciatech/file-manager/dist";
-`);let a=o.default.join(e,"src","components");n.default.existsSync(a)||n.default.mkdirSync(a,{recursive:!0}),n.default.writeFileSync(o.default.join(a,"FileManagerDemo.tsx"),u,"utf-8");let m=o.default.join(e,"src","App.tsx");n.default.writeFileSync(m,`import FileManagerDemo from "./components/FileManagerDemo";
+`);let t=n.default.join(o,"src","components");r.default.existsSync(t)||r.default.mkdirSync(t,{recursive:!0}),r.default.writeFileSync(n.default.join(t,"FileManagerDemo.tsx"),m,"utf-8");let u=n.default.join(o,"src","App.tsx");r.default.writeFileSync(u,`import FileManagerDemo from "./components/FileManagerDemo";
 
 function App() {
   return (
@@ -74,8 +177,8 @@ function App() {
 }
 
 export default App;
-`),x(i,"npm run dev")}function x(i,e="npm run dev"){console.log(`
+`),w(e,"npm run dev")}function w(e,o="npm run dev"){console.log(`
 =========================================`),console.log("\u{1F389} Your Media Library application is ready!"),console.log("========================================="),console.log(`
-Next steps:`),console.log(`  cd ${i}`),console.log(`  ${e}`),console.log(`
+Next steps:`),console.log(`  cd ${e}`),console.log(`  ${o}`),console.log(`
 Enjoy building! \u{1F5C2}\uFE0F
-`)}k();
+`)}z();
