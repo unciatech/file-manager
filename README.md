@@ -82,7 +82,7 @@ import {
   IFileManagerProvider, 
   FolderId, 
   FileUploadInput 
-} from "@/types/file-manager";
+} from "@/types/file-manager"; // Or "@unciatech/file-manager" for external users
 
 export class MyCustomApiProvider implements IFileManagerProvider {
   private baseUrl = "https://api.mybackend.com/v1";
@@ -126,24 +126,19 @@ export class MyCustomApiProvider implements IFileManagerProvider {
 ```
 
 > **💡 Pro Tip - The Mock Provider:**
-> If you are just prototyping and don't have a backend ready yet, you can skip Step 2 entirely! We included a fully functional `MockFileManagerProvider` that fakes network latency and stores data in memory. Just import it and use it right away to see the UI in action.
+> If you are just prototyping and don't have a backend ready yet, you can skip Step 2 entirely! We included a fully functional `MockProvider` that fakes network latency and stores data in memory. Just import it and use it right away to see the UI in action.
 
-### Step 3: Wrap Your Page with the Provider
-
-Finally, import your provider and wrap the `<FileManager />` component in the Context Provider. Define which file types you want to allow.
-
-```tsx
 // app/media/page.tsx
 import { FileManagerProvider } from "@/context/file-manager-context";
 import { FileManager } from "@/components/file-manager";
+import { MockProvider } from "@/providers/mock-provider";
 
-// Import your real provider OR the mock one
+// OR import your real provider
 import { MyCustomApiProvider } from "@/lib/my-api-provider"; 
-// import { MockFileManagerProvider } from "@/providers/mock-provider";
 
 export default function MediaLibraryPage() {
-  // Instantiate the provider
-  const apiProvider = new MyCustomApiProvider(); 
+  // Instantiate the provider (Real or Mock)
+  const apiProvider = new MockProvider(); 
 
   return (
     <div className="h-screen w-full">
