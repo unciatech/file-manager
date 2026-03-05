@@ -1,69 +1,88 @@
 /* @unciatech/file-manager — base styles
- * Import this file in your app's root layout to get the required CSS
- * custom properties for the file manager to render correctly.
+ * Import this in your root layout to provide the CSS variables the
+ * file manager components depend on.
  *
  * Usage: import '@unciatech/file-manager/styles';
+ *
+ * How it works with Tailwind v4:
+ *   Tailwind utility classes (e.g. bg-primary) resolve to var(--color-primary).
+ *   This file defines those --color-* variables directly so they work in any
+ *   consumer app without needing a @theme block or additional Tailwind config.
  */
 
-/* ── Light mode variables ─────────────────────────────────────── */
+/* ── Light mode ───────────────────────────────────────────────── */
 :root {
-  --fm-background: #ffffff;
-  --fm-foreground: #09090b;        /* zinc-950 */
-  --fm-card: #ffffff;
-  --fm-card-foreground: #09090b;
-  --fm-popover: #ffffff;
-  --fm-popover-foreground: #09090b;
-  --fm-primary: #3b82f6;           /* blue-500 */
-  --fm-primary-foreground: #ffffff;
-  --fm-secondary: #f4f4f5;         /* zinc-100 */
-  --fm-secondary-foreground: #18181b;
-  --fm-muted: #f4f4f5;
-  --fm-muted-foreground: #71717a;  /* zinc-500 */
-  --fm-accent: #f4f4f5;
-  --fm-accent-foreground: #18181b;
-  --fm-destructive: #dc2626;       /* red-600 */
-  --fm-destructive-foreground: #ffffff;
-  --fm-border: oklch(94% 0.004 286.32);
-  --fm-input: #e4e4e7;             /* zinc-200 */
-  --fm-ring: #a1a1aa;              /* zinc-400 */
-  --fm-radius: 0.5rem;
+  --color-background:        #ffffff;
+  --color-foreground:        #09090b;   /* zinc-950 */
+  --color-card:              #ffffff;
+  --color-card-foreground:   #09090b;
+  --color-popover:           #ffffff;
+  --color-popover-foreground:#09090b;
+  --color-primary:           #3b82f6;   /* blue-500 */
+  --color-primary-foreground:#ffffff;
+  --color-secondary:         #f4f4f5;   /* zinc-100 */
+  --color-secondary-foreground:#18181b;
+  --color-muted:             #f4f4f5;
+  --color-muted-foreground:  #71717a;   /* zinc-500 */
+  --color-accent:            #f4f4f5;
+  --color-accent-foreground: #18181b;
+  --color-destructive:       #dc2626;   /* red-600 */
+  --color-destructive-foreground:#ffffff;
+  --color-border:            oklch(94% 0.004 286.32);
+  --color-input:             #e4e4e7;   /* zinc-200 */
+  --color-ring:              #a1a1aa;   /* zinc-400 */
+  --radius:                  0.5rem;
 }
 
-/* ── Dark mode variables ──────────────────────────────────────── */
+/* ── Dark mode ────────────────────────────────────────────────── */
 .dark {
-  --fm-background: #09090b;        /* zinc-950 */
-  --fm-foreground: #fafafa;        /* zinc-50 */
-  --fm-card: #09090b;
-  --fm-card-foreground: #fafafa;
-  --fm-popover: #09090b;
-  --fm-popover-foreground: #fafafa;
-  --fm-primary: #2563eb;           /* blue-600 */
-  --fm-primary-foreground: #ffffff;
-  --fm-secondary: #27272a;         /* zinc-800 */
-  --fm-secondary-foreground: #fafafa;
-  --fm-muted: #18181b;             /* zinc-900 */
-  --fm-muted-foreground: #71717a;
-  --fm-accent: #18181b;
-  --fm-accent-foreground: #fafafa;
-  --fm-destructive: #dc2626;
-  --fm-destructive-foreground: #ffffff;
-  --fm-border: #27272a;            /* zinc-800 */
-  --fm-input: #27272a;
-  --fm-ring: #52525b;              /* zinc-600 */
+  --color-background:        #09090b;   /* zinc-950 */
+  --color-foreground:        #fafafa;   /* zinc-50  */
+  --color-card:              #09090b;
+  --color-card-foreground:   #fafafa;
+  --color-popover:           #09090b;
+  --color-popover-foreground:#fafafa;
+  --color-primary:           #2563eb;   /* blue-600 */
+  --color-primary-foreground:#ffffff;
+  --color-secondary:         #27272a;   /* zinc-800 */
+  --color-secondary-foreground:#fafafa;
+  --color-muted:             #18181b;   /* zinc-900 */
+  --color-muted-foreground:  #71717a;
+  --color-accent:            #18181b;
+  --color-accent-foreground: #fafafa;
+  --color-destructive:       #dc2626;
+  --color-destructive-foreground:#ffffff;
+  --color-border:            #27272a;   /* zinc-800 */
+  --color-input:             #27272a;
+  --color-ring:              #52525b;   /* zinc-600 */
+}
+
+/* ── Border base reset ────────────────────────────────────────── */
+*, *::before, *::after {
+  border-color: var(--color-border);
+}
+
+/* ── Focus ring ───────────────────────────────────────────────── */
+/* Suppress the thick native browser outline on all elements */
+*:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
 /* ── Scrollbar ────────────────────────────────────────────────── */
-[data-file-manager] ::-webkit-scrollbar {
-  width: 5px;
-}
-[data-file-manager] ::-webkit-scrollbar-track {
-  background: transparent;
-}
-[data-file-manager] ::-webkit-scrollbar-thumb {
-  background: var(--fm-input);
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--color-input);
   border-radius: 5px;
 }
-[data-file-manager] * {
+* {
   scrollbar-width: thin;
-  scrollbar-color: var(--fm-input) transparent;
+  scrollbar-color: var(--color-input) transparent;
+}
+
+/* ── Smooth scroll ────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
 }
