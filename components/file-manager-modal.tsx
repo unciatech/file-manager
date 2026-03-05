@@ -82,9 +82,9 @@ function ModalContent({ onClose }: { onClose: () => void }) {
                     updateSearchQuery('');
                     setIsSearchActive(false);
                   }}
-                  className="border-gray-200 bg-white shrink-0"
+                  className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shrink-0"
                 >
-                  <CrossIcon className="size-5" />
+                  <CrossIcon className="size-5 text-gray-600 dark:text-zinc-400" />
                   <span className="sr-only">Cancel Search</span>
                 </Button>
               </div>
@@ -98,9 +98,9 @@ function ModalContent({ onClose }: { onClose: () => void }) {
                   size="icon"
                   radius="full"
                   onClick={onClose}
-                  className="border-gray-200 bg-white"
+                  className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900"
                 >
-                  <CrossIcon className="size-5" />
+                  <CrossIcon className="size-5 text-gray-600 dark:text-zinc-400" />
                   <span className="hidden">Close</span>
                 </Button>
               </>

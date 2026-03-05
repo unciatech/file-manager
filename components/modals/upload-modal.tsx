@@ -175,9 +175,9 @@ export function UploadModal() {
                 size="icon"
                 radius="full"
                 onClick={() => setIsUploadModalOpen(false)}
-                className="border-gray-200 bg-white hover:text-red-600 hover:border-red-200 hover:bg-red-50"
+                className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950"
               >
-                <CrossIcon className="size-5" />
+                <CrossIcon className="size-5 text-gray-600 dark:text-zinc-400" />
                 <span className="hidden">Close</span>
               </Button>
             </div>
@@ -189,7 +189,7 @@ export function UploadModal() {
           {/* Upload Area */}
           <div
             className={cn(
-              'relative rounded-lg border-dashed border-[2.5px]  bg-gray-100 border-gray-300 px-6 py-16 text-center transition-colors mb-4',
+              'relative rounded-lg border-dashed border-[2.5px] bg-gray-100 dark:bg-zinc-800 border-gray-300 dark:border-zinc-600 px-6 py-16 text-center transition-colors mb-4',
               isDragging
                 ? 'border-primary bg-primary/5'
                 : 'border-muted-foreground/25 hover:border-muted-foreground/50',
@@ -243,7 +243,7 @@ export function UploadModal() {
                       size="icon"
                       className="absolute -end-2 -top-2 z-10 size-6 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
                     >
-                      <CrossIcon className="size-3" />
+                      <CrossIcon className="size-3 text-gray-600 dark:text-zinc-400" />
                     </Button>
 
                     {/* Wrapper */}

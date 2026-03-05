@@ -93,11 +93,11 @@ function FolderTreeItem({
         {hasChildren ? (
           <button
             onClick={handleToggle}
-            className="p-1 -m-1 hover:bg-gray-100 rounded transition-colors"
+            className="p-1 -m-1 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded transition-colors"
             aria-label={isOpen ? "Collapse folder" : "Expand folder"}
           >
             <ChevronRightIcon
-              className={`size-4 text-gray-500 transition-transform ${!isDisabled && isOpen ? 'rotate-90' : ''}`}
+              className={`size-4 text-gray-500 dark:text-zinc-400 transition-transform ${!isDisabled && isOpen ? 'rotate-90' : ''}`}
             />
           </button>
         ) : (
@@ -112,13 +112,13 @@ function FolderTreeItem({
               ? 'bg-blue-100 text-blue-600 font-semibold'
               : isDisabled
                 ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-gray-100'
+                : 'hover:bg-gray-100 dark:hover:bg-zinc-700'
             }`}
         >
           <FolderIcon className="size-8 text-white shrink-0" strokeWidth={1.5} />
           <div className="flex flex-col gap-1">
             <span className="truncate min-w-0">{ middleTruncate(folder.name, 15)}</span>
-            {isDisabled ? <span className="text-[0.6rem] text-left font-medium text-gray-900">(Already selected)</span> : ''}
+            {isDisabled ? <span className="text-[0.6rem] text-left font-medium text-gray-900 dark:text-zinc-300">(Already selected)</span> : ''}
           </div>
         </button>
       </div>
@@ -148,7 +148,7 @@ function FolderTreeItem({
              {isLoading && children.length === 0 && (
                  <li className="py-1">
                   <div className="flex items-center gap-1.5 px-2">
-                    <span className="text-sm text-gray-500">Loading...</span>
+                    <span className="text-sm text-gray-500 dark:text-zinc-400">Loading...</span>
                   </div>
                 </li>
              )}
@@ -317,9 +317,9 @@ export function MoveModal() {
                 size="icon"
                 radius="full"
                 onClick={() => handleOpenChange(false)}
-                className="border-gray-200 bg-white hover:text-red-600 hover:border-red-200 hover:bg-red-50"
+                className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950"
               >
-            <CrossIcon className="size-5" />
+            <CrossIcon className="size-5 text-gray-600 dark:text-zinc-400" />
             <span className="hidden">Close</span>
           </Button>
         </div>
@@ -329,7 +329,7 @@ export function MoveModal() {
         <div className="text-sm my-3 px-6 flex-1 flex flex-col min-h-0">
           <div className="space-y-4 flex flex-col flex-1 min-h-0">
             <div className="flex flex-col flex-1 min-h-0">
-              <label className="block mb-2 font-medium text-gray-900">
+              <label className="block mb-2 font-medium text-gray-900 dark:text-zinc-100">
                 Select destination folder:
               </label>
 
@@ -343,7 +343,7 @@ export function MoveModal() {
                         onClick={() => setTargetFolderId(null)}
                         className={`flex items-center gap-1.5 px-2 py-1 rounded-xl flex-1 text-left transition-colors min-w-0 ${targetFolderId === null
                             ? 'bg-blue-100 text-blue-600 font-semibold'
-                            : 'hover:bg-gray-100'
+                            : 'hover:bg-gray-100 dark:hover:bg-zinc-700'
                           }`}
                       >
                         <FolderIcon className="size-8 text-white shrink-0" strokeWidth={1.5} />
@@ -371,7 +371,7 @@ export function MoveModal() {
                       </li>
                   )}
                   {rootFolders.length === 0 && !isRootLoading && !rootHasMore && (
-                    <li className="text-gray-500 text-sm text-center py-4">
+                    <li className="text-gray-500 dark:text-zinc-400 text-sm text-center py-4">
                       No nested folders available
                     </li>
                   )}

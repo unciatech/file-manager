@@ -87,9 +87,9 @@ export function CreateFolderModal() {
                 size="icon"
                 radius="full"
                 onClick={handleClose}
-                className="border-gray-200 bg-white hover:text-red-600 hover:border-red-200 hover:bg-red-50"
+                className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950"
               >
-                <CrossIcon className="size-5" />
+                <CrossIcon className="size-5 text-gray-600 dark:text-zinc-400" />
                 <span className="hidden">Close</span>
               </Button>
             </div>
