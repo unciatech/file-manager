@@ -6,7 +6,6 @@ import { FileMetaData } from '@/types/file-manager';
 import { DetailsLayout } from '@/components/file-details/details-layout';
 import { FileDeleteButton, FileDownloadButton, FileCopyLinkButton } from '@/components/file-details/file-action-buttons';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { getFileSize } from '@/lib/file-size';
@@ -92,14 +91,14 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Size
           </p>
-          <p className="text-xs font-bold text-blue-600">{getFileSize(file.size)}</p>
+          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{getFileSize(file.size)}</p>
         </div>
 
         <div>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Duration
           </p>
-          <p className="text-xs font-bold text-blue-600">
+          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
             {file.metaData?.duration ? formatDuration(file.metaData.duration) : 'N/A'}
           </p>
         </div>
@@ -108,7 +107,7 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Bitrate
           </p>
-          <p className="text-xs font-bold text-blue-600">
+          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
             {file.metaData?.bitrate ? `${file.metaData.bitrate} kbps` : 'N/A'}
           </p>
         </div>
@@ -117,7 +116,7 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Date
           </p>
-          <p className="text-xs font-bold text-blue-600">
+          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
             {formatDate(file.createdAt)}
           </p>
         </div>
@@ -126,14 +125,14 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Extension
           </p>
-          <p className="text-xs font-bold text-blue-600">{file.ext?.replace('.', '') || 'N/A'}</p>
+          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{file.ext?.replace('.', '') || 'N/A'}</p>
         </div>
 
 
       </div>
 
       {/* Editable Fields */}
-      <div className="space-y-4 pt-4 border-t border-slate-200">
+      <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-zinc-700">
         <div className="space-y-2">
           <Field className='gap-0'>
             <FieldLabel htmlFor="fileName">File name</FieldLabel>

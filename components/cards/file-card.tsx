@@ -153,7 +153,7 @@ export function FileCard({
 
           {/* Metadata: Only visible if not selected or style preference */}
           <div className={`flex flex-col items-center justify-center gap-0.5 mt-1 transition-opacity duration-200 ${isSelected ? "opacity-60" : "opacity-100"}`}>
-            <span className="text-[11px] text-blue-600 font-medium tracking-tight">{getFileSize(file.size)}</span>
+            <span className="text-[11px] text-blue-600 dark:text-blue-400 font-medium tracking-tight">{getFileSize(file.size)}</span>
             {FileMetadataComponent ? (
               <div className="text-[11px] text-gray-400 flex items-center scale-95">
                 <FileMetadataComponent file={file} />

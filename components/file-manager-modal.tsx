@@ -9,7 +9,8 @@ import { BulkActionsStatic } from "./layout/bulk-actions-bar";
 import { HeaderNavigation } from "./layout/header-navigation";
 import { UnifiedGrid } from "./grid/unified-grid";
 import { ModalResponsiveHeaderActions } from "./layout/header-actions-responsive";
-import { CrossIcon, SearchIcon } from "./icons";
+import { SearchIcon } from "./icons";
+import { CloseButton } from "@/components/ui/close-button";
 import { useState, useRef, useEffect } from "react";
 import { Input } from "./ui/input";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -73,36 +74,22 @@ function ModalContent({ onClose }: { onClose: () => void }) {
                     }
                   }}
                 />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  radius="full"
+                <CloseButton
                   onClick={() => {
                     setSearchInput('');
                     updateSearchQuery('');
                     setIsSearchActive(false);
                   }}
-                  className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shrink-0"
-                >
-                  <CrossIcon className="size-5 text-gray-600 dark:text-zinc-400" />
-                  <span className="sr-only">Cancel Search</span>
-                </Button>
+                  className="shrink-0"
+                  label="Cancel Search"
+                />
               </div>
             ) : (
               /* Normal Header Mode */
               <>
                 <HeaderNavigation />
                 <ModalResponsiveHeaderActions onSearchClick={() => setIsSearchActive(true)} />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  radius="full"
-                  onClick={onClose}
-                  className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900"
-                >
-                  <CrossIcon className="size-5 text-gray-600 dark:text-zinc-400" />
-                  <span className="hidden">Close</span>
-                </Button>
+                <CloseButton onClick={onClose} />
               </>
             )}
           </div>

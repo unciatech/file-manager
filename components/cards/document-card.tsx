@@ -43,7 +43,7 @@ export function DocumentCard({ file, className }: DocumentCardProps) {
 export function DocumentCardMetadata({ file }: { file: FileMetaData }) {
     if (!file.metaData?.pageCount) return null;
     return (
-        <p className="text-xs text-blue-600 mb-2">
+        <p className="text-xs text-blue-600 dark:text-blue-400 mb-2">
             Pages: {file.metaData.pageCount}
         </p>
     );
