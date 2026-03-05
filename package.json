@@ -1,24 +1,39 @@
 {
   "name": "@unciatech/file-manager",
   "version": "0.0.24",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "description": "Modern file manager component for React and Next.js",
+  "author": "Avi",
+  "license": "MIT",
+  "homepage": "https://github.com/unciatech/file-manager",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unciatech/file-manager.git"
+  },
+  "keywords": [
+    "file-manager",
+    "react-file-manager",
+    "nextjs-file-manager",
+    "file-browser",
+    "react-component",
+    "unciatech"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "file-manager": "dist/cli.js"
+    "file-manager": "./dist/cli.cjs"
   },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./mock": {
       "types": "./dist/mock.d.ts",
-      "import": "./dist/mock.mjs",
-      "require": "./dist/mock.js",
-      "default": "./dist/mock.js"
+      "import": "./dist/mock.js",
+      "require": "./dist/mock.cjs"
     },
     "./styles": "./dist/styles.css"
   },
@@ -30,14 +45,11 @@
   "sideEffects": [
     "*.css"
   ],
-  "author": "Avi",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/unciatech/file-manager.git"
-  },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "scripts": {
     "dev": "next dev",
@@ -62,9 +74,12 @@
     "tw-animate-css": "^1.4.0"
   },
   "peerDependencies": {
-    "next": "^14.0.0 || ^15.0.0 || ^16.0.0",
-    "react": "^18.2.0 || ^19.0.0",
-    "react-dom": "^18.2.0 || ^19.0.0"
+    "@radix-ui/react-context-menu": "^2",
+    "@radix-ui/react-dialog": "^1",
+    "@radix-ui/react-tooltip": "^1",
+    "next": "^14 || ^15 || ^16",
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.1",
