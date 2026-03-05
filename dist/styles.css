@@ -1,0 +1,69 @@
+/* @unciatech/file-manager — base styles
+ * Import this file in your app's root layout to get the required CSS
+ * custom properties for the file manager to render correctly.
+ *
+ * Usage: import '@unciatech/file-manager/styles';
+ */
+
+/* ── Light mode variables ─────────────────────────────────────── */
+:root {
+  --fm-background: #ffffff;
+  --fm-foreground: #09090b;        /* zinc-950 */
+  --fm-card: #ffffff;
+  --fm-card-foreground: #09090b;
+  --fm-popover: #ffffff;
+  --fm-popover-foreground: #09090b;
+  --fm-primary: #3b82f6;           /* blue-500 */
+  --fm-primary-foreground: #ffffff;
+  --fm-secondary: #f4f4f5;         /* zinc-100 */
+  --fm-secondary-foreground: #18181b;
+  --fm-muted: #f4f4f5;
+  --fm-muted-foreground: #71717a;  /* zinc-500 */
+  --fm-accent: #f4f4f5;
+  --fm-accent-foreground: #18181b;
+  --fm-destructive: #dc2626;       /* red-600 */
+  --fm-destructive-foreground: #ffffff;
+  --fm-border: oklch(94% 0.004 286.32);
+  --fm-input: #e4e4e7;             /* zinc-200 */
+  --fm-ring: #a1a1aa;              /* zinc-400 */
+  --fm-radius: 0.5rem;
+}
+
+/* ── Dark mode variables ──────────────────────────────────────── */
+.dark {
+  --fm-background: #09090b;        /* zinc-950 */
+  --fm-foreground: #fafafa;        /* zinc-50 */
+  --fm-card: #09090b;
+  --fm-card-foreground: #fafafa;
+  --fm-popover: #09090b;
+  --fm-popover-foreground: #fafafa;
+  --fm-primary: #2563eb;           /* blue-600 */
+  --fm-primary-foreground: #ffffff;
+  --fm-secondary: #27272a;         /* zinc-800 */
+  --fm-secondary-foreground: #fafafa;
+  --fm-muted: #18181b;             /* zinc-900 */
+  --fm-muted-foreground: #71717a;
+  --fm-accent: #18181b;
+  --fm-accent-foreground: #fafafa;
+  --fm-destructive: #dc2626;
+  --fm-destructive-foreground: #ffffff;
+  --fm-border: #27272a;            /* zinc-800 */
+  --fm-input: #27272a;
+  --fm-ring: #52525b;              /* zinc-600 */
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────── */
+[data-file-manager] ::-webkit-scrollbar {
+  width: 5px;
+}
+[data-file-manager] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+[data-file-manager] ::-webkit-scrollbar-thumb {
+  background: var(--fm-input);
+  border-radius: 5px;
+}
+[data-file-manager] * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--fm-input) transparent;
+}
