@@ -16,7 +16,7 @@ import { FolderId, Folder, PaginationInfo } from "@/types/file-manager";
 import { ChevronRightIcon, Loader2Icon } from '../icons';
 import FolderIcon from "../icons/folder";
 import { middleTruncate } from "@/lib/truncate-name";
-import { CrossIcon } from "../icons";
+import { CloseButton } from "@/components/ui/close-button";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 
 type FolderTreeState = {
@@ -109,7 +109,7 @@ function FolderTreeItem({
           disabled={isDisabled}
           title={folder.name}
           className={`flex items-center gap-1.5 px-2 py-1 rounded-xl flex-1 text-left transition-colors min-w-0 ${isSelected
-              ? 'bg-blue-100 text-blue-600 font-semibold'
+              ? 'bg-blue-100 text-blue-600 dark:text-blue-400 font-semibold'
               : isDisabled
                 ? 'opacity-50 cursor-not-allowed'
                 : 'hover:bg-gray-100 dark:hover:bg-zinc-700'
@@ -312,16 +312,7 @@ export function MoveModal() {
               </p>
               </span>
 
-              <Button
-                variant="outline"
-                size="icon"
-                radius="full"
-                onClick={() => handleOpenChange(false)}
-                className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950"
-              >
-            <CrossIcon className="size-5 text-gray-600 dark:text-zinc-400" />
-            <span className="hidden">Close</span>
-          </Button>
+              <CloseButton onClick={() => handleOpenChange(false)} />
         </div>
           </DialogTitle>
           <DialogDescription />
@@ -342,7 +333,7 @@ export function MoveModal() {
                       <button
                         onClick={() => setTargetFolderId(null)}
                         className={`flex items-center gap-1.5 px-2 py-1 rounded-xl flex-1 text-left transition-colors min-w-0 ${targetFolderId === null
-                            ? 'bg-blue-100 text-blue-600 font-semibold'
+                            ? 'bg-blue-100 text-blue-600 dark:text-blue-400 font-semibold'
                             : 'hover:bg-gray-100 dark:hover:bg-zinc-700'
                           }`}
                       >

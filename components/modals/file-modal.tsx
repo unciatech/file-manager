@@ -6,7 +6,6 @@ import { FileMetaData } from '@/types/file-manager';
 import { DetailsLayout } from '@/components/file-details/details-layout';
 import { FileDeleteButton, FileDownloadButton, FileCopyLinkButton } from '@/components/file-details/file-action-buttons';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { getFileSize } from '@/lib/file-size';
@@ -76,14 +75,14 @@ export function FileModal({ file, onClose, onSave }: FileModalProps) {
           <p className="text-xs font-medium text-muted-foreground tracking-wide mb-1">
             Size
           </p>
-          <p className="text-xs font-bold text-blue-600">{getFileSize(file.size)}</p>
+          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{getFileSize(file.size)}</p>
         </div>
 
         <div>
           <p className="text-xs font-medium text-muted-foreground  tracking-wide mb-1">
             Date
           </p>
-          <p className="text-xs font-bold text-blue-600">
+          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
             {formatDate(file.createdAt)}
           </p>
         </div>
@@ -92,7 +91,7 @@ export function FileModal({ file, onClose, onSave }: FileModalProps) {
           <p className="text-xs font-medium text-muted-foreground tracking-wide mb-1">
             Extension
           </p>
-          <p className="text-xs font-bold text-blue-600">{ext}</p>
+          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{ext}</p>
         </div>
 
         {file.metaData?.pageCount && (
@@ -100,7 +99,7 @@ export function FileModal({ file, onClose, onSave }: FileModalProps) {
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
               Page Count
             </p>
-            <p className="text-xs font-bold text-blue-600">{file.metaData.pageCount}</p>
+            <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{file.metaData.pageCount}</p>
           </div>
         )}
 
@@ -109,7 +108,7 @@ export function FileModal({ file, onClose, onSave }: FileModalProps) {
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
               Author
             </p>
-            <p className="text-xs font-bold text-blue-600">{file.metaData.author}</p>
+            <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{file.metaData.author}</p>
           </div>
         )}
 

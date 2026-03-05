@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import UploadFolderIcon from "../icons/upload-folder";
 import MoveIcon from "../icons/move";
-import { PlusIcon, SearchIcon } from "../icons";
+import { PlusIcon } from "../icons";
 
 export function MoveAction() {
   const {
@@ -78,7 +78,7 @@ export function UploadFileAction() {
       className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-md font-medium"
       onClick={() => setIsUploadModalOpen(true)}
     >
-      <PlusIcon className="size-5 text-gray-900 dark:text-zinc-100" />
+      <PlusIcon strokeWidth={2} className="size-5 text-gray-900 dark:text-zinc-100" />
       <span className="hidden sm:inline">Upload File</span>
     </Button>
   );

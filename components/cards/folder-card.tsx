@@ -149,7 +149,7 @@ export function FolderCard({
           </span>
 
           <div className={`flex items-center justify-center gap-1 mt-1 transition-opacity duration-200 ${isSelected ? "opacity-60" : "opacity-100"}`}>
-            <span className="text-[11px] text-blue-600 font-medium tracking-tight  px-1.5 rounded-full">{folder.fileCount} items</span>
+            <span className="text-[11px] text-blue-600 dark:text-blue-400 font-medium tracking-tight  px-1.5 rounded-full">{folder.fileCount} items</span>
           </div>
         </div>
       </div>

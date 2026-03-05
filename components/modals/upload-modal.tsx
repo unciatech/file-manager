@@ -20,16 +20,13 @@ import {
   type EntityId,
 } from '@/hooks/use-file-upload';
 import { type FileUploadItem } from '@/hooks/use-file-upload';
-import {
-  RefreshCwIcon,
-  TriangleAlert,
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getFileSize } from '@/lib/file-size';
 import { fileTypesToAccept, getFileTypeFromMime, getFileTypesDescription } from '@/lib/file-utils';
 import { FileUploadInput } from '@/types/provider';
 import UploadCloudIcon from '../icons/upload-cloud';
-import { CrossIcon } from '../icons';
+import { RefreshCwIcon, TriangleAlertIcon } from '../icons';
+import { CloseButton } from "@/components/ui/close-button";
 import { getFileComponents } from '../grid/file-component-registry';
 import { KbdGroup, Kbd } from "../ui/kbd";
 
@@ -170,16 +167,7 @@ export function UploadModal() {
                   <Kbd><span className="text-lg">⌘</span> + U</Kbd>
                 </KbdGroup>
               </span>
-              <Button
-                variant="outline"
-                size="icon"
-                radius="full"
-                onClick={() => setIsUploadModalOpen(false)}
-                className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950"
-              >
-                <CrossIcon className="size-5 text-gray-600 dark:text-zinc-400" />
-                <span className="hidden">Close</span>
-              </Button>
+              <CloseButton onClick={() => setIsUploadModalOpen(false)} />
             </div>
           </DialogTitle>
           <DialogDescription />
@@ -217,7 +205,7 @@ export function UploadModal() {
                   <button
                     type="button"
                     onClick={openFileDialog}
-                    className="cursor-pointer text-primary underline-offset-4 hover:underline"
+                    className="cursor-pointer text-blue-600 dark:text-blue-400 underline-offset-4 underline"
                   >
                     browse files
                   </button>
@@ -237,19 +225,16 @@ export function UploadModal() {
                 {uploadItems.map((fileItem) => (
                   <div key={fileItem.id} className="relative group">
                     {/* Remove button */}
-                    <Button
+                    <CloseButton
                       onClick={() => removeUploadFile(fileItem.id)}
-                      variant="outline"
-                      size="icon"
-                      className="absolute -end-2 -top-2 z-10 size-6 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
-                    >
-                      <CrossIcon className="size-3 text-gray-600 dark:text-zinc-400" />
-                    </Button>
+                      className="absolute -inset-e-2 -top-2 z-10 size-6 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+                      iconClassName="size-3"
+                    />
 
                     {/* Wrapper */}
                     <div className="relative overflow-hidden rounded-lg border bg-card transition-colors">
                       {/* File preview area - uses component registry */}
-                      <div className="relative aspect-square bg-muted border-b border-slate-200">
+                      <div className="relative aspect-square bg-muted border-b border-slate-200 dark:border-zinc-800">
                         <div className="flex h-full items-center justify-center p-4">
                           <div className="w-[75%] h-[75%] flex items-center justify-center">
                             {fileItem.status === 'uploading' ? (
@@ -291,7 +276,7 @@ export function UploadModal() {
                         <div className="space-y-1">
                           <p className="truncate text-xs font-medium">{fileItem.file.name}</p>
                           <div className="relative flex items-center justify-between gap-2">
-                            <span className="text-[11px] text-blue-600 font-medium tracking-tight">{getFileSize(fileItem.file.size)}</span>
+                            <span className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold tracking-tight">{getFileSize(fileItem.file.size)}</span>
 
                             {fileItem.status === 'error' && fileItem.error && (
                               <Tooltip>
@@ -322,7 +307,7 @@ export function UploadModal() {
           {errors.length > 0 && (
             <Alert variant="destructive" appearance="light" className="mt-5">
               <AlertIcon>
-                <TriangleAlert />
+                <TriangleAlertIcon />
               </AlertIcon>
               <AlertContent>
                 <AlertTitle>File upload error(s)</AlertTitle>

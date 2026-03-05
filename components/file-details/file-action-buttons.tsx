@@ -25,13 +25,13 @@ export function FileDeleteButton({ file }: FileButtonProps) {
     try {
       // Call provider's delete method directly with this specific file
       await provider.deleteFiles([file.id]);
-      
+
       // Refresh the file list
       await refreshData();
-      
+
       // Close the details modal after successful deletion
       setFileDetailsModalFile(null);
-      
+
       toast.success('File Deleted', {
         description: `${middleTruncate(file.name, 20)} has been deleted`,
       });
@@ -47,7 +47,7 @@ export function FileDeleteButton({ file }: FileButtonProps) {
       size="icon"
       radius="full"
       title="Delete"
-      className='border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950 active:scale-95 transition-transform'
+      className='border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/40 active:scale-95 transition-all duration-200'
       onClick={handleDelete}
       disabled={deleting}
     >
@@ -87,7 +87,7 @@ export function FileDownloadButton({ file }: FileButtonProps) {
       size="icon"
       radius="full"
       onClick={handleDownload}
-      className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-950 active:scale-95 transition-transform"
+      className="border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/40 active:scale-95 transition-all duration-200"
       title="Download"
       disabled={downloading}
     >
@@ -110,7 +110,7 @@ export function FileCopyLinkButton({ file }: FileButtonProps) {
       toast.success('Link Copied', {
         description: 'File URL copied to clipboard',
       });
-      
+
       // Reset after 2 seconds
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
@@ -124,11 +124,11 @@ export function FileCopyLinkButton({ file }: FileButtonProps) {
       size="icon"
       radius="full"
       onClick={handleCopyLink}
-      className={`border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 active:scale-95 transition-all ${
-        copied 
-          ? 'text-green-700 border-green-400 bg-green-100 font-bold' 
-          : 'hover:text-orange-600 hover:border-orange-200 hover:bg-orange-50'
-      }`}
+      className={`border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 active:scale-95 transition-all duration-200
+      ${copied
+          ? 'text-green-700 dark:text-green-400 border-green-400 dark:border-green-700 bg-green-100 dark:bg-green-900/40 font-bold'
+          : 'hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-300 dark:hover:border-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/40'
+        }`}
       title="Copy Link"
       disabled={copied}
     >
@@ -153,7 +153,7 @@ export function FileFullscreenButton({ file, onFullscreen }: FileFullscreenButto
       size="icon"
       radius="full"
       onClick={onFullscreen}
-      className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-purple-600 hover:border-purple-200 hover:bg-purple-50 dark:hover:bg-purple-950 active:scale-95 transition-transform"
+      className="border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-purple-600 dark:hover:text-purple-400 hover:border-purple-300 dark:hover:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/40 active:scale-95 transition-all duration-200"
       title="Fullscreen"
     >
       <FullscreenIcon className="size-5" strokeWidth={1} />

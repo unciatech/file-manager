@@ -10,8 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '../ui/scroll-area';
-import { Button } from '../ui/button';
-import { CrossIcon } from '../icons';
+import { CloseButton } from '../ui/close-button';
 
 interface DetailsLayoutProps {
   title: string;
@@ -37,16 +36,7 @@ export function DetailsLayout({
           <DialogTitle className="px-6 text-base">
             <div className="flex w-full justify-between gap-2">
               <span>{title}</span>
-              <Button
-                variant="outline"
-                size="icon"
-                radius="full"
-                onClick={() => onClose()}
-                className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950"
-              >
-                <CrossIcon className="size-5 text-gray-600 dark:text-zinc-400" />
-                <span className="hidden">Close</span>
-              </Button>
+              <CloseButton onClick={() => onClose()} />
             </div>
           </DialogTitle>
           <DialogDescription />
@@ -55,12 +45,12 @@ export function DetailsLayout({
           {/* Content */}
           <div className="grid grid-cols-1 lg:grid-cols-2 min-h-full">
             {/* Preview Section - Left side on desktop, top on mobile */}
-            <div className="p-6 border-b lg:border-b-0 lg:border-r border-slate-200 ">
+            <div className="p-6 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-zinc-700">
               {previewSection}
             </div>
 
             {/* Metadata Section - Right side on desktop, bottom on mobile */}
-            <div className="p-6 overflow-y-auto">
+            <div className="p-6 overflow-y-auto ">
               {metadataSection}
             </div>
           </div>

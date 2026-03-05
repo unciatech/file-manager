@@ -6,7 +6,6 @@ import { FileMetaData } from '@/types/file-manager';
 import { DetailsLayout } from '@/components/file-details/details-layout';
 import { FileDeleteButton, FileDownloadButton, FileCopyLinkButton } from '@/components/file-details/file-action-buttons';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { getFileSize } from '@/lib/file-size';
@@ -85,14 +84,14 @@ export function VideoModal({ file, onClose, onSave, onDelete }: VideoModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Size
           </p>
-          <p className="text-xs font-bold text-blue-600">{getFileSize(file.size)}</p>
+          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{getFileSize(file.size)}</p>
         </div>
 
         <div>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Dimensions
           </p>
-          <p className="text-xs font-bold text-blue-600">
+          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
             {file.width && file.height ? `${file.width}×${file.height}` : 'N/A'}
           </p>
         </div>
@@ -101,7 +100,7 @@ export function VideoModal({ file, onClose, onSave, onDelete }: VideoModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Duration
           </p>
-          <p className="text-xs font-bold text-blue-600">
+          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
             {file.metaData?.duration ? formatDuration(file.metaData.duration) : 'N/A'}
           </p>
         </div>
@@ -110,7 +109,7 @@ export function VideoModal({ file, onClose, onSave, onDelete }: VideoModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Date
           </p>
-          <p className="text-xs font-bold text-blue-600">
+          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
             {formatDate(file.createdAt)}
           </p>
         </div>
@@ -119,19 +118,17 @@ export function VideoModal({ file, onClose, onSave, onDelete }: VideoModalProps)
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Extension
           </p>
-          <p className="text-xs font-bold text-blue-600">{file.ext?.replace('.', '') || 'N/A'}</p>
+          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{file.ext?.replace('.', '') || 'N/A'}</p>
         </div>
 
         <div>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Video Source
           </p>
-          <p className="text-xs font-bold text-blue-600 capitalize">
+          <p className="text-xs font-bold text-blue-600 dark:text-blue-400 capitalize">
             {file.metaData?.videoSource || 'local'}
           </p>
         </div>
-
-
       </div>
 
       {/* Editable Fields */}

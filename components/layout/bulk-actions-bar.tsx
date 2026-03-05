@@ -6,14 +6,14 @@ import { CrossIcon, MoveIcon, TrashIcon } from "../icons";
 
 export function MoveButton() {
   const { setIsMoveFileModalOpen } = useFileManager();
-  
+
   return (
     <Button
       variant="outline"
       size="lg"
       radius="full"
       onClick={() => setIsMoveFileModalOpen(true)}
-      className="text-md font-medium bg-white dark:bg-zinc-900 hover:bg-blue-50 dark:hover:bg-blue-950 hover:text-blue-600 hover:border-blue-200 border-gray-200 dark:border-zinc-700 shadow-sm"
+      className="text-md font-medium border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-blue-50 dark:hover:bg-blue-900/40 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 shadow-sm transition-all duration-200"
     >
       <MoveIcon className="size-5" />
       <span className="hidden sm:inline">Move</span>
@@ -23,14 +23,14 @@ export function MoveButton() {
 
 export function DeleteButton() {
   const { bulkDelete } = useFileManager();
-  
+
   return (
     <Button
       variant="outline"
       size="lg"
       radius="full"
       onClick={bulkDelete}
-      className="text-md font-medium bg-white dark:bg-zinc-900 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-600 hover:border-red-200 border-gray-200 dark:border-zinc-700 shadow-sm"
+      className="text-md font-medium border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-red-50 dark:hover:bg-red-900/40 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-700 shadow-sm transition-all duration-200"
     >
       <TrashIcon className="size-5" />
       <span className="hidden">Delete</span>
@@ -40,15 +40,15 @@ export function DeleteButton() {
 
 export function ClearSelectionButton() {
   const { handleClearSelection } = useFileManager();
-  
+
   return (
     <Button
       variant="outline"
       size="lg"
       onClick={handleClearSelection}
-      className="rounded-full text-md font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 hover:font-bold hover:border-blue-200 transition-all duration-200"
+      className="rounded-full text-md font-medium border border-transparent text-blue-600 dark:text-blue-400  hover:text-blue-700 dark:hover:text-blue-300  hover:bg-blue-50 dark:hover:bg-blue-900/40  hover:border-blue-300 dark:hover:border-blue-700  hover:font-semibold transition-all duration-200"
     >
-      <CrossIcon className="size-5 text-blue-600" />
+      <CrossIcon className="size-5 transition-colors" />
       Clear
     </Button>
   );
