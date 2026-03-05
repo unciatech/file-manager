@@ -70,7 +70,7 @@ export class FileManagerErrorBoundary extends Component<ErrorBoundaryProps, Erro
                 <summary className="cursor-pointer text-xs font-mono bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 transition-colors">
                   View Technical Details
                 </summary>
-                <div className="p-3 bg-white">
+                <div className="p-3 bg-white dark:bg-zinc-900">
                   <pre className="text-[10px] text-slate-600 font-mono whitespace-pre-wrap word-break-all max-h-40 overflow-auto">
                     {this.state.error.toString()}
                   </pre>

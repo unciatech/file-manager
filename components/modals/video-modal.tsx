@@ -142,7 +142,7 @@ export function VideoModal({ file, onClose, onSave, onDelete }: VideoModalProps)
             <InputGroup>
               <InputGroupInput id="fileName" placeholder="Enter file name" value={fileName.replace(file.ext || '', '')} onChange={(e: ChangeEvent<HTMLInputElement>) => setFileName(e.target.value)} />
               <InputGroupAddon align="inline-end" className='pr-1'>
-                <InputGroupText className='font-bold bg-gray-200 rounded-lg py-1 px-3'>{file.ext}</InputGroupText>
+                <InputGroupText className='font-bold bg-gray-200 dark:bg-zinc-700 rounded-lg py-1 px-3'>{file.ext}</InputGroupText>
               </InputGroupAddon>
             </InputGroup>
           </Field>

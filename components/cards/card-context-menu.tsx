@@ -70,7 +70,7 @@ export function CardContextMenu({
             {item.label}
           </MenuItemComponent>
           {nextItemIsDestructive && !isLast && (
-            <SeparatorComponent className="bg-gray-200" />
+            <SeparatorComponent className="bg-gray-200 dark:bg-zinc-700" />
           )}
         </React.Fragment>
       );
@@ -97,10 +97,10 @@ export function CardContextMenu({
                     radius="full"
                     className="focus-visible:ring-0 focus-visible:ring-offset-0"
                   >
-                    <MoveVerticalIcon className="size-4 text-gray-700" />
+                    <MoveVerticalIcon className="size-4 text-gray-700 dark:text-zinc-300" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 rounded-2xl shadow-xl bg-white/50 backdrop-blur-2xl border-gray-200">
+                <DropdownMenuContent className="w-56 rounded-2xl shadow-xl bg-white/50 dark:bg-zinc-900/80 backdrop-blur-2xl border-gray-200 dark:border-zinc-700">
                   {renderMenuItems(true)}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -111,7 +111,7 @@ export function CardContextMenu({
 
       {/* Desktop right-click context menu */}
       {shouldShowMenu && (
-        <ContextMenuContent className="w-56 rounded-2xl shadow-xl bg-white/50 backdrop-blur-2xl border-gray-200">
+        <ContextMenuContent className="w-56 rounded-2xl shadow-xl bg-white/50 dark:bg-zinc-900/80 backdrop-blur-2xl border-gray-200 dark:border-zinc-700">
           {renderMenuItems(false)}
         </ContextMenuContent>
       )}
