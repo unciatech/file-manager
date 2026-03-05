@@ -81,9 +81,9 @@ export default function SearchDialog() {
         variant="outline"
         size="icon"
         radius="full"
-        className="border-gray-200 bg-white"
+        className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900"
         onClick={() => setIsSearchModalOpen(true)}>
-        <SearchIcon className="size-4 text-gray-700" />
+        <SearchIcon className="size-4 text-gray-700 dark:text-zinc-300" />
         <span className="hidden">Search</span>
       </Button>
       
@@ -98,10 +98,10 @@ export default function SearchDialog() {
           {!loading && fileResults.length === 0 && folderResults.length === 0 && !searchQuery && (
             <CommandEmpty>
               <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-                <SearchIcon className="size-12 text-gray-300 mb-3" />
-                <p className="text-sm font-medium text-gray-900 mb-1">Search your files and folders</p>
-                <p className="text-xs text-gray-500">Start typing to find what you're looking for</p>
-                <p className="text-xs text-gray-500 mt-2">
+                <SearchIcon className="size-12 text-gray-300 dark:text-zinc-600 mb-3" />
+                <p className="text-sm font-medium text-gray-900 dark:text-zinc-100 mb-1">Search your files and folders</p>
+                <p className="text-xs text-gray-500 dark:text-zinc-400">Start typing to find what you're looking for</p>
+                <p className="text-xs text-gray-500 dark:text-zinc-400 mt-2">
                   <KbdGroup>
                     <Kbd><span className="text-lg">⌘</span> + K</Kbd>
                   </KbdGroup>
@@ -112,9 +112,9 @@ export default function SearchDialog() {
           {!loading && fileResults.length === 0 && folderResults.length === 0 && searchQuery && (
             <CommandEmpty>
               <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-                <SearchIcon className="size-12 text-gray-300 mb-3" />
-                <p className="text-sm font-medium text-gray-900 mb-1">No results found</p>
-                <p className="text-xs text-gray-500">Try searching with different keywords</p>
+                <SearchIcon className="size-12 text-gray-300 dark:text-zinc-600 mb-3" />
+                <p className="text-sm font-medium text-gray-900 dark:text-zinc-100 mb-1">No results found</p>
+                <p className="text-xs text-gray-500 dark:text-zinc-400">Try searching with different keywords</p>
               </div>
             </CommandEmpty>
           )}

@@ -34,27 +34,52 @@
   --radius:                  0.5rem;
 }
 
-/* ── Dark mode ────────────────────────────────────────────────── */
+/* ── Dark mode (system preference + manual .dark class) ───────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background:        #09090b;   /* zinc-950 */
+    --color-foreground:        #fafafa;   /* zinc-50  */
+    --color-card:              #09090b;
+    --color-card-foreground:   #fafafa;
+    --color-popover:           #09090b;
+    --color-popover-foreground:#fafafa;
+    --color-primary:           #2563eb;   /* blue-600 */
+    --color-primary-foreground:#ffffff;
+    --color-secondary:         #27272a;   /* zinc-800 */
+    --color-secondary-foreground:#fafafa;
+    --color-muted:             #18181b;   /* zinc-900 */
+    --color-muted-foreground:  #71717a;
+    --color-accent:            #18181b;
+    --color-accent-foreground: #fafafa;
+    --color-destructive:       #dc2626;
+    --color-destructive-foreground:#ffffff;
+    --color-border:            #27272a;   /* zinc-800 */
+    --color-input:             #27272a;
+    --color-ring:              #52525b;   /* zinc-600 */
+  }
+}
+
+/* Manual .dark class (toggle button override) */
 .dark {
-  --color-background:        #09090b;   /* zinc-950 */
-  --color-foreground:        #fafafa;   /* zinc-50  */
+  --color-background:        #09090b;
+  --color-foreground:        #fafafa;
   --color-card:              #09090b;
   --color-card-foreground:   #fafafa;
   --color-popover:           #09090b;
   --color-popover-foreground:#fafafa;
-  --color-primary:           #2563eb;   /* blue-600 */
+  --color-primary:           #2563eb;
   --color-primary-foreground:#ffffff;
-  --color-secondary:         #27272a;   /* zinc-800 */
+  --color-secondary:         #27272a;
   --color-secondary-foreground:#fafafa;
-  --color-muted:             #18181b;   /* zinc-900 */
+  --color-muted:             #18181b;
   --color-muted-foreground:  #71717a;
   --color-accent:            #18181b;
   --color-accent-foreground: #fafafa;
   --color-destructive:       #dc2626;
   --color-destructive-foreground:#ffffff;
-  --color-border:            #27272a;   /* zinc-800 */
+  --color-border:            #27272a;
   --color-input:             #27272a;
-  --color-ring:              #52525b;   /* zinc-600 */
+  --color-ring:              #52525b;
 }
 
 /* ── Border base reset ────────────────────────────────────────── */

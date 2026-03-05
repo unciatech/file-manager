@@ -2,7 +2,7 @@
  
 @import 'tw-animate-css';
  
-/** Dark Mode Variant **/
+/** Dark Mode Variant — class-based so toggle button works; system preference also supported via CSS **/
 @custom-variant dark (&:is(.dark *));
 
 
@@ -45,7 +45,9 @@
   --radius: 0.5rem;
 }
  
-.dark {
+/* System preference (automatic) */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
   --background: var(--color-zinc-950);
   --foreground: var(--color-zinc-50);
   --card: var(--color-zinc-950);
@@ -70,8 +72,32 @@
   --border: var(--color-zinc-800);
   --input: var(--color-zinc-800);
   --ring: var(--color-zinc-600);
+  }
 }
- 
+
+/* Manual toggle: .dark class on <html> overrides system preference */
+.dark {
+  --background: var(--color-zinc-950);
+  --foreground: var(--color-zinc-50);
+  --card: var(--color-zinc-950);
+  --card-foreground: var(--color-zinc-50);
+  --popover: var(--color-zinc-950);
+  --popover-foreground: var(--color-zinc-50);
+  --primary: var(--color-blue-600);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--color-zinc-800);
+  --secondary-foreground: var(--color-zinc-50);
+  --muted: var(--color-zinc-900);
+  --muted-foreground: var(--color-zinc-500);
+  --accent: var(--color-zinc-900);
+  --accent-foreground: var(--color-zinc-50);
+  --destructive: var(--color-red-600);
+  --destructive-foreground: var(--color-white);
+  --border: var(--color-zinc-800);
+  --input: var(--color-zinc-800);
+  --ring: var(--color-zinc-600);
+}
+
 /** Theme Setup **/
 @theme inline {
   --color-background: var(--background);

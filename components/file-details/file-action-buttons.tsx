@@ -47,7 +47,7 @@ export function FileDeleteButton({ file }: FileButtonProps) {
       size="icon"
       radius="full"
       title="Delete"
-      className='border-gray-200 bg-white hover:text-red-600 hover:border-red-200 hover:bg-red-50 active:scale-95 transition-transform'
+      className='border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950 active:scale-95 transition-transform'
       onClick={handleDelete}
       disabled={deleting}
     >
@@ -87,7 +87,7 @@ export function FileDownloadButton({ file }: FileButtonProps) {
       size="icon"
       radius="full"
       onClick={handleDownload}
-      className="border-gray-200 bg-white hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 active:scale-95 transition-transform"
+      className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-950 active:scale-95 transition-transform"
       title="Download"
       disabled={downloading}
     >
@@ -124,7 +124,7 @@ export function FileCopyLinkButton({ file }: FileButtonProps) {
       size="icon"
       radius="full"
       onClick={handleCopyLink}
-      className={`border-gray-200 bg-white active:scale-95 transition-all ${
+      className={`border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 active:scale-95 transition-all ${
         copied 
           ? 'text-green-700 border-green-400 bg-green-100 font-bold' 
           : 'hover:text-orange-600 hover:border-orange-200 hover:bg-orange-50'
@@ -153,7 +153,7 @@ export function FileFullscreenButton({ file, onFullscreen }: FileFullscreenButto
       size="icon"
       radius="full"
       onClick={onFullscreen}
-      className="border-gray-200 bg-white hover:text-purple-600 hover:border-purple-200 hover:bg-purple-50 active:scale-95 transition-transform"
+      className="border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-purple-600 hover:border-purple-200 hover:bg-purple-50 dark:hover:bg-purple-950 active:scale-95 transition-transform"
       title="Fullscreen"
     >
       <FullscreenIcon className="size-5" strokeWidth={1} />
