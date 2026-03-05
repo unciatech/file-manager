@@ -82,7 +82,7 @@ export function VideoCardMetadata({ file }: { file: FileMetaData }) {
     if (!file.metaData?.duration) return null;
     
     return (
-        <p className="text-xs text-blue-600 dark:text-blue-400 mb-2">
+        <p className="text-xs text-primary mb-2">
             Duration: {Math.floor(file.metaData.duration / 60)}:
             {(file.metaData.duration % 60).toString().padStart(2, "0")}
         </p>

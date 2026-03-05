@@ -38,7 +38,7 @@ export function ImageCard({ file }: ImageCardProps) {
 export function ImageCardMetadata({ file }: { file: FileMetaData }) {
     if (!file.caption) return null;
     return (
-        <p className="text-xs text-blue-600 dark:text-blue-400 line-clamp-2 mb-2">
+        <p className="text-xs text-primary line-clamp-2 mb-2">
             {file.height} x {file.width}
         </p>
     );
