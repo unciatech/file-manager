@@ -2,8 +2,8 @@ export function splitAndTruncate(filename: string, maxLength: number = 28): stri
   if (filename.length <= maxLength) return filename;
 
   const lastDot = filename.lastIndexOf('.');
-  const ext = lastDot !== -1 ? filename.slice(lastDot) : '';
-  const name = lastDot !== -1 ? filename.slice(0, lastDot) : filename;
+  const ext = lastDot === -1 ? '' : filename.slice(lastDot);
+  const name = lastDot === -1 ? filename : filename.slice(0, lastDot);
 
   const ellipsis = '...';
   const lineLength = Math.floor(maxLength / 2);

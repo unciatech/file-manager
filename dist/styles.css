@@ -34,30 +34,7 @@
   --radius:                  0.5rem;
 }
 
-/* ── Dark mode (system preference + manual .dark class) ───────── */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background:        #09090b;   /* zinc-950 */
-    --color-foreground:        #fafafa;   /* zinc-50  */
-    --color-card:              #09090b;
-    --color-card-foreground:   #fafafa;
-    --color-popover:           #09090b;
-    --color-popover-foreground:#fafafa;
-    --color-primary:           #2563eb;   /* blue-600 */
-    --color-primary-foreground:#ffffff;
-    --color-secondary:         #27272a;   /* zinc-800 */
-    --color-secondary-foreground:#fafafa;
-    --color-muted:             #18181b;   /* zinc-900 */
-    --color-muted-foreground:  #71717a;
-    --color-accent:            #18181b;
-    --color-accent-foreground: #fafafa;
-    --color-destructive:       #dc2626;
-    --color-destructive-foreground:#ffffff;
-    --color-border:            #27272a;   /* zinc-800 */
-    --color-input:             #27272a;
-    --color-ring:              #52525b;   /* zinc-600 */
-  }
-}
+
 
 /* Manual .dark class (toggle button override) */
 .dark {
@@ -82,32 +59,4 @@
   --color-ring:              #52525b;
 }
 
-/* ── Border base reset ────────────────────────────────────────── */
-*, *::before, *::after {
-  border-color: var(--color-border);
-}
 
-/* ── Focus ring ───────────────────────────────────────────────── */
-/* Suppress the thick native browser outline on all elements */
-*:focus-visible {
-  outline: 2px solid var(--color-ring);
-  outline-offset: 2px;
-  box-shadow: none;
-}
-
-/* ── Scrollbar ────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: var(--color-input);
-  border-radius: 5px;
-}
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-input) transparent;
-}
-
-/* ── Smooth scroll ────────────────────────────────────────────── */
-html {
-  scroll-behavior: smooth;
-}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, ChangeEvent } from 'react';
-import { Loader2Icon } from '../icons';
+import { Loader2Icon, MusicIcon } from '../icons';
 import { FileMetaData } from '@/types/file-manager';
 import { DetailsLayout } from '@/components/file-details/details-layout';
 import { FileDeleteButton, FileDownloadButton, FileCopyLinkButton } from '@/components/file-details/file-action-buttons';
@@ -10,7 +10,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { getFileSize } from '@/lib/file-size';
 import { formatDate, formatDuration } from '@/lib/format-utils';
-import { MusicIcon } from '../icons';
 import { Field, FieldLabel } from '../ui/field';
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '../ui/input-group';
 
@@ -19,16 +18,14 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '..
  */
 interface AudioModalProps {
   /** The audio file data object to display and edit. */
-  file: FileMetaData;
+  readonly file: FileMetaData;
   /** Callback fired when the modal is closed without saving or after a successful save. */
-  onClose: () => void;
+  readonly onClose: () => void;
   /**
    * Asynchronous callback fired when the user saves their changes.
    * Receives a partial metadata object containing the requested updates.
    */
-  onSave?: (updates: Partial<FileMetaData>) => Promise<void> | void;
-  /** Optional callback fired when the user chooses to delete the audio file. */
-  onDelete?: () => void;
+  readonly onSave?: (updates: Partial<FileMetaData>) => Promise<void> | void;
 }
 
 /**
@@ -36,7 +33,7 @@ interface AudioModalProps {
  * Displays an audio player along with audio-specific metadata (duration, bitrate).
  * Supports updating the file name and caption.
  */
-export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps) {
+export function AudioModal({ file, onClose, onSave }: AudioModalProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [fileName, setFileName] = useState(file.name);
   const [caption, setCaption] = useState(file.caption || '');
@@ -76,6 +73,7 @@ export function AudioModal({ file, onClose, onSave, onDelete }: AudioModalProps)
             controls
             className="w-full"
           >
+            <track kind="captions" srcLang="en" label="English" />
             Your browser does not support the audio tag.
           </audio>
         </div>

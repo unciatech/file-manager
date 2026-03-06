@@ -79,7 +79,7 @@ export function BulkActionsStatic() {
 }
 
 // Floating variant - fixed at bottom (for page mode)
-export function BulkActionsFloating({ className }: { className?: string }) {
+export function BulkActionsFloating({ className }: Readonly<{ className?: string }>) {
   const {
     selectedFiles,
     selectedFolders,

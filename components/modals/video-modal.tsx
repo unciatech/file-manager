@@ -18,16 +18,14 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '..
  */
 interface VideoModalProps {
   /** The video file data object to display and edit. */
-  file: FileMetaData;
+  readonly file: FileMetaData;
   /** Callback fired when the modal is closed without saving or after a successful save. */
-  onClose: () => void;
+  readonly onClose: () => void;
   /**
    * Asynchronous callback fired when the user saves their changes.
    * Receives a partial metadata object containing the requested updates.
    */
-  onSave?: (updates: Partial<FileMetaData>) => Promise<void> | void;
-  /** Optional callback fired when the user chooses to delete the video file. */
-  onDelete?: () => void;
+  readonly onSave?: (updates: Partial<FileMetaData>) => Promise<void> | void;
 }
 
 /**
@@ -35,7 +33,7 @@ interface VideoModalProps {
  * Displays a video player along with video-specific metadata (duration, source).
  * Supports updating the file name and caption.
  */
-export function VideoModal({ file, onClose, onSave, onDelete }: VideoModalProps) {
+export function VideoModal({ file, onClose, onSave }: VideoModalProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [fileName, setFileName] = useState(file.name);
   const [caption, setCaption] = useState(file.caption || '');

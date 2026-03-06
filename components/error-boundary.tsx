@@ -43,7 +43,7 @@ export class FileManagerErrorBoundary extends Component<ErrorBoundaryProps, Erro
   handleReset = (): void => {
     // A hard reload is the safest way to clear corrupted React state
     // for an application-level failure boundary.
-    window.location.reload();
+    globalThis.location.reload();
   };
 
   render(): ReactNode {

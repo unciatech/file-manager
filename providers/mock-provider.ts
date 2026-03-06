@@ -52,13 +52,13 @@ export class MockProvider implements IFileManagerProvider {
     await delay(300);
     
     // Filter folders by parent
-    const filteredFolders = folderId !== null
-      ? mockFolders.filter((folder) => folder.parentId === folderId)
-      : mockFolders.filter((folder) => folder.parentId === null);
+    const filteredFolders = folderId === null
+      ? mockFolders.filter((folder) => folder.parentId === null)
+      : mockFolders.filter((folder) => folder.parentId === folderId);
     
     // Filter by search query
     let searchFiltered = filteredFolders;
-    if (query && query.trim()) {
+    if (query?.trim()) {
       const searchLower = query.toLowerCase().trim();
       searchFiltered = filteredFolders.filter((folder) =>
         folder.name.toLowerCase().includes(searchLower)
@@ -66,7 +66,7 @@ export class MockProvider implements IFileManagerProvider {
     }
     
     // Sort by creation date ascending (oldest first)
-    const sortedFolders = searchFiltered.sort((a, b) => 
+    const sortedFolders = searchFiltered.toSorted((a, b) => 
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
     
@@ -123,7 +123,7 @@ export class MockProvider implements IFileManagerProvider {
     }
 
     // Sort by creation date ascending (oldest first)
-    const sortedFiles = filteredFiles.sort((a, b) => 
+    const sortedFiles = filteredFiles.toSorted((a, b) => 
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
 
@@ -138,7 +138,7 @@ export class MockProvider implements IFileManagerProvider {
       startIndex + filesPerPage
     );
 
-    return Promise.resolve({
+    return {
       files: paginatedFiles,
       pagination: {
         currentPage,
@@ -146,7 +146,7 @@ export class MockProvider implements IFileManagerProvider {
         totalFiles,
         filesPerPage,
       },
-    });
+    };
   }
   
   /**
@@ -168,14 +168,14 @@ export class MockProvider implements IFileManagerProvider {
     await delay(300);
     
     // Fetch all folders in current directory
-    let filteredFolders = folderId !== null
-      ? mockFolders.filter((folder) => folder.parentId === folderId)
-      : mockFolders.filter((folder) => folder.parentId === null);
+    let filteredFolders = folderId === null
+      ? mockFolders.filter((folder) => folder.parentId === null)
+      : mockFolders.filter((folder) => folder.parentId === folderId);
     
     // Fetch all files in current directory
-    let filteredFiles = folderId !== null
-      ? mockFiles.filter((file) => file.folderId === folderId)
-      : mockFiles.filter((file) => file.folderId === null);
+    let filteredFiles = folderId === null
+      ? mockFiles.filter((file) => file.folderId === null)
+      : mockFiles.filter((file) => file.folderId === folderId);
 
     // Filter by file types
     if (fileTypes && fileTypes.length > 0) {
@@ -186,7 +186,7 @@ export class MockProvider implements IFileManagerProvider {
     }
     
     // Apply search query to both folders and files
-    if (query && query.trim()) {
+    if (query?.trim()) {
       const searchLower = query.toLowerCase().trim();
       
       filteredFolders = filteredFolders.filter((folder) =>
@@ -200,12 +200,12 @@ export class MockProvider implements IFileManagerProvider {
     }
     
     // Sort folders by createdAt ASC (oldest first)
-    const sortedFolders = filteredFolders.sort((a, b) => 
+    const sortedFolders = filteredFolders.toSorted((a, b) => 
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
     
     // Sort files by createdAt ASC (oldest first)
-    const sortedFiles = filteredFiles.sort((a, b) => 
+    const sortedFiles = filteredFiles.toSorted((a, b) => 
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
     
@@ -226,7 +226,6 @@ export class MockProvider implements IFileManagerProvider {
     const fileSlots = limit - foldersTaken;
     
     // Calculate file offset taking into account folders on previous pages
-    const foldersOnPreviousPages = Math.min(sortedFolders.length, startIndex);
     const fileStartIndex = Math.max(0, startIndex - sortedFolders.length);
     
     const filesToShow = sortedFiles.slice(fileStartIndex, fileStartIndex + fileSlots);
@@ -267,12 +266,7 @@ export class MockProvider implements IFileManagerProvider {
   private getMetaDataType(file: File, videoSource?: VideoSource): MetaDataType {
     // Basic metadata extraction
     if (file.type.startsWith("image/")) {
-      return {
-        // Dimensions would normally require reading the image
-        // dimensions: { width: 0, height: 0 },
-        // altText: "",
-        // caption: "",
-      } as any; // Cast to any to avoid partial checks for now
+      return {} as MetaDataType;
     } else if (file.type.startsWith("video/")) {
       return {
         duration: 0, // Mock

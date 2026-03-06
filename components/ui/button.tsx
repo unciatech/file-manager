@@ -413,10 +413,10 @@ function Button({
 }
 
 interface ButtonArrowProps extends React.SVGProps<SVGSVGElement> {
-  icon?: React.FC<React.SVGProps<SVGSVGElement>>;
+  readonly icon?: React.FC<React.SVGProps<SVGSVGElement>>;
 }
 
-function ButtonArrow({ icon: Icon = ChevronDownIcon, className, ...props }: ButtonArrowProps) {
+function ButtonArrow({ icon: Icon = ChevronDownIcon, className, ...props }: Readonly<ButtonArrowProps>) {
   return <Icon data-slot="button-arrow" className={cn('ms-auto -me-1', className)} {...props} />;
 }
 

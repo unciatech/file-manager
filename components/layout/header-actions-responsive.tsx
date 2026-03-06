@@ -1,6 +1,6 @@
 "use client";
 
-import { MoveHorizontalIcon } from '../icons';
+import { MoveHorizontalIcon, PlusIcon, SearchIcon, UploadFolderIcon } from '../icons';
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -15,7 +15,6 @@ import {
 } from "./header-actions";
 import { ThemeToggle } from "./theme-toggle";
 import { useFileManager } from "@/context/file-manager-context";
-import { PlusIcon, SearchIcon, UploadFolderIcon } from "../icons";
 
 /**
  * Responsive wrapper for header actions that displays:
@@ -79,7 +78,7 @@ export function ResponsiveHeaderActions() {
 
 
 
-export function ModalResponsiveHeaderActions({ onSearchClick }: { onSearchClick?: () => void }) {
+export function ModalResponsiveHeaderActions({ onSearchClick }: { readonly onSearchClick?: () => void }) {
   const { setIsUploadModalOpen, setIsCreateFolderModalOpen } = useFileManager();
 
   return (

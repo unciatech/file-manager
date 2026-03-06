@@ -22,7 +22,7 @@ export function useIntersectionObserver({
     }
 
     if (node) {
-      if (typeof window !== 'undefined' && 'IntersectionObserver' in window) {
+      if (typeof globalThis !== 'undefined' && 'IntersectionObserver' in globalThis) {
         observer.current = new IntersectionObserver(
           ([newEntry]) => {
             setEntry(newEntry);

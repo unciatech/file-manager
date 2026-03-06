@@ -18,16 +18,14 @@ import { Loader2Icon } from '../icons';
  */
 interface ImageModalProps {
   /** The image file data object to display and edit. */
-  file: FileMetaData;
+  readonly file: FileMetaData;
   /** Callback fired when the modal is closed without saving or after a successful save. */
-  onClose: () => void;
+  readonly onClose: () => void;
   /**
    * Asynchronous callback fired when the user saves their changes.
    * Receives a partial metadata object containing the requested updates.
    */
-  onSave?: (updates: Partial<FileMetaData>) => Promise<void> | void;
-  /** Optional callback fired when the user chooses to delete the image. */
-  onDelete?: () => void;
+  readonly onSave?: (updates: Partial<FileMetaData>) => Promise<void> | void;
 }
 
 /**
@@ -35,7 +33,7 @@ interface ImageModalProps {
  * Supports updating the file name, alternative text, and caption.
  * Displays a full-screen preview with the image set as a blurred background.
  */
-export function ImageModal({ file, onClose, onSave, onDelete }: ImageModalProps) {
+export function ImageModal({ file, onClose, onSave }: ImageModalProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [fileName, setFileName] = useState(file.name);
   const [alternativeText, setAlternativeText] = useState(file.alternativeText || '');
@@ -62,7 +60,7 @@ export function ImageModal({ file, onClose, onSave, onDelete }: ImageModalProps)
         <FileDeleteButton file={file} />
         <FileDownloadButton file={file} />
         <FileCopyLinkButton file={file} />
-        <FileFullscreenButton file={file} onFullscreen={() => window.open(file.url, '_blank')} />
+        <FileFullscreenButton onFullscreen={() => window.open(file.url, '_blank')} />
       </div>
 
       {/* Image Preview */}
@@ -150,7 +148,7 @@ export function ImageModal({ file, onClose, onSave, onDelete }: ImageModalProps)
             rows={3}
           />
           <p className="text-xs text-muted-foreground">
-            This text will be displayed if the asset can't be shown.
+            This text will be displayed if the asset can&apos;t be shown.
           </p>
         </div>
 

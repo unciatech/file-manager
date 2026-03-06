@@ -181,7 +181,7 @@ export function useFileHandlers(state: FileState) {
         setSelectedFolders([]);
         
         // Update URL with folderId parameter
-        const params = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(globalThis.location.search);
         if (folderId === null) {
           params.delete('folderId');
         } else {
@@ -190,7 +190,7 @@ export function useFileHandlers(state: FileState) {
         // Reset to page 1 when navigating folders
         params.set('page', '1');
         
-        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        const newUrl = `${globalThis.location.pathname}?${params.toString()}`;
         router.push(newUrl, { scroll: false });
       }
     },
@@ -364,7 +364,7 @@ export function useFileHandlers(state: FileState) {
         console.error("Failed to rename folder:", error);
       }
     },
-    [provider, refreshData]
+    [provider, refreshData, setFolders]
   );
 
   /**
@@ -400,7 +400,7 @@ export function useFileHandlers(state: FileState) {
         console.error("Failed to update metadata:", error);
       }
     },
-    [provider, refreshData]
+    [provider, refreshData, setFiles]
   );
 
   /**

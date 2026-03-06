@@ -5,8 +5,8 @@ export function FileManagerHeader({
   children,
   className
 }: {
-  children?: ReactNode;
-  className?: string;
+  readonly children?: ReactNode;
+  readonly className?: string;
 }) {
   return (
     <div className={cn('p-4 flex md:flex-row gap-2', className)}>

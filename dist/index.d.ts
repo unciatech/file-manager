@@ -2,9 +2,9 @@ import { F as FileManagerPageProps, a as FileManagerModalProps, b as FileManager
 export { h as FILE_TYPE, i as FILE_TYPES, j as FileStateOptions, k as FormatDetails, l as MODE, m as MODES, n as MetaDataType, o as MockProvider, p as SELECTION_MODE, q as SELECTION_MODES, T as Tag, V as VIDEO_SOURCE, r as VIDEO_SOURCES, s as VIEW_MODE, t as VIEW_MODES, u as VideoSource, v as ViewMode } from './mock-provider-nCBvw7nl.js';
 import * as react_jsx_runtime from 'react/jsx-runtime';
 
-declare function FileManager(props: FileManagerPageProps): react_jsx_runtime.JSX.Element;
+declare function FileManager(props: Readonly<FileManagerPageProps>): react_jsx_runtime.JSX.Element;
 
-declare function FileManagerModal({ open, onClose, ...props }: FileManagerModalProps): react_jsx_runtime.JSX.Element;
+declare function FileManagerModal({ open, onClose, ...props }: Readonly<FileManagerModalProps>): react_jsx_runtime.JSX.Element;
 
 interface FileManagerContextType {
     files: FileMetaData[];

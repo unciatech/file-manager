@@ -161,14 +161,14 @@ function useFileHandlers(state) {
         setIsLoading(true);
         setSelectedFiles([]);
         setSelectedFolders([]);
-        const params = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(globalThis.location.search);
         if (folderId === null) {
           params.delete("folderId");
         } else {
           params.set("folderId", String(folderId));
         }
         params.set("page", "1");
-        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        const newUrl = `${globalThis.location.pathname}?${params.toString()}`;
         router.push(newUrl, { scroll: false });
       }
     },
@@ -291,7 +291,7 @@ function useFileHandlers(state) {
         console.error("Failed to rename folder:", error);
       }
     },
-    [provider, refreshData]
+    [provider, refreshData, setFolders]
   );
   const updateFileMetadata = useCallback(
     async (fileId, metadata) => {
@@ -317,7 +317,7 @@ function useFileHandlers(state) {
         console.error("Failed to update metadata:", error);
       }
     },
-    [provider, refreshData]
+    [provider, refreshData, setFiles]
   );
   const bulkDelete = useCallback(async () => {
     try {
@@ -386,8 +386,8 @@ function useFileState(options) {
   const searchParams = useSearchParams();
   const router = useRouter2();
   const pathname = usePathname();
-  const pageFromUrl = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-  const limitFromUrl = Math.max(1, parseInt(searchParams.get("limit") || "24", 10));
+  const pageFromUrl = Math.max(1, Number.parseInt(searchParams.get("page") || "1", 10));
+  const limitFromUrl = Math.max(1, Number.parseInt(searchParams.get("limit") || "24", 10));
   const queryFromUrl = searchParams.get("query") || "";
   const folderId = useMemo(() => {
     if (mode === MODE.PAGE && (params == null ? void 0 : params.path)) {
@@ -430,7 +430,7 @@ function useFileState(options) {
     params2.set("page", page.toString());
     params2.set("limit", limit.toString());
     router.push(`${pathname}?${params2.toString()}`, { scroll: false });
-  }, [router, pathname]);
+  }, [router, pathname, searchParams]);
   useEffect(() => {
     setPagination((prev) => __spreadProps(__spreadValues({}, prev), {
       currentPage: pageFromUrl,
@@ -2657,19 +2657,13 @@ var useFileUpload = (options = {}) => {
   }, [state.files]);
   const validateFile = useCallback3(
     (file) => {
-      if (file instanceof File) {
-        if (file.size > maxSize) {
-          return `File "${file.name}" exceeds the maximum size of ${getFileSize(maxSize)}.`;
-        }
-      } else {
-        if (file.size > maxSize) {
-          return `File "${file.name}" exceeds the maximum size of ${getFileSize(maxSize)}.`;
-        }
+      if (file.size > maxSize) {
+        return `File "${file.name}" exceeds the maximum size of ${getFileSize(maxSize)}.`;
       }
       if (accept !== "*") {
         const acceptedTypes = accept.split(",").map((type) => type.trim());
         const fileType = file instanceof File ? file.type || "" : file.type;
-        const fileExtension = `.${file instanceof File ? file.name.split(".").pop() : file.name.split(".").pop()}`;
+        const fileExtension = `.${file.name.split(".").pop()}`;
         const isAccepted = acceptedTypes.some((type) => {
           if (type.startsWith(".")) {
             return fileExtension.toLowerCase() === type.toLowerCase();
@@ -2681,7 +2675,7 @@ var useFileUpload = (options = {}) => {
           return fileType === type;
         });
         if (!isAccepted) {
-          return `File "${file instanceof File ? file.name : file.name}" is not an accepted file type.`;
+          return `File "${file.name}" is not an accepted file type.`;
         }
       }
       return null;
@@ -2762,7 +2756,7 @@ var useFileUpload = (options = {}) => {
         }
         if (validFiles.length > 0) {
           onFilesAdded == null ? void 0 : onFilesAdded(validFiles);
-          const newFiles2 = !multiple ? validFiles : [...prev.files, ...validFiles];
+          const newFiles2 = multiple ? [...prev.files, ...validFiles] : validFiles;
           onFilesChange == null ? void 0 : onFilesChange(newFiles2);
           return __spreadProps(__spreadValues({}, prev), {
             files: newFiles2,
@@ -2797,7 +2791,7 @@ var useFileUpload = (options = {}) => {
     (id) => {
       setState((prev) => {
         const fileToRemove = prev.files.find((file) => file.id === id);
-        if (fileToRemove && fileToRemove.preview && fileToRemove.file instanceof File && fileToRemove.file.type.startsWith("image/")) {
+        if ((fileToRemove == null ? void 0 : fileToRemove.preview) && fileToRemove.file instanceof File && fileToRemove.file.type.startsWith("image/")) {
           URL.revokeObjectURL(fileToRemove.preview);
         }
         const newFiles = prev.files.filter((file) => file.id !== id);
@@ -2842,11 +2836,11 @@ var useFileUpload = (options = {}) => {
         return;
       }
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        if (!multiple) {
+        if (multiple) {
+          addFiles(e.dataTransfer.files);
+        } else {
           const file = e.dataTransfer.files[0];
           addFiles([file]);
-        } else {
-          addFiles(e.dataTransfer.files);
         }
       }
     },
@@ -2867,11 +2861,12 @@ var useFileUpload = (options = {}) => {
   }, []);
   const getInputProps = useCallback3(
     (props = {}) => {
+      var _a;
       return __spreadProps(__spreadValues({}, props), {
         type: "file",
         onChange: handleFileChange,
         accept: props.accept || accept,
-        multiple: props.multiple !== void 0 ? props.multiple : multiple,
+        multiple: (_a = props.multiple) != null ? _a : multiple,
         ref: inputRef
       });
     },
@@ -3341,9 +3336,12 @@ function UploadModal() {
       const newUploadItems = newFiles.map((file) => {
         const existingFile = uploadItems.find((existing) => existing.id === file.id);
         if (existingFile) {
-          return __spreadValues(__spreadValues({}, existingFile), file);
+          return __spreadProps(__spreadValues(__spreadValues({}, existingFile), file), {
+            file: file.file
+          });
         } else {
           return __spreadProps(__spreadValues({}, file), {
+            file: file.file,
             progress: 100,
             status: "completed"
           });
@@ -3534,7 +3532,7 @@ function UploadModal() {
         /* @__PURE__ */ jsx57(AlertIcon, { children: /* @__PURE__ */ jsx57(TriangleAlertIcon, {}) }),
         /* @__PURE__ */ jsxs39(AlertContent, { children: [
           /* @__PURE__ */ jsx57(AlertTitle, { children: "File upload error(s)" }),
-          /* @__PURE__ */ jsx57(AlertDescription, { children: errors.map((error, index) => /* @__PURE__ */ jsx57("p", { className: "last:mb-0", children: error }, index)) })
+          /* @__PURE__ */ jsx57(AlertDescription, { children: errors.map((error) => /* @__PURE__ */ jsx57("p", { className: "last:mb-0", children: error }, error)) })
         ] })
       ] })
     ] }),
@@ -3549,7 +3547,7 @@ function UploadModal() {
 }
 
 // components/modals/create-folder.tsx
-import { useState as useState6, useEffect as useEffect3 } from "react";
+import { useState as useState6 } from "react";
 
 // components/ui/input.tsx
 import { cva as cva4 } from "class-variance-authority";
@@ -3697,16 +3695,11 @@ function CreateFolderModal() {
     folderToRename,
     setFolderToRename
   } = useFileManager();
-  const [folderName, setFolderName] = useState6("");
+  const [editedName, setEditedName] = useState6(null);
   const isRenameMode = isRenameFolderModalOpen;
   const isOpen = isCreateFolderModalOpen || isRenameFolderModalOpen;
-  useEffect3(() => {
-    if (isRenameFolderModalOpen && folderToRename) {
-      setFolderName(folderToRename.name);
-    } else if (!isCreateFolderModalOpen) {
-      setFolderName("");
-    }
-  }, [isRenameFolderModalOpen, isCreateFolderModalOpen, folderToRename]);
+  const defaultFolderName = isRenameMode && folderToRename ? folderToRename.name : "";
+  const folderName = editedName != null ? editedName : defaultFolderName;
   const handleSubmit = async () => {
     if (folderName.trim() !== "") {
       if (isRenameMode && folderToRename) {
@@ -3720,7 +3713,7 @@ function CreateFolderModal() {
         createFolder(folderName.trim());
         setIsCreateFolderModalOpen(false);
       }
-      setFolderName("");
+      setEditedName(null);
     }
   };
   const handleClose = () => {
@@ -3730,7 +3723,7 @@ function CreateFolderModal() {
     } else {
       setIsCreateFolderModalOpen(false);
     }
-    setFolderName("");
+    setEditedName(null);
   };
   if (!isOpen) return null;
   return /* @__PURE__ */ jsx59(Dialog, { open: isOpen, onOpenChange: handleClose, children: /* @__PURE__ */ jsxs40(DialogContent, { className: "p-0 max-w-xl m-auto max-h-[32vh] flex flex-col", variant: "fullscreen", showCloseButton: false, children: [
@@ -3752,7 +3745,7 @@ function CreateFolderModal() {
           id: "folder-name",
           name: "folder-name",
           value: folderName,
-          onChange: (e) => setFolderName(e.target.value),
+          onChange: (e) => setEditedName(e.target.value),
           placeholder: "Enter folder name",
           autoFocus: true,
           onKeyDown: (e) => {
@@ -3781,7 +3774,7 @@ function CreateFolderModal() {
 }
 
 // components/modals/move-modal.tsx
-import { useState as useState8, useEffect as useEffect5 } from "react";
+import { useState as useState8, useEffect as useEffect4, useCallback as useCallback4, useRef as useRef4 } from "react";
 
 // lib/truncate-name.ts
 function middleTruncate(text, maxLength = 30) {
@@ -3792,7 +3785,7 @@ function middleTruncate(text, maxLength = 30) {
 }
 
 // hooks/use-intersection-observer.ts
-import { useEffect as useEffect4, useRef as useRef3, useState as useState7 } from "react";
+import { useEffect as useEffect3, useRef as useRef3, useState as useState7 } from "react";
 function useIntersectionObserver({
   threshold = 0,
   root = null,
@@ -3801,12 +3794,12 @@ function useIntersectionObserver({
   const [entry, setEntry] = useState7();
   const [node, setNode] = useState7(null);
   const observer = useRef3(null);
-  useEffect4(() => {
+  useEffect3(() => {
     if (observer.current) {
       observer.current.disconnect();
     }
     if (node) {
-      if (typeof window !== "undefined" && "IntersectionObserver" in window) {
+      if (typeof globalThis !== "undefined" && "IntersectionObserver" in globalThis) {
         observer.current = new IntersectionObserver(
           ([newEntry]) => {
             setEntry(newEntry);
@@ -3849,7 +3842,7 @@ function FolderTreeItem({
     rootMargin: "100px"
   });
   const hasMore = pagination && pagination.currentPage < pagination.totalPages;
-  useEffect5(() => {
+  useEffect4(() => {
     if (isOpen && (entry == null ? void 0 : entry.isIntersecting) && hasMore && !isLoading) {
       const nextPage = ((pagination == null ? void 0 : pagination.currentPage) || 1) + 1;
       onLoadChildren(folder.id, nextPage);
@@ -3868,6 +3861,15 @@ function FolderTreeItem({
       onSelect(folder.id);
     }
   };
+  const selectedClassName = "bg-blue-100 text-blue-600 dark:text-blue-400 font-semibold";
+  const disabledClassName = "opacity-50 cursor-not-allowed";
+  const defaultClassName = "hover:bg-gray-100 dark:hover:bg-zinc-700";
+  let buttonClassName = defaultClassName;
+  if (isSelected) {
+    buttonClassName = selectedClassName;
+  } else if (isDisabled) {
+    buttonClassName = disabledClassName;
+  }
   return /* @__PURE__ */ jsxs41("li", { children: [
     /* @__PURE__ */ jsxs41("div", { className: "flex items-center gap-1.5 py-1", children: [
       hasChildren ? /* @__PURE__ */ jsx60(
@@ -3890,7 +3892,7 @@ function FolderTreeItem({
           onClick: handleSelect,
           disabled: isDisabled,
           title: folder.name,
-          className: `flex items-center gap-1.5 px-2 py-1 rounded-xl flex-1 text-left transition-colors min-w-0 ${isSelected ? "bg-blue-100 text-blue-600 dark:text-blue-400 font-semibold" : isDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100 dark:hover:bg-zinc-700"}`,
+          className: `flex items-center gap-1.5 px-2 py-1 rounded-xl flex-1 text-left transition-colors min-w-0 ${buttonClassName}`,
           children: [
             /* @__PURE__ */ jsx60(FolderIcon, { className: "size-8 text-white shrink-0", strokeWidth: 1.5 }),
             /* @__PURE__ */ jsxs41("div", { className: "flex flex-col gap-1", children: [
@@ -3935,6 +3937,8 @@ function MoveModal() {
     loaded: /* @__PURE__ */ new Set(),
     pagination: /* @__PURE__ */ new Map()
   });
+  const fetchingRef = useRef4(/* @__PURE__ */ new Set());
+  const hasInitializedRef = useRef4(false);
   const { ref: rootObserverRef, entry: rootEntry } = useIntersectionObserver({
     threshold: 0.1,
     rootMargin: "100px"
@@ -3944,19 +3948,9 @@ function MoveModal() {
   const isRootLoading = treeState.loading.has(null);
   const disabledFolderIds = selectedFolders.map((f) => f.id);
   const rootFolders = treeState.folders.get(null) || [];
-  useEffect5(() => {
-    if (isMoveFileModalOpen && !treeState.loaded.has(null) && !treeState.loading.has(null)) {
-      loadFolders(null, 1);
-    }
-  }, [isMoveFileModalOpen]);
-  useEffect5(() => {
-    if (isMoveFileModalOpen && (rootEntry == null ? void 0 : rootEntry.isIntersecting) && rootHasMore && !isRootLoading) {
-      const nextPage = ((rootPagination == null ? void 0 : rootPagination.currentPage) || 1) + 1;
-      loadFolders(null, nextPage);
-    }
-  }, [rootEntry == null ? void 0 : rootEntry.isIntersecting, rootHasMore, isRootLoading, rootPagination, isMoveFileModalOpen]);
-  const loadFolders = async (folderId, page = 1) => {
-    if (treeState.loading.has(folderId)) return;
+  const loadFolders = useCallback4(async (folderId, page = 1) => {
+    if (fetchingRef.current.has(folderId)) return;
+    fetchingRef.current.add(folderId);
     setTreeState((prev) => __spreadProps(__spreadValues({}, prev), {
       loading: new Set(prev.loading).add(folderId)
     }));
@@ -3988,12 +3982,28 @@ function MoveModal() {
       setTreeState((prev) => {
         const newLoading = new Set(prev.loading);
         newLoading.delete(folderId);
-        return __spreadProps(__spreadValues({}, prev), {
-          loading: newLoading
-        });
+        return __spreadProps(__spreadValues({}, prev), { loading: newLoading });
       });
+    } finally {
+      fetchingRef.current.delete(folderId);
     }
-  };
+  }, [provider]);
+  useEffect4(() => {
+    if (isMoveFileModalOpen) {
+      if (!hasInitializedRef.current) {
+        hasInitializedRef.current = true;
+        loadFolders(null, 1);
+      }
+    } else {
+      hasInitializedRef.current = false;
+    }
+  }, [isMoveFileModalOpen, loadFolders]);
+  useEffect4(() => {
+    if (isMoveFileModalOpen && (rootEntry == null ? void 0 : rootEntry.isIntersecting) && rootHasMore && !isRootLoading) {
+      const nextPage = ((rootPagination == null ? void 0 : rootPagination.currentPage) || 1) + 1;
+      loadFolders(null, nextPage);
+    }
+  }, [isMoveFileModalOpen, rootEntry == null ? void 0 : rootEntry.isIntersecting, rootHasMore, isRootLoading, rootPagination, loadFolders]);
   const handleMove = () => {
     if (targetFolderId !== void 0) {
       bulkMove(targetFolderId);
@@ -4009,9 +4019,7 @@ function MoveModal() {
   };
   const handleOpenChange = (open) => {
     setIsMoveFileModalOpen(open);
-    if (open) {
-      loadFolders(null, 1);
-    } else {
+    if (!open) {
       setTargetFolderId(void 0);
       setTreeState({
         folders: /* @__PURE__ */ new Map(),
@@ -4019,6 +4027,7 @@ function MoveModal() {
         loaded: /* @__PURE__ */ new Set(),
         pagination: /* @__PURE__ */ new Map()
       });
+      fetchingRef.current.clear();
     }
   };
   if (!isMoveFileModalOpen) return null;
@@ -4045,8 +4054,8 @@ function MoveModal() {
       /* @__PURE__ */ jsx60(DialogDescription, {})
     ] }),
     /* @__PURE__ */ jsx60("div", { className: "text-sm my-3 px-6 flex-1 flex flex-col min-h-0", children: /* @__PURE__ */ jsx60("div", { className: "space-y-4 flex flex-col flex-1 min-h-0", children: /* @__PURE__ */ jsxs41("div", { className: "flex flex-col flex-1 min-h-0", children: [
-      /* @__PURE__ */ jsx60("label", { className: "block mb-2 font-medium text-gray-900 dark:text-zinc-100", children: "Select destination folder:" }),
-      /* @__PURE__ */ jsxs41("ul", { className: "border  rounded-xl  p-2 shadow-inner overflow-y-auto flex-1 min-h-0", children: [
+      /* @__PURE__ */ jsx60("label", { htmlFor: "destination-folder", className: "block mb-2 font-medium text-gray-900 dark:text-zinc-100", children: "Select destination folder:" }),
+      /* @__PURE__ */ jsxs41("ul", { id: "destination-folder", className: "border rounded-xl p-2 shadow-inner overflow-y-auto flex-1 min-h-0", children: [
         /* @__PURE__ */ jsx60("li", { children: /* @__PURE__ */ jsxs41("div", { className: "flex items-center gap-1.5 py-1", children: [
           /* @__PURE__ */ jsx60("div", { className: "w-4" }),
           /* @__PURE__ */ jsxs41(
@@ -4087,61 +4096,8 @@ function MoveModal() {
 // components/modals/image-modal.tsx
 import { useState as useState10 } from "react";
 
-// components/ui/scroll-area.tsx
-import { ScrollArea as ScrollAreaPrimitive } from "radix-ui";
-import { jsx as jsx61, jsxs as jsxs42 } from "react/jsx-runtime";
-function ScrollArea(_a) {
-  var _b = _a, {
-    className,
-    viewportClassName,
-    children,
-    viewportRef
-  } = _b, props = __objRest(_b, [
-    "className",
-    "viewportClassName",
-    "children",
-    "viewportRef"
-  ]);
-  return /* @__PURE__ */ jsxs42(ScrollAreaPrimitive.Root, __spreadProps(__spreadValues({ "data-slot": "scroll-area", className: cn("relative overflow-hidden", className) }, props), { children: [
-    /* @__PURE__ */ jsx61(
-      ScrollAreaPrimitive.Viewport,
-      {
-        ref: viewportRef,
-        className: cn("h-full w-full rounded-[inherit]", viewportClassName),
-        children
-      }
-    ),
-    /* @__PURE__ */ jsx61(ScrollBar, {}),
-    /* @__PURE__ */ jsx61(ScrollAreaPrimitive.Corner, {})
-  ] }));
-}
-function ScrollBar(_a) {
-  var _b = _a, {
-    className,
-    orientation = "vertical"
-  } = _b, props = __objRest(_b, [
-    "className",
-    "orientation"
-  ]);
-  return /* @__PURE__ */ jsx61(
-    ScrollAreaPrimitive.ScrollAreaScrollbar,
-    __spreadProps(__spreadValues({
-      "data-slot": "scroll-area-scrollbar",
-      orientation,
-      className: cn(
-        "flex touch-none select-none transition-colors",
-        orientation === "vertical" && "h-full w-2 border-l border-l-transparent p-[1px]",
-        orientation === "horizontal" && "h-2 flex-col border-t border-t-transparent p-[1px]",
-        className
-      )
-    }, props), {
-      children: /* @__PURE__ */ jsx61(ScrollAreaPrimitive.ScrollAreaThumb, { className: "relative flex-1 rounded-full bg-border" })
-    })
-  );
-}
-
 // components/file-details/details-layout.tsx
-import { jsx as jsx62, jsxs as jsxs43 } from "react/jsx-runtime";
+import { jsx as jsx61, jsxs as jsxs42 } from "react/jsx-runtime";
 function DetailsLayout({
   title,
   open,
@@ -4150,26 +4106,34 @@ function DetailsLayout({
   metadataSection,
   footer
 }) {
-  return /* @__PURE__ */ jsx62(Dialog, { open, onOpenChange: (isOpen) => !isOpen && onClose(), children: /* @__PURE__ */ jsxs43(DialogContent, { className: "p-0 max-w-6xl w-full mx-auto flex flex-col", variant: "fullscreen", showCloseButton: false, children: [
-    /* @__PURE__ */ jsxs43(DialogHeader, { className: "pt-5 pb-3 m-0 border-b border-border", children: [
-      /* @__PURE__ */ jsx62(DialogTitle, { className: "px-6 text-base", children: /* @__PURE__ */ jsxs43("div", { className: "flex w-full justify-between gap-2", children: [
-        /* @__PURE__ */ jsx62("span", { children: title }),
-        /* @__PURE__ */ jsx62(CloseButton, { onClick: () => onClose() })
-      ] }) }),
-      /* @__PURE__ */ jsx62(DialogDescription, {})
-    ] }),
-    /* @__PURE__ */ jsx62(ScrollArea, { className: "flex-1 h-0", children: /* @__PURE__ */ jsxs43("div", { className: "grid grid-cols-1 lg:grid-cols-2 min-h-full", children: [
-      /* @__PURE__ */ jsx62("div", { className: "p-6 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-zinc-700", children: previewSection }),
-      /* @__PURE__ */ jsx62("div", { className: "p-6 overflow-y-auto ", children: metadataSection })
-    ] }) }),
-    /* @__PURE__ */ jsx62(DialogFooter, { className: "px-6 py-4 border-t border-border", children: footer })
-  ] }) });
+  return /* @__PURE__ */ jsx61(Dialog, { open, onOpenChange: (isOpen) => !isOpen && onClose(), children: /* @__PURE__ */ jsxs42(
+    DialogContent,
+    {
+      className: "p-0 max-w-6xl w-full m-auto h-[80vh] flex flex-col overflow-hidden",
+      variant: "fullscreen",
+      showCloseButton: false,
+      children: [
+        /* @__PURE__ */ jsxs42(DialogHeader, { className: "pt-5 pb-3 border-b border-border shrink-0", children: [
+          /* @__PURE__ */ jsx61(DialogTitle, { className: "px-6 text-base", children: /* @__PURE__ */ jsxs42("div", { className: "flex w-full items-center justify-between gap-2", children: [
+            /* @__PURE__ */ jsx61("span", { className: "truncate", children: title }),
+            /* @__PURE__ */ jsx61(CloseButton, { onClick: onClose })
+          ] }) }),
+          /* @__PURE__ */ jsx61(DialogDescription, {})
+        ] }),
+        /* @__PURE__ */ jsx61("div", { className: "flex-1 min-h-0", children: /* @__PURE__ */ jsxs42("div", { className: "grid grid-cols-1 lg:grid-cols-2 h-full", children: [
+          /* @__PURE__ */ jsx61("div", { className: "p-6 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-zinc-700 overflow-auto", children: previewSection }),
+          /* @__PURE__ */ jsx61("div", { className: "p-6 overflow-auto", children: metadataSection })
+        ] }) }),
+        /* @__PURE__ */ jsx61(DialogFooter, { className: "px-6 py-4 border-t border-border shrink-0", children: footer })
+      ]
+    }
+  ) });
 }
 
 // components/file-details/file-action-buttons.tsx
 import { toast as toast3 } from "sonner";
 import { useState as useState9 } from "react";
-import { jsx as jsx63 } from "react/jsx-runtime";
+import { jsx as jsx62 } from "react/jsx-runtime";
 function FileDeleteButton({ file }) {
   const { provider, setFileDetailsModalFile, refreshData } = useFileManager();
   const [deleting, setDeleting] = useState9(false);
@@ -4182,12 +4146,12 @@ function FileDeleteButton({ file }) {
       toast3.success("File Deleted", {
         description: `${middleTruncate(file.name, 20)} has been deleted`
       });
-    } catch (error) {
+    } catch (e) {
       toast3.error("Delete failed");
       setDeleting(false);
     }
   };
-  return /* @__PURE__ */ jsx63(
+  return /* @__PURE__ */ jsx62(
     Button,
     {
       variant: "outline",
@@ -4197,7 +4161,7 @@ function FileDeleteButton({ file }) {
       className: "border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/40 active:scale-95 transition-all duration-200",
       onClick: handleDelete,
       disabled: deleting,
-      children: deleting ? /* @__PURE__ */ jsx63(Loader2Icon, { className: "size-5 animate-spin" }) : /* @__PURE__ */ jsx63(TrashIcon, { className: "size-5" })
+      children: deleting ? /* @__PURE__ */ jsx62(Loader2Icon, { className: "size-5 animate-spin" }) : /* @__PURE__ */ jsx62(TrashIcon, { className: "size-5" })
     }
   );
 }
@@ -4213,13 +4177,13 @@ function FileDownloadButton({ file }) {
       toast3.success("Download Started", {
         description: `Downloading ${middleTruncate(file.name, 20)}`
       });
-    } catch (error) {
+    } catch (e) {
       toast3.error("Download failed");
     } finally {
       setDownloading(false);
     }
   };
-  return /* @__PURE__ */ jsx63(
+  return /* @__PURE__ */ jsx62(
     Button,
     {
       variant: "outline",
@@ -4229,7 +4193,7 @@ function FileDownloadButton({ file }) {
       className: "border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/40 active:scale-95 transition-all duration-200",
       title: "Download",
       disabled: downloading,
-      children: downloading ? /* @__PURE__ */ jsx63(Loader2Icon, { className: "size-5 animate-spin" }) : /* @__PURE__ */ jsx63(DownloadIcon, { className: "size-5", strokeWidth: 2.5 })
+      children: downloading ? /* @__PURE__ */ jsx62(Loader2Icon, { className: "size-5 animate-spin" }) : /* @__PURE__ */ jsx62(DownloadIcon, { className: "size-5", strokeWidth: 2.5 })
     }
   );
 }
@@ -4243,11 +4207,11 @@ function FileCopyLinkButton({ file }) {
         description: "File URL copied to clipboard"
       });
       setTimeout(() => setCopied(false), 2e3);
-    } catch (error) {
+    } catch (e) {
       toast3.error("Failed to copy link");
     }
   };
-  return /* @__PURE__ */ jsx63(
+  return /* @__PURE__ */ jsx62(
     Button,
     {
       variant: "outline",
@@ -4258,12 +4222,12 @@ function FileCopyLinkButton({ file }) {
       ${copied ? "text-green-700 dark:text-green-400 border-green-400 dark:border-green-700 bg-green-100 dark:bg-green-900/40 font-bold" : "hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-300 dark:hover:border-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/40"}`,
       title: "Copy Link",
       disabled: copied,
-      children: copied ? /* @__PURE__ */ jsx63(CheckIcon, { className: "size-5 animate-in zoom-in duration-200", strokeWidth: 3 }) : /* @__PURE__ */ jsx63(LinkIcon, { className: "size-5", strokeWidth: 2.5 })
+      children: copied ? /* @__PURE__ */ jsx62(CheckIcon, { className: "size-5 animate-in zoom-in duration-200", strokeWidth: 3 }) : /* @__PURE__ */ jsx62(LinkIcon, { className: "size-5", strokeWidth: 2.5 })
     }
   );
 }
-function FileFullscreenButton({ file, onFullscreen }) {
-  return /* @__PURE__ */ jsx63(
+function FileFullscreenButton({ onFullscreen }) {
+  return /* @__PURE__ */ jsx62(
     Button,
     {
       variant: "outline",
@@ -4272,14 +4236,14 @@ function FileFullscreenButton({ file, onFullscreen }) {
       onClick: onFullscreen,
       className: "border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:text-purple-600 dark:hover:text-purple-400 hover:border-purple-300 dark:hover:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/40 active:scale-95 transition-all duration-200",
       title: "Fullscreen",
-      children: /* @__PURE__ */ jsx63(FullscreenIcon, { className: "size-5", strokeWidth: 1 })
+      children: /* @__PURE__ */ jsx62(FullscreenIcon, { className: "size-5", strokeWidth: 1 })
     }
   );
 }
 
 // components/ui/textarea.tsx
 import { cva as cva5 } from "class-variance-authority";
-import { jsx as jsx64 } from "react/jsx-runtime";
+import { jsx as jsx63 } from "react/jsx-runtime";
 var textareaVariants = cva5(
   `
     w-full bg-background border border-input bg-background text-foreground shadow-xs shadow-black/5 transition-[color,box-shadow] 
@@ -4308,13 +4272,13 @@ function Textarea(_a) {
     "className",
     "variant"
   ]);
-  return /* @__PURE__ */ jsx64("textarea", __spreadValues({ "data-slot": "textarea", className: cn(textareaVariants({ variant }), className) }, props));
+  return /* @__PURE__ */ jsx63("textarea", __spreadValues({ "data-slot": "textarea", className: cn(textareaVariants({ variant }), className) }, props));
 }
 
 // components/ui/label.tsx
 import { cva as cva6 } from "class-variance-authority";
 import { Label as LabelPrimitive } from "radix-ui";
-import { jsx as jsx65 } from "react/jsx-runtime";
+import { jsx as jsx64 } from "react/jsx-runtime";
 var labelVariants = cva6(
   "text-sm leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
   {
@@ -4337,7 +4301,7 @@ function Label(_a) {
     "className",
     "variant"
   ]);
-  return /* @__PURE__ */ jsx65(LabelPrimitive.Root, __spreadValues({ "data-slot": "label", className: cn(labelVariants({ variant }), className) }, props));
+  return /* @__PURE__ */ jsx64(LabelPrimitive.Root, __spreadValues({ "data-slot": "label", className: cn(labelVariants({ variant }), className) }, props));
 }
 
 // lib/format-utils.ts
@@ -4357,7 +4321,7 @@ function formatDuration(seconds) {
 // components/ui/field.tsx
 import { useMemo as useMemo3 } from "react";
 import { cva as cva7 } from "class-variance-authority";
-import { jsx as jsx66, jsxs as jsxs44 } from "react/jsx-runtime";
+import { jsx as jsx65, jsxs as jsxs43 } from "react/jsx-runtime";
 var fieldVariants = cva7(
   "group/field flex w-full gap-3 data-[invalid=true]:text-destructive",
   {
@@ -4389,7 +4353,7 @@ function Field(_a) {
     "className",
     "orientation"
   ]);
-  return /* @__PURE__ */ jsx66(
+  return /* @__PURE__ */ jsx65(
     "div",
     __spreadValues({
       role: "group",
@@ -4405,7 +4369,7 @@ function FieldLabel(_a) {
   } = _b, props = __objRest(_b, [
     "className"
   ]);
-  return /* @__PURE__ */ jsx66(
+  return /* @__PURE__ */ jsx65(
     Label,
     __spreadValues({
       "data-slot": "field-label",
@@ -4421,10 +4385,10 @@ function FieldLabel(_a) {
 
 // components/ui/input-group.tsx
 import { cva as cva8 } from "class-variance-authority";
-import { jsx as jsx67 } from "react/jsx-runtime";
+import { jsx as jsx66 } from "react/jsx-runtime";
 function InputGroup(_a) {
   var _b = _a, { className } = _b, props = __objRest(_b, ["className"]);
-  return /* @__PURE__ */ jsx67(
+  return /* @__PURE__ */ jsx66(
     "div",
     __spreadValues({
       "data-slot": "input-group",
@@ -4470,7 +4434,7 @@ function InputGroupAddon(_a) {
     "className",
     "align"
   ]);
-  return /* @__PURE__ */ jsx67(
+  return /* @__PURE__ */ jsx66(
     "div",
     __spreadValues({
       role: "group",
@@ -4505,7 +4469,7 @@ var inputGroupButtonVariants = cva8(
 );
 function InputGroupText(_a) {
   var _b = _a, { className } = _b, props = __objRest(_b, ["className"]);
-  return /* @__PURE__ */ jsx67(
+  return /* @__PURE__ */ jsx66(
     "span",
     __spreadValues({
       className: cn(
@@ -4521,7 +4485,7 @@ function InputGroupInput(_a) {
   } = _b, props = __objRest(_b, [
     "className"
   ]);
-  return /* @__PURE__ */ jsx67(
+  return /* @__PURE__ */ jsx66(
     Input,
     __spreadValues({
       "data-slot": "input-group-control",
@@ -4534,8 +4498,8 @@ function InputGroupInput(_a) {
 }
 
 // components/modals/image-modal.tsx
-import { jsx as jsx68, jsxs as jsxs45 } from "react/jsx-runtime";
-function ImageModal({ file, onClose, onSave, onDelete }) {
+import { jsx as jsx67, jsxs as jsxs44 } from "react/jsx-runtime";
+function ImageModal({ file, onClose, onSave }) {
   var _a;
   const [isSaving, setIsSaving] = useState10(false);
   const [fileName, setFileName] = useState10(file.name);
@@ -4554,14 +4518,14 @@ function ImageModal({ file, onClose, onSave, onDelete }) {
       setIsSaving(false);
     }
   };
-  const previewSection = /* @__PURE__ */ jsxs45("div", { className: "flex flex-col h-full", children: [
-    /* @__PURE__ */ jsxs45("div", { className: "flex gap-2 mb-4", children: [
-      /* @__PURE__ */ jsx68(FileDeleteButton, { file }),
-      /* @__PURE__ */ jsx68(FileDownloadButton, { file }),
-      /* @__PURE__ */ jsx68(FileCopyLinkButton, { file }),
-      /* @__PURE__ */ jsx68(FileFullscreenButton, { file, onFullscreen: () => window.open(file.url, "_blank") })
+  const previewSection = /* @__PURE__ */ jsxs44("div", { className: "flex flex-col h-full", children: [
+    /* @__PURE__ */ jsxs44("div", { className: "flex gap-2 mb-4", children: [
+      /* @__PURE__ */ jsx67(FileDeleteButton, { file }),
+      /* @__PURE__ */ jsx67(FileDownloadButton, { file }),
+      /* @__PURE__ */ jsx67(FileCopyLinkButton, { file }),
+      /* @__PURE__ */ jsx67(FileFullscreenButton, { onFullscreen: () => window.open(file.url, "_blank") })
     ] }),
-    /* @__PURE__ */ jsx68(
+    /* @__PURE__ */ jsx67(
       "div",
       {
         className: "flex-1 flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden",
@@ -4575,7 +4539,7 @@ function ImageModal({ file, onClose, onSave, onDelete }) {
           backgroundSize: "20px 20px",
           backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px"
         },
-        children: /* @__PURE__ */ jsx68(
+        children: /* @__PURE__ */ jsx67(
           "img",
           {
             src: file.previewUrl || file.url,
@@ -4586,23 +4550,144 @@ function ImageModal({ file, onClose, onSave, onDelete }) {
       }
     )
   ] });
+  const metadataSection = /* @__PURE__ */ jsxs44("div", { className: "space-y-6", children: [
+    /* @__PURE__ */ jsxs44("div", { className: "grid grid-cols-2 gap-4", children: [
+      /* @__PURE__ */ jsxs44("div", { children: [
+        /* @__PURE__ */ jsx67("p", { className: "text-xs font-medium text-muted-foreground tracking-wide mb-1", children: "Size" }),
+        /* @__PURE__ */ jsx67("p", { className: "text-xs font-bold text-primary", children: getFileSize(file.size) })
+      ] }),
+      /* @__PURE__ */ jsxs44("div", { children: [
+        /* @__PURE__ */ jsx67("p", { className: "text-xs font-medium text-muted-foreground  tracking-wide mb-1", children: "Dimensions" }),
+        /* @__PURE__ */ jsx67("p", { className: "text-xs font-bold text-primary", children: file.width && file.height ? `${file.width}\xD7${file.height}` : "N/A" })
+      ] }),
+      /* @__PURE__ */ jsxs44("div", { children: [
+        /* @__PURE__ */ jsx67("p", { className: "text-xs font-medium text-muted-foreground  tracking-wide mb-1", children: "Date" }),
+        /* @__PURE__ */ jsx67("p", { className: "text-xs font-bold text-primary", children: formatDate(file.createdAt) })
+      ] }),
+      /* @__PURE__ */ jsxs44("div", { children: [
+        /* @__PURE__ */ jsx67("p", { className: "text-xs font-medium text-muted-foreground  tracking-wide mb-1", children: "Extension" }),
+        /* @__PURE__ */ jsx67("p", { className: "text-xs font-bold text-primary", children: ((_a = file.ext) == null ? void 0 : _a.replace(".", "")) || "N/A" })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxs44("div", { className: "space-y-4 pt-4 border-t border-border", children: [
+      /* @__PURE__ */ jsx67("div", { className: "space-y-2", children: /* @__PURE__ */ jsxs44(Field, { className: "gap-0", children: [
+        /* @__PURE__ */ jsx67(FieldLabel, { htmlFor: "fileName", children: "File name" }),
+        /* @__PURE__ */ jsxs44(InputGroup, { children: [
+          /* @__PURE__ */ jsx67(InputGroupInput, { id: "fileName", placeholder: "Enter file name", value: fileName.replace(file.ext || "", ""), onChange: (e) => setFileName(e.target.value) }),
+          /* @__PURE__ */ jsx67(InputGroupAddon, { align: "inline-end", className: "pr-1", children: /* @__PURE__ */ jsx67(InputGroupText, { className: "font-bold bg-accent rounded-lg py-1 px-3", children: file.ext }) })
+        ] })
+      ] }) }),
+      /* @__PURE__ */ jsxs44("div", { className: "space-y-2", children: [
+        /* @__PURE__ */ jsx67(Label, { htmlFor: "altText", children: "Alternative text" }),
+        /* @__PURE__ */ jsx67(
+          Textarea,
+          {
+            id: "altText",
+            value: alternativeText,
+            onChange: (e) => setAlternativeText(e.target.value),
+            placeholder: "Describe the image for accessibility",
+            rows: 3
+          }
+        ),
+        /* @__PURE__ */ jsx67("p", { className: "text-xs text-muted-foreground", children: "This text will be displayed if the asset can't be shown." })
+      ] }),
+      /* @__PURE__ */ jsxs44("div", { className: "space-y-2", children: [
+        /* @__PURE__ */ jsx67(Label, { htmlFor: "caption", children: "Caption" }),
+        /* @__PURE__ */ jsx67(
+          Textarea,
+          {
+            id: "caption",
+            value: caption,
+            onChange: (e) => setCaption(e.target.value),
+            placeholder: "Add a caption",
+            rows: 3
+          }
+        )
+      ] })
+    ] })
+  ] });
+  const footer = /* @__PURE__ */ jsxs44("div", { className: "flex w-full justify-between items-center flex-col sm:flex-row gap-2 ", children: [
+    /* @__PURE__ */ jsx67(Button, { className: "w-full md:w-auto", variant: "outline", onClick: onClose, radius: "full", disabled: isSaving, children: "Cancel" }),
+    /* @__PURE__ */ jsxs44(Button, { className: "w-full md:w-auto", onClick: handleSave, radius: "full", disabled: isSaving, children: [
+      isSaving && /* @__PURE__ */ jsx67(Loader2Icon, { className: "mr-2 h-4 w-4 animate-spin" }),
+      "Finish"
+    ] })
+  ] });
+  return /* @__PURE__ */ jsx67(
+    DetailsLayout,
+    {
+      title: "Details",
+      open: true,
+      onClose,
+      previewSection,
+      metadataSection,
+      footer
+    }
+  );
+}
+
+// components/modals/video-modal.tsx
+import { useState as useState11 } from "react";
+import { jsx as jsx68, jsxs as jsxs45 } from "react/jsx-runtime";
+function VideoModal({ file, onClose, onSave }) {
+  var _a, _b, _c;
+  const [isSaving, setIsSaving] = useState11(false);
+  const [fileName, setFileName] = useState11(file.name);
+  const [caption, setCaption] = useState11(file.caption || "");
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await (onSave == null ? void 0 : onSave({
+        name: fileName,
+        caption
+      }));
+      onClose();
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  const previewSection = /* @__PURE__ */ jsxs45("div", { className: "flex flex-col h-full", children: [
+    /* @__PURE__ */ jsxs45("div", { className: "flex gap-2 mb-4", children: [
+      /* @__PURE__ */ jsx68(FileDeleteButton, { file }),
+      /* @__PURE__ */ jsx68(FileDownloadButton, { file }),
+      /* @__PURE__ */ jsx68(FileCopyLinkButton, { file })
+    ] }),
+    /* @__PURE__ */ jsx68("div", { className: "flex-1 flex items-center justify-center bg-black rounded-lg overflow-hidden", children: /* @__PURE__ */ jsx68(
+      "video",
+      {
+        src: file.url,
+        controls: true,
+        className: "max-w-full max-h-full",
+        style: { maxHeight: "500px" },
+        children: "Your browser does not support the video tag."
+      }
+    ) })
+  ] });
   const metadataSection = /* @__PURE__ */ jsxs45("div", { className: "space-y-6", children: [
     /* @__PURE__ */ jsxs45("div", { className: "grid grid-cols-2 gap-4", children: [
       /* @__PURE__ */ jsxs45("div", { children: [
-        /* @__PURE__ */ jsx68("p", { className: "text-xs font-medium text-muted-foreground tracking-wide mb-1", children: "Size" }),
+        /* @__PURE__ */ jsx68("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Size" }),
         /* @__PURE__ */ jsx68("p", { className: "text-xs font-bold text-primary", children: getFileSize(file.size) })
       ] }),
       /* @__PURE__ */ jsxs45("div", { children: [
-        /* @__PURE__ */ jsx68("p", { className: "text-xs font-medium text-muted-foreground  tracking-wide mb-1", children: "Dimensions" }),
+        /* @__PURE__ */ jsx68("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Dimensions" }),
         /* @__PURE__ */ jsx68("p", { className: "text-xs font-bold text-primary", children: file.width && file.height ? `${file.width}\xD7${file.height}` : "N/A" })
       ] }),
       /* @__PURE__ */ jsxs45("div", { children: [
-        /* @__PURE__ */ jsx68("p", { className: "text-xs font-medium text-muted-foreground  tracking-wide mb-1", children: "Date" }),
+        /* @__PURE__ */ jsx68("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Duration" }),
+        /* @__PURE__ */ jsx68("p", { className: "text-xs font-bold text-primary", children: ((_a = file.metaData) == null ? void 0 : _a.duration) ? formatDuration(file.metaData.duration) : "N/A" })
+      ] }),
+      /* @__PURE__ */ jsxs45("div", { children: [
+        /* @__PURE__ */ jsx68("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Date" }),
         /* @__PURE__ */ jsx68("p", { className: "text-xs font-bold text-primary", children: formatDate(file.createdAt) })
       ] }),
       /* @__PURE__ */ jsxs45("div", { children: [
-        /* @__PURE__ */ jsx68("p", { className: "text-xs font-medium text-muted-foreground  tracking-wide mb-1", children: "Extension" }),
-        /* @__PURE__ */ jsx68("p", { className: "text-xs font-bold text-primary", children: ((_a = file.ext) == null ? void 0 : _a.replace(".", "")) || "N/A" })
+        /* @__PURE__ */ jsx68("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Extension" }),
+        /* @__PURE__ */ jsx68("p", { className: "text-xs font-bold text-primary", children: ((_b = file.ext) == null ? void 0 : _b.replace(".", "")) || "N/A" })
+      ] }),
+      /* @__PURE__ */ jsxs45("div", { children: [
+        /* @__PURE__ */ jsx68("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Video Source" }),
+        /* @__PURE__ */ jsx68("p", { className: "text-xs font-bold text-primary capitalize", children: ((_c = file.metaData) == null ? void 0 : _c.videoSource) || "local" })
       ] })
     ] }),
     /* @__PURE__ */ jsxs45("div", { className: "space-y-4 pt-4 border-t border-border", children: [
@@ -4613,20 +4698,6 @@ function ImageModal({ file, onClose, onSave, onDelete }) {
           /* @__PURE__ */ jsx68(InputGroupAddon, { align: "inline-end", className: "pr-1", children: /* @__PURE__ */ jsx68(InputGroupText, { className: "font-bold bg-accent rounded-lg py-1 px-3", children: file.ext }) })
         ] })
       ] }) }),
-      /* @__PURE__ */ jsxs45("div", { className: "space-y-2", children: [
-        /* @__PURE__ */ jsx68(Label, { htmlFor: "altText", children: "Alternative text" }),
-        /* @__PURE__ */ jsx68(
-          Textarea,
-          {
-            id: "altText",
-            value: alternativeText,
-            onChange: (e) => setAlternativeText(e.target.value),
-            placeholder: "Describe the image for accessibility",
-            rows: 3
-          }
-        ),
-        /* @__PURE__ */ jsx68("p", { className: "text-xs text-muted-foreground", children: "This text will be displayed if the asset can't be shown." })
-      ] }),
       /* @__PURE__ */ jsxs45("div", { className: "space-y-2", children: [
         /* @__PURE__ */ jsx68(Label, { htmlFor: "caption", children: "Caption" }),
         /* @__PURE__ */ jsx68(
@@ -4642,9 +4713,9 @@ function ImageModal({ file, onClose, onSave, onDelete }) {
       ] })
     ] })
   ] });
-  const footer = /* @__PURE__ */ jsxs45("div", { className: "flex w-full justify-between items-center flex-col sm:flex-row gap-2 ", children: [
-    /* @__PURE__ */ jsx68(Button, { className: "w-full md:w-auto", variant: "outline", onClick: onClose, radius: "full", disabled: isSaving, children: "Cancel" }),
-    /* @__PURE__ */ jsxs45(Button, { className: "w-full md:w-auto", onClick: handleSave, radius: "full", disabled: isSaving, children: [
+  const footer = /* @__PURE__ */ jsxs45("div", { className: "flex w-full sm:justify-between justify-center items-center flex-col sm:flex-row gap-2 ", children: [
+    /* @__PURE__ */ jsx68(Button, { variant: "outline", onClick: onClose, radius: "full", className: "w-full md:w-auto", disabled: isSaving, children: "Cancel" }),
+    /* @__PURE__ */ jsxs45(Button, { onClick: handleSave, radius: "full", className: "w-full md:w-auto", disabled: isSaving, children: [
       isSaving && /* @__PURE__ */ jsx68(Loader2Icon, { className: "mr-2 h-4 w-4 animate-spin" }),
       "Finish"
     ] })
@@ -4662,14 +4733,14 @@ function ImageModal({ file, onClose, onSave, onDelete }) {
   );
 }
 
-// components/modals/video-modal.tsx
-import { useState as useState11 } from "react";
+// components/modals/audio-modal.tsx
+import { useState as useState12 } from "react";
 import { jsx as jsx69, jsxs as jsxs46 } from "react/jsx-runtime";
-function VideoModal({ file, onClose, onSave, onDelete }) {
+function AudioModal({ file, onClose, onSave }) {
   var _a, _b, _c;
-  const [isSaving, setIsSaving] = useState11(false);
-  const [fileName, setFileName] = useState11(file.name);
-  const [caption, setCaption] = useState11(file.caption || "");
+  const [isSaving, setIsSaving] = useState12(false);
+  const [fileName, setFileName] = useState12(file.name);
+  const [caption, setCaption] = useState12(file.caption || "");
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -4688,16 +4759,21 @@ function VideoModal({ file, onClose, onSave, onDelete }) {
       /* @__PURE__ */ jsx69(FileDownloadButton, { file }),
       /* @__PURE__ */ jsx69(FileCopyLinkButton, { file })
     ] }),
-    /* @__PURE__ */ jsx69("div", { className: "flex-1 flex items-center justify-center bg-black rounded-lg overflow-hidden", children: /* @__PURE__ */ jsx69(
-      "video",
-      {
-        src: file.url,
-        controls: true,
-        className: "max-w-full max-h-full",
-        style: { maxHeight: "500px" },
-        children: "Your browser does not support the video tag."
-      }
-    ) })
+    /* @__PURE__ */ jsxs46("div", { className: "flex-1 flex flex-col items-center justify-center bg-linear-to-br from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 rounded-lg p-8", children: [
+      /* @__PURE__ */ jsx69("div", { className: "mb-8", children: /* @__PURE__ */ jsx69("div", { className: "w-32 h-32 rounded-full bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center", children: /* @__PURE__ */ jsx69(MusicIcon, { className: "w-16 h-16 text-purple-600 dark:text-purple-400" }) }) }),
+      /* @__PURE__ */ jsx69("div", { className: "w-full max-w-md", children: /* @__PURE__ */ jsxs46(
+        "audio",
+        {
+          src: file.url,
+          controls: true,
+          className: "w-full",
+          children: [
+            /* @__PURE__ */ jsx69("track", { kind: "captions", srcLang: "en", label: "English" }),
+            "Your browser does not support the audio tag."
+          ]
+        }
+      ) })
+    ] })
   ] });
   const metadataSection = /* @__PURE__ */ jsxs46("div", { className: "space-y-6", children: [
     /* @__PURE__ */ jsxs46("div", { className: "grid grid-cols-2 gap-4", children: [
@@ -4706,12 +4782,12 @@ function VideoModal({ file, onClose, onSave, onDelete }) {
         /* @__PURE__ */ jsx69("p", { className: "text-xs font-bold text-primary", children: getFileSize(file.size) })
       ] }),
       /* @__PURE__ */ jsxs46("div", { children: [
-        /* @__PURE__ */ jsx69("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Dimensions" }),
-        /* @__PURE__ */ jsx69("p", { className: "text-xs font-bold text-primary", children: file.width && file.height ? `${file.width}\xD7${file.height}` : "N/A" })
-      ] }),
-      /* @__PURE__ */ jsxs46("div", { children: [
         /* @__PURE__ */ jsx69("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Duration" }),
         /* @__PURE__ */ jsx69("p", { className: "text-xs font-bold text-primary", children: ((_a = file.metaData) == null ? void 0 : _a.duration) ? formatDuration(file.metaData.duration) : "N/A" })
+      ] }),
+      /* @__PURE__ */ jsxs46("div", { children: [
+        /* @__PURE__ */ jsx69("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Bitrate" }),
+        /* @__PURE__ */ jsx69("p", { className: "text-xs font-bold text-primary", children: ((_b = file.metaData) == null ? void 0 : _b.bitrate) ? `${file.metaData.bitrate} kbps` : "N/A" })
       ] }),
       /* @__PURE__ */ jsxs46("div", { children: [
         /* @__PURE__ */ jsx69("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Date" }),
@@ -4719,11 +4795,7 @@ function VideoModal({ file, onClose, onSave, onDelete }) {
       ] }),
       /* @__PURE__ */ jsxs46("div", { children: [
         /* @__PURE__ */ jsx69("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Extension" }),
-        /* @__PURE__ */ jsx69("p", { className: "text-xs font-bold text-primary", children: ((_b = file.ext) == null ? void 0 : _b.replace(".", "")) || "N/A" })
-      ] }),
-      /* @__PURE__ */ jsxs46("div", { children: [
-        /* @__PURE__ */ jsx69("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Video Source" }),
-        /* @__PURE__ */ jsx69("p", { className: "text-xs font-bold text-primary capitalize", children: ((_c = file.metaData) == null ? void 0 : _c.videoSource) || "local" })
+        /* @__PURE__ */ jsx69("p", { className: "text-xs font-bold text-primary", children: ((_c = file.ext) == null ? void 0 : _c.replace(".", "")) || "N/A" })
       ] })
     ] }),
     /* @__PURE__ */ jsxs46("div", { className: "space-y-4 pt-4 border-t border-border", children: [
@@ -4749,7 +4821,7 @@ function VideoModal({ file, onClose, onSave, onDelete }) {
       ] })
     ] })
   ] });
-  const footer = /* @__PURE__ */ jsxs46("div", { className: "flex w-full sm:justify-between justify-center items-center flex-col sm:flex-row gap-2 ", children: [
+  const footer = /* @__PURE__ */ jsxs46("div", { className: "flex gap-2 w-full sm:justify-between justify-center items-center flex-col sm:flex-row ", children: [
     /* @__PURE__ */ jsx69(Button, { variant: "outline", onClick: onClose, radius: "full", className: "w-full md:w-auto", disabled: isSaving, children: "Cancel" }),
     /* @__PURE__ */ jsxs46(Button, { onClick: handleSave, radius: "full", className: "w-full md:w-auto", disabled: isSaving, children: [
       isSaving && /* @__PURE__ */ jsx69(Loader2Icon, { className: "mr-2 h-4 w-4 animate-spin" }),
@@ -4769,114 +4841,9 @@ function VideoModal({ file, onClose, onSave, onDelete }) {
   );
 }
 
-// components/modals/audio-modal.tsx
-import { useState as useState12 } from "react";
-import { jsx as jsx70, jsxs as jsxs47 } from "react/jsx-runtime";
-function AudioModal({ file, onClose, onSave, onDelete }) {
-  var _a, _b, _c;
-  const [isSaving, setIsSaving] = useState12(false);
-  const [fileName, setFileName] = useState12(file.name);
-  const [caption, setCaption] = useState12(file.caption || "");
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      await (onSave == null ? void 0 : onSave({
-        name: fileName,
-        caption
-      }));
-      onClose();
-    } finally {
-      setIsSaving(false);
-    }
-  };
-  const previewSection = /* @__PURE__ */ jsxs47("div", { className: "flex flex-col h-full", children: [
-    /* @__PURE__ */ jsxs47("div", { className: "flex gap-2 mb-4", children: [
-      /* @__PURE__ */ jsx70(FileDeleteButton, { file }),
-      /* @__PURE__ */ jsx70(FileDownloadButton, { file }),
-      /* @__PURE__ */ jsx70(FileCopyLinkButton, { file })
-    ] }),
-    /* @__PURE__ */ jsxs47("div", { className: "flex-1 flex flex-col items-center justify-center bg-linear-to-br from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 rounded-lg p-8", children: [
-      /* @__PURE__ */ jsx70("div", { className: "mb-8", children: /* @__PURE__ */ jsx70("div", { className: "w-32 h-32 rounded-full bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center", children: /* @__PURE__ */ jsx70(MusicIcon, { className: "w-16 h-16 text-purple-600 dark:text-purple-400" }) }) }),
-      /* @__PURE__ */ jsx70("div", { className: "w-full max-w-md", children: /* @__PURE__ */ jsx70(
-        "audio",
-        {
-          src: file.url,
-          controls: true,
-          className: "w-full",
-          children: "Your browser does not support the audio tag."
-        }
-      ) })
-    ] })
-  ] });
-  const metadataSection = /* @__PURE__ */ jsxs47("div", { className: "space-y-6", children: [
-    /* @__PURE__ */ jsxs47("div", { className: "grid grid-cols-2 gap-4", children: [
-      /* @__PURE__ */ jsxs47("div", { children: [
-        /* @__PURE__ */ jsx70("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Size" }),
-        /* @__PURE__ */ jsx70("p", { className: "text-xs font-bold text-primary", children: getFileSize(file.size) })
-      ] }),
-      /* @__PURE__ */ jsxs47("div", { children: [
-        /* @__PURE__ */ jsx70("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Duration" }),
-        /* @__PURE__ */ jsx70("p", { className: "text-xs font-bold text-primary", children: ((_a = file.metaData) == null ? void 0 : _a.duration) ? formatDuration(file.metaData.duration) : "N/A" })
-      ] }),
-      /* @__PURE__ */ jsxs47("div", { children: [
-        /* @__PURE__ */ jsx70("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Bitrate" }),
-        /* @__PURE__ */ jsx70("p", { className: "text-xs font-bold text-primary", children: ((_b = file.metaData) == null ? void 0 : _b.bitrate) ? `${file.metaData.bitrate} kbps` : "N/A" })
-      ] }),
-      /* @__PURE__ */ jsxs47("div", { children: [
-        /* @__PURE__ */ jsx70("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Date" }),
-        /* @__PURE__ */ jsx70("p", { className: "text-xs font-bold text-primary", children: formatDate(file.createdAt) })
-      ] }),
-      /* @__PURE__ */ jsxs47("div", { children: [
-        /* @__PURE__ */ jsx70("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Extension" }),
-        /* @__PURE__ */ jsx70("p", { className: "text-xs font-bold text-primary", children: ((_c = file.ext) == null ? void 0 : _c.replace(".", "")) || "N/A" })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxs47("div", { className: "space-y-4 pt-4 border-t border-border", children: [
-      /* @__PURE__ */ jsx70("div", { className: "space-y-2", children: /* @__PURE__ */ jsxs47(Field, { className: "gap-0", children: [
-        /* @__PURE__ */ jsx70(FieldLabel, { htmlFor: "fileName", children: "File name" }),
-        /* @__PURE__ */ jsxs47(InputGroup, { children: [
-          /* @__PURE__ */ jsx70(InputGroupInput, { id: "fileName", placeholder: "Enter file name", value: fileName.replace(file.ext || "", ""), onChange: (e) => setFileName(e.target.value) }),
-          /* @__PURE__ */ jsx70(InputGroupAddon, { align: "inline-end", className: "pr-1", children: /* @__PURE__ */ jsx70(InputGroupText, { className: "font-bold bg-accent rounded-lg py-1 px-3", children: file.ext }) })
-        ] })
-      ] }) }),
-      /* @__PURE__ */ jsxs47("div", { className: "space-y-2", children: [
-        /* @__PURE__ */ jsx70(Label, { htmlFor: "caption", children: "Caption" }),
-        /* @__PURE__ */ jsx70(
-          Textarea,
-          {
-            id: "caption",
-            value: caption,
-            onChange: (e) => setCaption(e.target.value),
-            placeholder: "Add a caption",
-            rows: 3
-          }
-        )
-      ] })
-    ] })
-  ] });
-  const footer = /* @__PURE__ */ jsxs47("div", { className: "flex gap-2 w-full sm:justify-between justify-center items-center flex-col sm:flex-row ", children: [
-    /* @__PURE__ */ jsx70(Button, { variant: "outline", onClick: onClose, radius: "full", className: "w-full md:w-auto", disabled: isSaving, children: "Cancel" }),
-    /* @__PURE__ */ jsxs47(Button, { onClick: handleSave, radius: "full", className: "w-full md:w-auto", disabled: isSaving, children: [
-      isSaving && /* @__PURE__ */ jsx70(Loader2Icon, { className: "mr-2 h-4 w-4 animate-spin" }),
-      "Finish"
-    ] })
-  ] });
-  return /* @__PURE__ */ jsx70(
-    DetailsLayout,
-    {
-      title: "Details",
-      open: true,
-      onClose,
-      previewSection,
-      metadataSection,
-      footer
-    }
-  );
-}
-
 // components/modals/file-modal.tsx
 import { useState as useState13 } from "react";
-import { jsx as jsx71, jsxs as jsxs48 } from "react/jsx-runtime";
+import { jsx as jsx70, jsxs as jsxs47 } from "react/jsx-runtime";
 function FileModal({ file, onClose, onSave }) {
   var _a, _b, _c, _d;
   const [isSaving, setIsSaving] = useState13(false);
@@ -4898,54 +4865,54 @@ function FileModal({ file, onClose, onSave }) {
   };
   const ext = ((_b = file.ext) == null ? void 0 : _b.replace(".", "")) || "file";
   const { component: FilePreviewComponent } = getFileComponents(file);
-  const previewSection = /* @__PURE__ */ jsxs48("div", { className: "flex flex-col h-full", children: [
-    /* @__PURE__ */ jsxs48("div", { className: "flex gap-2 mb-4", children: [
-      /* @__PURE__ */ jsx71(FileDeleteButton, { file }),
-      /* @__PURE__ */ jsx71(FileDownloadButton, { file }),
-      /* @__PURE__ */ jsx71(FileCopyLinkButton, { file })
+  const previewSection = /* @__PURE__ */ jsxs47("div", { className: "flex flex-col h-full", children: [
+    /* @__PURE__ */ jsxs47("div", { className: "flex gap-2 mb-4", children: [
+      /* @__PURE__ */ jsx70(FileDeleteButton, { file }),
+      /* @__PURE__ */ jsx70(FileDownloadButton, { file }),
+      /* @__PURE__ */ jsx70(FileCopyLinkButton, { file })
     ] }),
-    /* @__PURE__ */ jsxs48("div", { className: "flex-1 flex flex-col items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-lg p-8", children: [
-      /* @__PURE__ */ jsx71("div", { className: "mb-4 w-32 h-32 flex items-center justify-center", children: /* @__PURE__ */ jsx71(FilePreviewComponent, { file, metaData: file.metaData }) }),
-      /* @__PURE__ */ jsxs48("p", { className: "text-sm font-medium text-muted-foreground uppercase tracking-wider", children: [
+    /* @__PURE__ */ jsxs47("div", { className: "flex-1 flex flex-col items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-lg p-8", children: [
+      /* @__PURE__ */ jsx70("div", { className: "mb-4 w-32 h-32 flex items-center justify-center", children: /* @__PURE__ */ jsx70(FilePreviewComponent, { file, metaData: file.metaData }) }),
+      /* @__PURE__ */ jsxs47("p", { className: "text-sm font-medium text-muted-foreground uppercase tracking-wider", children: [
         ext,
         " File"
       ] })
     ] })
   ] });
-  const metadataSection = /* @__PURE__ */ jsxs48("div", { className: "space-y-6", children: [
-    /* @__PURE__ */ jsxs48("div", { className: "grid grid-cols-2 gap-4", children: [
-      /* @__PURE__ */ jsxs48("div", { children: [
-        /* @__PURE__ */ jsx71("p", { className: "text-xs font-medium text-muted-foreground tracking-wide mb-1", children: "Size" }),
-        /* @__PURE__ */ jsx71("p", { className: "text-xs font-bold text-blue-600 dark:text-blue-400", children: getFileSize(file.size) })
+  const metadataSection = /* @__PURE__ */ jsxs47("div", { className: "space-y-6", children: [
+    /* @__PURE__ */ jsxs47("div", { className: "grid grid-cols-2 gap-4", children: [
+      /* @__PURE__ */ jsxs47("div", { children: [
+        /* @__PURE__ */ jsx70("p", { className: "text-xs font-medium text-muted-foreground tracking-wide mb-1", children: "Size" }),
+        /* @__PURE__ */ jsx70("p", { className: "text-xs font-bold text-blue-600 dark:text-blue-400", children: getFileSize(file.size) })
       ] }),
-      /* @__PURE__ */ jsxs48("div", { children: [
-        /* @__PURE__ */ jsx71("p", { className: "text-xs font-medium text-muted-foreground  tracking-wide mb-1", children: "Date" }),
-        /* @__PURE__ */ jsx71("p", { className: "text-xs font-bold text-blue-600 dark:text-blue-400", children: formatDate(file.createdAt) })
+      /* @__PURE__ */ jsxs47("div", { children: [
+        /* @__PURE__ */ jsx70("p", { className: "text-xs font-medium text-muted-foreground  tracking-wide mb-1", children: "Date" }),
+        /* @__PURE__ */ jsx70("p", { className: "text-xs font-bold text-blue-600 dark:text-blue-400", children: formatDate(file.createdAt) })
       ] }),
-      /* @__PURE__ */ jsxs48("div", { children: [
-        /* @__PURE__ */ jsx71("p", { className: "text-xs font-medium text-muted-foreground tracking-wide mb-1", children: "Extension" }),
-        /* @__PURE__ */ jsx71("p", { className: "text-xs font-bold text-blue-600 dark:text-blue-400", children: ext })
+      /* @__PURE__ */ jsxs47("div", { children: [
+        /* @__PURE__ */ jsx70("p", { className: "text-xs font-medium text-muted-foreground tracking-wide mb-1", children: "Extension" }),
+        /* @__PURE__ */ jsx70("p", { className: "text-xs font-bold text-blue-600 dark:text-blue-400", children: ext })
       ] }),
-      ((_c = file.metaData) == null ? void 0 : _c.pageCount) && /* @__PURE__ */ jsxs48("div", { children: [
-        /* @__PURE__ */ jsx71("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Page Count" }),
-        /* @__PURE__ */ jsx71("p", { className: "text-xs font-bold text-blue-600 dark:text-blue-400", children: file.metaData.pageCount })
+      ((_c = file.metaData) == null ? void 0 : _c.pageCount) && /* @__PURE__ */ jsxs47("div", { children: [
+        /* @__PURE__ */ jsx70("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Page Count" }),
+        /* @__PURE__ */ jsx70("p", { className: "text-xs font-bold text-blue-600 dark:text-blue-400", children: file.metaData.pageCount })
       ] }),
-      ((_d = file.metaData) == null ? void 0 : _d.author) && /* @__PURE__ */ jsxs48("div", { children: [
-        /* @__PURE__ */ jsx71("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Author" }),
-        /* @__PURE__ */ jsx71("p", { className: "text-xs font-bold text-blue-600 dark:text-blue-400", children: file.metaData.author })
+      ((_d = file.metaData) == null ? void 0 : _d.author) && /* @__PURE__ */ jsxs47("div", { children: [
+        /* @__PURE__ */ jsx70("p", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1", children: "Author" }),
+        /* @__PURE__ */ jsx70("p", { className: "text-xs font-bold text-blue-600 dark:text-blue-400", children: file.metaData.author })
       ] })
     ] }),
-    /* @__PURE__ */ jsxs48("div", { className: "space-y-4 pt-4 border-t border-slate-200", children: [
-      /* @__PURE__ */ jsx71("div", { className: "space-y-2", children: /* @__PURE__ */ jsxs48(Field, { className: "gap-0", children: [
-        /* @__PURE__ */ jsx71(FieldLabel, { htmlFor: "fileName", children: "File name" }),
-        /* @__PURE__ */ jsxs48(InputGroup, { children: [
-          /* @__PURE__ */ jsx71(InputGroupInput, { id: "fileName", placeholder: "Enter file name", value: fileName.replace(file.ext || "", ""), onChange: (e) => setFileName(e.target.value) }),
-          /* @__PURE__ */ jsx71(InputGroupAddon, { align: "inline-end", className: "pr-1", children: /* @__PURE__ */ jsx71(InputGroupText, { className: "font-bold bg-gray-200 dark:bg-zinc-700 rounded-lg py-1 px-3", children: file.ext }) })
+    /* @__PURE__ */ jsxs47("div", { className: "space-y-4 pt-4 border-t border-slate-200", children: [
+      /* @__PURE__ */ jsx70("div", { className: "space-y-2", children: /* @__PURE__ */ jsxs47(Field, { className: "gap-0", children: [
+        /* @__PURE__ */ jsx70(FieldLabel, { htmlFor: "fileName", children: "File name" }),
+        /* @__PURE__ */ jsxs47(InputGroup, { children: [
+          /* @__PURE__ */ jsx70(InputGroupInput, { id: "fileName", placeholder: "Enter file name", value: fileName.replace(file.ext || "", ""), onChange: (e) => setFileName(e.target.value) }),
+          /* @__PURE__ */ jsx70(InputGroupAddon, { align: "inline-end", className: "pr-1", children: /* @__PURE__ */ jsx70(InputGroupText, { className: "font-bold bg-gray-200 dark:bg-zinc-700 rounded-lg py-1 px-3", children: file.ext }) })
         ] })
       ] }) }),
-      /* @__PURE__ */ jsxs48("div", { className: "space-y-2", children: [
-        /* @__PURE__ */ jsx71(Label, { htmlFor: "description", children: "Description" }),
-        /* @__PURE__ */ jsx71(
+      /* @__PURE__ */ jsxs47("div", { className: "space-y-2", children: [
+        /* @__PURE__ */ jsx70(Label, { htmlFor: "description", children: "Description" }),
+        /* @__PURE__ */ jsx70(
           Textarea,
           {
             id: "description",
@@ -4958,14 +4925,14 @@ function FileModal({ file, onClose, onSave }) {
       ] })
     ] })
   ] });
-  const footer = /* @__PURE__ */ jsxs48("div", { className: "flex w-full justify-between items-center flex-col sm:flex-row gap-2 ", children: [
-    /* @__PURE__ */ jsx71(Button, { className: "w-full md:w-auto", variant: "outline", onClick: onClose, radius: "full", disabled: isSaving, children: "Cancel" }),
-    /* @__PURE__ */ jsxs48(Button, { className: "w-full md:w-auto", onClick: handleSave, radius: "full", disabled: isSaving, children: [
-      isSaving && /* @__PURE__ */ jsx71(Loader2Icon, { className: "mr-2 h-4 w-4 animate-spin" }),
+  const footer = /* @__PURE__ */ jsxs47("div", { className: "flex w-full justify-between items-center flex-col sm:flex-row gap-2 ", children: [
+    /* @__PURE__ */ jsx70(Button, { className: "w-full md:w-auto", variant: "outline", onClick: onClose, radius: "full", disabled: isSaving, children: "Cancel" }),
+    /* @__PURE__ */ jsxs47(Button, { className: "w-full md:w-auto", onClick: handleSave, radius: "full", disabled: isSaving, children: [
+      isSaving && /* @__PURE__ */ jsx70(Loader2Icon, { className: "mr-2 h-4 w-4 animate-spin" }),
       "Save"
     ] })
   ] });
-  return /* @__PURE__ */ jsx71(
+  return /* @__PURE__ */ jsx70(
     DetailsLayout,
     {
       title: "Details",
@@ -4979,7 +4946,7 @@ function FileModal({ file, onClose, onSave }) {
 }
 
 // components/layout/overlays.tsx
-import { jsx as jsx72, jsxs as jsxs49 } from "react/jsx-runtime";
+import { jsx as jsx71, jsxs as jsxs48 } from "react/jsx-runtime";
 function FileManagerOverlays({ className }) {
   const {
     fileDetailsModalFile,
@@ -5002,7 +4969,7 @@ function FileManagerOverlays({ className }) {
     );
     switch (fileType) {
       case FILE_TYPE.IMAGE:
-        return /* @__PURE__ */ jsx72(
+        return /* @__PURE__ */ jsx71(
           ImageModal,
           {
             file: fileDetailsModalFile,
@@ -5011,7 +4978,7 @@ function FileManagerOverlays({ className }) {
           }
         );
       case FILE_TYPE.VIDEO:
-        return /* @__PURE__ */ jsx72(
+        return /* @__PURE__ */ jsx71(
           VideoModal,
           {
             file: fileDetailsModalFile,
@@ -5020,7 +4987,7 @@ function FileManagerOverlays({ className }) {
           }
         );
       case FILE_TYPE.AUDIO:
-        return /* @__PURE__ */ jsx72(
+        return /* @__PURE__ */ jsx71(
           AudioModal,
           {
             file: fileDetailsModalFile,
@@ -5030,7 +4997,7 @@ function FileManagerOverlays({ className }) {
         );
       case FILE_TYPE.FILE:
       default:
-        return /* @__PURE__ */ jsx72(
+        return /* @__PURE__ */ jsx71(
           FileModal,
           {
             file: fileDetailsModalFile,
@@ -5040,23 +5007,23 @@ function FileManagerOverlays({ className }) {
         );
     }
   };
-  return /* @__PURE__ */ jsxs49("div", { className: cn("", className), children: [
-    /* @__PURE__ */ jsx72(UploadModal, {}),
-    /* @__PURE__ */ jsx72(CreateFolderModal, {}),
-    /* @__PURE__ */ jsx72(MoveModal, {}),
+  return /* @__PURE__ */ jsxs48("div", { className: cn("", className), children: [
+    /* @__PURE__ */ jsx71(UploadModal, {}),
+    /* @__PURE__ */ jsx71(CreateFolderModal, {}),
+    /* @__PURE__ */ jsx71(MoveModal, {}),
     renderFileDetailsModal()
   ] });
 }
 
 // components/file-manager-root.tsx
-import { jsx as jsx73 } from "react/jsx-runtime";
+import { jsx as jsx72 } from "react/jsx-runtime";
 function FileManagerPageProvider(_a) {
   var _b = _a, {
     children
   } = _b, props = __objRest(_b, [
     "children"
   ]);
-  return /* @__PURE__ */ jsx73(
+  return /* @__PURE__ */ jsx72(
     FileManagerProvider,
     __spreadProps(__spreadValues({
       mode: MODE.PAGE,
@@ -5082,7 +5049,7 @@ function FileManagerModalProvider(_a) {
     "onFilesSelected",
     "onClose"
   ]);
-  return /* @__PURE__ */ jsx73(
+  return /* @__PURE__ */ jsx72(
     FileManagerProvider,
     __spreadProps(__spreadValues({
       mode: MODE.MODAL,
@@ -5105,10 +5072,10 @@ var FileManagerComposition = {
 };
 
 // components/layout/bulk-actions-bar.tsx
-import { jsx as jsx74, jsxs as jsxs50 } from "react/jsx-runtime";
+import { jsx as jsx73, jsxs as jsxs49 } from "react/jsx-runtime";
 function MoveButton() {
   const { setIsMoveFileModalOpen } = useFileManager();
-  return /* @__PURE__ */ jsxs50(
+  return /* @__PURE__ */ jsxs49(
     Button,
     {
       variant: "outline",
@@ -5117,15 +5084,15 @@ function MoveButton() {
       onClick: () => setIsMoveFileModalOpen(true),
       className: "text-md font-medium border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-blue-50 dark:hover:bg-blue-900/40 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 shadow-sm transition-all duration-200",
       children: [
-        /* @__PURE__ */ jsx74(MoveIcon, { className: "size-5" }),
-        /* @__PURE__ */ jsx74("span", { className: "hidden sm:inline", children: "Move" })
+        /* @__PURE__ */ jsx73(MoveIcon, { className: "size-5" }),
+        /* @__PURE__ */ jsx73("span", { className: "hidden sm:inline", children: "Move" })
       ]
     }
   );
 }
 function DeleteButton() {
   const { bulkDelete } = useFileManager();
-  return /* @__PURE__ */ jsxs50(
+  return /* @__PURE__ */ jsxs49(
     Button,
     {
       variant: "outline",
@@ -5134,15 +5101,15 @@ function DeleteButton() {
       onClick: bulkDelete,
       className: "text-md font-medium border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-red-50 dark:hover:bg-red-900/40 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-700 shadow-sm transition-all duration-200",
       children: [
-        /* @__PURE__ */ jsx74(TrashIcon, { className: "size-5" }),
-        /* @__PURE__ */ jsx74("span", { className: "hidden", children: "Delete" })
+        /* @__PURE__ */ jsx73(TrashIcon, { className: "size-5" }),
+        /* @__PURE__ */ jsx73("span", { className: "hidden", children: "Delete" })
       ]
     }
   );
 }
 function ClearSelectionButton() {
   const { handleClearSelection } = useFileManager();
-  return /* @__PURE__ */ jsxs50(
+  return /* @__PURE__ */ jsxs49(
     Button,
     {
       variant: "outline",
@@ -5150,7 +5117,7 @@ function ClearSelectionButton() {
       onClick: handleClearSelection,
       className: "rounded-full text-md font-medium border border-transparent text-blue-600 dark:text-blue-400  hover:text-blue-700 dark:hover:text-blue-300  hover:bg-blue-50 dark:hover:bg-blue-900/40  hover:border-blue-300 dark:hover:border-blue-700  hover:font-semibold transition-all duration-200",
       children: [
-        /* @__PURE__ */ jsx74(CrossIcon, { className: "size-5 transition-colors" }),
+        /* @__PURE__ */ jsx73(CrossIcon, { className: "size-5 transition-colors" }),
         "Clear"
       ]
     }
@@ -5163,12 +5130,12 @@ function BulkActionsStatic() {
   } = useFileManager();
   const totalSelected = selectedFiles.length + selectedFolders.length;
   if (totalSelected === 0) return null;
-  return /* @__PURE__ */ jsx74("div", { className: "w-full", children: /* @__PURE__ */ jsxs50("div", { className: "flex flex-wrap items-center gap-2 sm:gap-3", children: [
-    /* @__PURE__ */ jsxs50("div", { className: "flex items-center gap-2 flex-1 sm:flex-initial", children: [
-      /* @__PURE__ */ jsx74(MoveButton, {}),
-      /* @__PURE__ */ jsx74(DeleteButton, {})
+  return /* @__PURE__ */ jsx73("div", { className: "w-full", children: /* @__PURE__ */ jsxs49("div", { className: "flex flex-wrap items-center gap-2 sm:gap-3", children: [
+    /* @__PURE__ */ jsxs49("div", { className: "flex items-center gap-2 flex-1 sm:flex-initial", children: [
+      /* @__PURE__ */ jsx73(MoveButton, {}),
+      /* @__PURE__ */ jsx73(DeleteButton, {})
     ] }),
-    /* @__PURE__ */ jsx74(ClearSelectionButton, {})
+    /* @__PURE__ */ jsx73(ClearSelectionButton, {})
   ] }) });
 }
 function BulkActionsFloating({ className }) {
@@ -5178,25 +5145,25 @@ function BulkActionsFloating({ className }) {
   } = useFileManager();
   const totalSelected = selectedFiles.length + selectedFolders.length;
   if (totalSelected === 0) return null;
-  return /* @__PURE__ */ jsx74("div", { className: `fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border-t border-gray-200 dark:border-zinc-700 shadow-lg ${className || ""}`, children: /* @__PURE__ */ jsx74("div", { className: "px-4 sm:px-6 py-3 mx-auto", children: /* @__PURE__ */ jsxs50("div", { className: "flex flex-wrap items-center gap-2 sm:gap-3", children: [
-    /* @__PURE__ */ jsxs50("div", { className: "flex items-center gap-2 flex-1 sm:flex-initial", children: [
-      /* @__PURE__ */ jsx74(MoveButton, {}),
-      /* @__PURE__ */ jsx74(DeleteButton, {})
+  return /* @__PURE__ */ jsx73("div", { className: `fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border-t border-gray-200 dark:border-zinc-700 shadow-lg ${className || ""}`, children: /* @__PURE__ */ jsx73("div", { className: "px-4 sm:px-6 py-3 mx-auto", children: /* @__PURE__ */ jsxs49("div", { className: "flex flex-wrap items-center gap-2 sm:gap-3", children: [
+    /* @__PURE__ */ jsxs49("div", { className: "flex items-center gap-2 flex-1 sm:flex-initial", children: [
+      /* @__PURE__ */ jsx73(MoveButton, {}),
+      /* @__PURE__ */ jsx73(DeleteButton, {})
     ] }),
-    /* @__PURE__ */ jsx74(ClearSelectionButton, {})
+    /* @__PURE__ */ jsx73(ClearSelectionButton, {})
   ] }) }) });
 }
 
 // components/ui/skeleton.tsx
-import { jsx as jsx75 } from "react/jsx-runtime";
+import { jsx as jsx74 } from "react/jsx-runtime";
 function Skeleton(_a) {
   var _b = _a, { className } = _b, props = __objRest(_b, ["className"]);
-  return /* @__PURE__ */ jsx75("div", __spreadValues({ "data-slot": "skeleton", className: cn("animate-pulse rounded-md bg-accent", className) }, props));
+  return /* @__PURE__ */ jsx74("div", __spreadValues({ "data-slot": "skeleton", className: cn("animate-pulse rounded-md bg-accent", className) }, props));
 }
 
 // components/layout/header-navigation.tsx
 import { useRouter as useRouter3 } from "next/navigation";
-import { Fragment, jsx as jsx76, jsxs as jsxs51 } from "react/jsx-runtime";
+import { Fragment, jsx as jsx75, jsxs as jsxs50 } from "react/jsx-runtime";
 function HeaderNavigation() {
   const {
     currentFolder,
@@ -5208,13 +5175,13 @@ function HeaderNavigation() {
     router.back();
   };
   if (isLoading) {
-    return /* @__PURE__ */ jsxs51("div", { className: "flex item-center w-full", children: [
-      /* @__PURE__ */ jsx76(Skeleton, { className: "rounded-full size-10 mr-2 shrink-0" }),
-      /* @__PURE__ */ jsx76(Skeleton, { className: "min-w-32 rounded-md h-full" })
+    return /* @__PURE__ */ jsxs50("div", { className: "flex item-center w-full", children: [
+      /* @__PURE__ */ jsx75(Skeleton, { className: "rounded-full size-10 mr-2 shrink-0" }),
+      /* @__PURE__ */ jsx75(Skeleton, { className: "min-w-32 rounded-md h-full" })
     ] });
   }
-  return /* @__PURE__ */ jsx76(Fragment, { children: currentFolder ? /* @__PURE__ */ jsxs51("div", { className: "flex items-center flex-1 min-w-0 max-w-[calc(100%-40px)]", children: [
-    /* @__PURE__ */ jsx76(
+  return /* @__PURE__ */ jsx75(Fragment, { children: currentFolder ? /* @__PURE__ */ jsxs50("div", { className: "flex items-center flex-1 min-w-0 max-w-[calc(100%-40px)]", children: [
+    /* @__PURE__ */ jsx75(
       Button,
       {
         variant: "outline",
@@ -5223,12 +5190,12 @@ function HeaderNavigation() {
         disabled: isLoading,
         className: "border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 mr-2",
         onClick: handleBackClick,
-        children: /* @__PURE__ */ jsx76(ChevronLeftIcon, { className: "size-5 text-gray-900 dark:text-zinc-100", strokeWidth: "1.5" })
+        children: /* @__PURE__ */ jsx75(ChevronLeftIcon, { className: "size-5 text-gray-900 dark:text-zinc-100", strokeWidth: "1.5" })
       }
     ),
-    /* @__PURE__ */ jsx76("h1", { className: "text-lg flex-1 min-w-0 align-middle font-semibold", children: middleTruncate(currentFolder.name, 20) })
-  ] }) : /* @__PURE__ */ jsxs51("div", { className: "flex items-center flex-1 min-w-0 max-w-[calc(100%-40px)]", children: [
-    /* @__PURE__ */ jsx76(
+    /* @__PURE__ */ jsx75("h1", { className: "text-lg flex-1 min-w-0 align-middle font-semibold", children: middleTruncate(currentFolder.name, 20) })
+  ] }) : /* @__PURE__ */ jsxs50("div", { className: "flex items-center flex-1 min-w-0 max-w-[calc(100%-40px)]", children: [
+    /* @__PURE__ */ jsx75(
       Button,
       {
         className: "mr-2 shrink-0",
@@ -5237,23 +5204,23 @@ function HeaderNavigation() {
         mode: "icon",
         size: "icon",
         onClick: () => handleFolderClick(null),
-        children: /* @__PURE__ */ jsx76(HomeIcon, { className: "size-6 text-gray-900 dark:text-zinc-100" })
+        children: /* @__PURE__ */ jsx75(HomeIcon, { className: "size-6 text-gray-900 dark:text-zinc-100" })
       }
     ),
-    /* @__PURE__ */ jsx76("h1", { className: "text-lg flex-1 min-w-0 align-middle font-semibold", children: "Home" })
+    /* @__PURE__ */ jsx75("h1", { className: "text-lg flex-1 min-w-0 align-middle font-semibold", children: "Home" })
   ] }) });
 }
 
 // components/ui/dropdown-menu.tsx
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
-import { jsx as jsx77, jsxs as jsxs52 } from "react/jsx-runtime";
+import { jsx as jsx76, jsxs as jsxs51 } from "react/jsx-runtime";
 function DropdownMenu(_a) {
   var props = __objRest(_a, []);
-  return /* @__PURE__ */ jsx77(DropdownMenuPrimitive.Root, __spreadValues({ "data-slot": "dropdown-menu" }, props));
+  return /* @__PURE__ */ jsx76(DropdownMenuPrimitive.Root, __spreadValues({ "data-slot": "dropdown-menu" }, props));
 }
 function DropdownMenuTrigger(_a) {
   var props = __objRest(_a, []);
-  return /* @__PURE__ */ jsx77(DropdownMenuPrimitive.Trigger, __spreadValues({ className: "select-none", "data-slot": "dropdown-menu-trigger" }, props));
+  return /* @__PURE__ */ jsx76(DropdownMenuPrimitive.Trigger, __spreadValues({ className: "select-none", "data-slot": "dropdown-menu-trigger" }, props));
 }
 function DropdownMenuContent(_a) {
   var _b = _a, {
@@ -5263,7 +5230,7 @@ function DropdownMenuContent(_a) {
     "className",
     "sideOffset"
   ]);
-  return /* @__PURE__ */ jsx77(DropdownMenuPrimitive.Portal, { children: /* @__PURE__ */ jsx77(
+  return /* @__PURE__ */ jsx76(DropdownMenuPrimitive.Portal, { children: /* @__PURE__ */ jsx76(
     DropdownMenuPrimitive.Content,
     __spreadValues({
       "data-slot": "dropdown-menu-content",
@@ -5285,7 +5252,7 @@ function DropdownMenuItem(_a) {
     "inset",
     "variant"
   ]);
-  return /* @__PURE__ */ jsx77(
+  return /* @__PURE__ */ jsx76(
     DropdownMenuPrimitive.Item,
     __spreadValues({
       "data-slot": "dropdown-menu-item",
@@ -5302,7 +5269,7 @@ function DropdownMenuItem(_a) {
 }
 function DropdownMenuSeparator(_a) {
   var _b = _a, { className } = _b, props = __objRest(_b, ["className"]);
-  return /* @__PURE__ */ jsx77(
+  return /* @__PURE__ */ jsx76(
     DropdownMenuPrimitive.Separator,
     __spreadValues({
       "data-slot": "dropdown-menu-separator",
@@ -5312,14 +5279,14 @@ function DropdownMenuSeparator(_a) {
 }
 
 // components/modals/search-modal.tsx
-import { useCallback as useCallback4, useEffect as useEffect7, useState as useState15 } from "react";
+import { useCallback as useCallback5, useEffect as useEffect6, useState as useState15 } from "react";
 
 // components/ui/command.tsx
 import { Command as CommandPrimitive } from "cmdk";
-import { jsx as jsx78, jsxs as jsxs53 } from "react/jsx-runtime";
+import { jsx as jsx77, jsxs as jsxs52 } from "react/jsx-runtime";
 function Command(_a) {
   var _b = _a, { className } = _b, props = __objRest(_b, ["className"]);
-  return /* @__PURE__ */ jsx78(
+  return /* @__PURE__ */ jsx77(
     CommandPrimitive,
     __spreadValues({
       className: cn(
@@ -5331,9 +5298,9 @@ function Command(_a) {
 }
 var CommandDialog = (_a) => {
   var _b = _a, { children, className, shouldFilter } = _b, props = __objRest(_b, ["children", "className", "shouldFilter"]);
-  return /* @__PURE__ */ jsx78(Dialog, __spreadProps(__spreadValues({}, props), { children: /* @__PURE__ */ jsxs53(DialogContent, { className: cn("overflow-hidden p-0 shadow-lg", className), children: [
-    /* @__PURE__ */ jsx78(DialogTitle, { className: "hidden" }),
-    /* @__PURE__ */ jsx78(
+  return /* @__PURE__ */ jsx77(Dialog, __spreadProps(__spreadValues({}, props), { children: /* @__PURE__ */ jsxs52(DialogContent, { className: cn("overflow-hidden p-0 shadow-lg", className), children: [
+    /* @__PURE__ */ jsx77(DialogTitle, { className: "hidden" }),
+    /* @__PURE__ */ jsx77(
       Command,
       {
         shouldFilter,
@@ -5345,13 +5312,13 @@ var CommandDialog = (_a) => {
 };
 function CommandInput(_a) {
   var _b = _a, { className } = _b, props = __objRest(_b, ["className"]);
-  return /* @__PURE__ */ jsxs53("div", { className: "flex items-center border-border border-b px-3", "cmdk-input-wrapper": "", "data-slot": "command-input", children: [
-    /* @__PURE__ */ jsx78(SearchIcon, { className: "me-2 h-4 w-4 shrink-0 opacity-50" }),
-    /* @__PURE__ */ jsx78(
+  return /* @__PURE__ */ jsxs52("div", { className: "flex items-center border-border border-b px-3", "cmdk-input-wrapper": "", "data-slot": "command-input", children: [
+    /* @__PURE__ */ jsx77(SearchIcon, { className: "me-2 h-4 w-4 shrink-0 opacity-50" }),
+    /* @__PURE__ */ jsx77(
       CommandPrimitive.Input,
       __spreadValues({
         className: cn(
-          "flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-hidden text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+          "flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none! shadow-none! focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 border-none text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
           className
         )
       }, props)
@@ -5360,7 +5327,7 @@ function CommandInput(_a) {
 }
 function CommandList(_a) {
   var _b = _a, { className } = _b, props = __objRest(_b, ["className"]);
-  return /* @__PURE__ */ jsx78(
+  return /* @__PURE__ */ jsx77(
     CommandPrimitive.List,
     __spreadValues({
       "data-slot": "command-list",
@@ -5370,11 +5337,11 @@ function CommandList(_a) {
 }
 function CommandEmpty(_a) {
   var props = __objRest(_a, []);
-  return /* @__PURE__ */ jsx78(CommandPrimitive.Empty, __spreadValues({ "data-slot": "command-empty", className: "py-6 text-center text-sm" }, props));
+  return /* @__PURE__ */ jsx77(CommandPrimitive.Empty, __spreadValues({ "data-slot": "command-empty", className: "py-6 text-center text-sm" }, props));
 }
 function CommandGroup(_a) {
   var _b = _a, { className } = _b, props = __objRest(_b, ["className"]);
-  return /* @__PURE__ */ jsx78(
+  return /* @__PURE__ */ jsx77(
     CommandPrimitive.Group,
     __spreadValues({
       "data-slot": "command-group",
@@ -5387,7 +5354,7 @@ function CommandGroup(_a) {
 }
 function CommandItem(_a) {
   var _b = _a, { className } = _b, props = __objRest(_b, ["className"]);
-  return /* @__PURE__ */ jsx78(
+  return /* @__PURE__ */ jsx77(
     CommandPrimitive.Item,
     __spreadValues({
       "data-slot": "command-item",
@@ -5401,10 +5368,10 @@ function CommandItem(_a) {
 }
 
 // hooks/use-debounced-value.ts
-import { useEffect as useEffect6, useState as useState14 } from "react";
+import { useEffect as useEffect5, useState as useState14 } from "react";
 function useDebouncedValue(value, delay2 = 500) {
   const [debouncedValue, setDebouncedValue] = useState14(value);
-  useEffect6(() => {
+  useEffect5(() => {
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay2);
@@ -5417,7 +5384,7 @@ function useDebouncedValue(value, delay2 = 500) {
 
 // components/modals/search-modal.tsx
 import { toast as toast4 } from "sonner";
-import { Fragment as Fragment2, jsx as jsx79, jsxs as jsxs54 } from "react/jsx-runtime";
+import { Fragment as Fragment2, jsx as jsx78, jsxs as jsxs53 } from "react/jsx-runtime";
 function SearchDialog() {
   const [searchQuery, setSearchQuery] = useState15("");
   const [fileResults, setFileResults] = useState15([]);
@@ -5425,7 +5392,7 @@ function SearchDialog() {
   const [loading, setLoading] = useState15(false);
   const { provider, handleFolderClick, handleClearSelection, isSearchModalOpen, setIsSearchModalOpen, setFileDetailsModalFile } = useFileManager();
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
-  const doSearch = useCallback4(async (q) => {
+  const doSearch = useCallback5(async (q) => {
     setLoading(true);
     try {
       const [files, folders] = await Promise.all([
@@ -5445,7 +5412,7 @@ function SearchDialog() {
       setLoading(false);
     }
   }, [provider]);
-  useEffect7(() => {
+  useEffect6(() => {
     if (isSearchModalOpen && debouncedSearchQuery.length > 0) {
       doSearch(debouncedSearchQuery);
     } else {
@@ -5464,8 +5431,8 @@ function SearchDialog() {
       setFolderResults([]);
     }
   };
-  return /* @__PURE__ */ jsxs54(Fragment2, { children: [
-    /* @__PURE__ */ jsxs54(
+  return /* @__PURE__ */ jsxs53(Fragment2, { children: [
+    /* @__PURE__ */ jsxs53(
       Button,
       {
         variant: "outline",
@@ -5474,13 +5441,13 @@ function SearchDialog() {
         className: "border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900",
         onClick: () => setIsSearchModalOpen(true),
         children: [
-          /* @__PURE__ */ jsx79(SearchIcon, { className: "size-4 text-gray-700 dark:text-zinc-300" }),
-          /* @__PURE__ */ jsx79("span", { className: "hidden", children: "Search" })
+          /* @__PURE__ */ jsx78(SearchIcon, { className: "size-4 text-gray-700 dark:text-zinc-300" }),
+          /* @__PURE__ */ jsx78("span", { className: "hidden", children: "Search" })
         ]
       }
     ),
-    /* @__PURE__ */ jsxs54(CommandDialog, { className: "max-w-4xl w-full", open: isSearchModalOpen, onOpenChange: handleModalOpenChange, shouldFilter: false, children: [
-      /* @__PURE__ */ jsx79(
+    /* @__PURE__ */ jsxs53(CommandDialog, { className: "max-w-4xl w-full", open: isSearchModalOpen, onOpenChange: handleModalOpenChange, shouldFilter: false, children: [
+      /* @__PURE__ */ jsx78(
         CommandInput,
         {
           placeholder: "Type to search files or folders...",
@@ -5488,23 +5455,23 @@ function SearchDialog() {
           onValueChange: handleInputChange
         }
       ),
-      /* @__PURE__ */ jsxs54(CommandList, { children: [
-        loading && /* @__PURE__ */ jsx79(CommandEmpty, { children: "Searching..." }),
-        !loading && fileResults.length === 0 && folderResults.length === 0 && !searchQuery && /* @__PURE__ */ jsx79(CommandEmpty, { children: /* @__PURE__ */ jsxs54("div", { className: "flex flex-col items-center justify-center py-8 px-4 text-center", children: [
-          /* @__PURE__ */ jsx79(SearchIcon, { className: "size-12 text-gray-300 dark:text-zinc-600 mb-3" }),
-          /* @__PURE__ */ jsx79("p", { className: "text-sm font-medium text-gray-900 dark:text-zinc-100 mb-1", children: "Search your files and folders" }),
-          /* @__PURE__ */ jsx79("p", { className: "text-xs text-gray-500 dark:text-zinc-400", children: "Start typing to find what you're looking for" }),
-          /* @__PURE__ */ jsx79("p", { className: "text-xs text-gray-500 dark:text-zinc-400 mt-2", children: /* @__PURE__ */ jsx79(KbdGroup, { children: /* @__PURE__ */ jsxs54(Kbd, { children: [
-            /* @__PURE__ */ jsx79("span", { className: "text-lg", children: "\u2318" }),
+      /* @__PURE__ */ jsxs53(CommandList, { children: [
+        loading && /* @__PURE__ */ jsx78(CommandEmpty, { children: "Searching..." }),
+        !loading && fileResults.length === 0 && folderResults.length === 0 && !searchQuery && /* @__PURE__ */ jsx78(CommandEmpty, { children: /* @__PURE__ */ jsxs53("div", { className: "flex flex-col items-center justify-center py-8 px-4 text-center", children: [
+          /* @__PURE__ */ jsx78(SearchIcon, { className: "size-12 text-gray-300 dark:text-zinc-600 mb-3" }),
+          /* @__PURE__ */ jsx78("p", { className: "text-sm font-medium text-gray-900 dark:text-zinc-100 mb-1", children: "Search your files and folders" }),
+          /* @__PURE__ */ jsx78("p", { className: "text-xs text-gray-500 dark:text-zinc-400", children: "Start typing to find what you're looking for" }),
+          /* @__PURE__ */ jsx78("p", { className: "text-xs text-gray-500 dark:text-zinc-400 mt-2", children: /* @__PURE__ */ jsx78(KbdGroup, { children: /* @__PURE__ */ jsxs53(Kbd, { children: [
+            /* @__PURE__ */ jsx78("span", { className: "text-lg", children: "\u2318" }),
             " + K"
           ] }) }) })
         ] }) }),
-        !loading && fileResults.length === 0 && folderResults.length === 0 && searchQuery && /* @__PURE__ */ jsx79(CommandEmpty, { children: /* @__PURE__ */ jsxs54("div", { className: "flex flex-col items-center justify-center py-8 px-4 text-center", children: [
-          /* @__PURE__ */ jsx79(SearchIcon, { className: "size-12 text-gray-300 dark:text-zinc-600 mb-3" }),
-          /* @__PURE__ */ jsx79("p", { className: "text-sm font-medium text-gray-900 dark:text-zinc-100 mb-1", children: "No results found" }),
-          /* @__PURE__ */ jsx79("p", { className: "text-xs text-gray-500 dark:text-zinc-400", children: "Try searching with different keywords" })
+        !loading && fileResults.length === 0 && folderResults.length === 0 && searchQuery && /* @__PURE__ */ jsx78(CommandEmpty, { children: /* @__PURE__ */ jsxs53("div", { className: "flex flex-col items-center justify-center py-8 px-4 text-center", children: [
+          /* @__PURE__ */ jsx78(SearchIcon, { className: "size-12 text-gray-300 dark:text-zinc-600 mb-3" }),
+          /* @__PURE__ */ jsx78("p", { className: "text-sm font-medium text-gray-900 dark:text-zinc-100 mb-1", children: "No results found" }),
+          /* @__PURE__ */ jsx78("p", { className: "text-xs text-gray-500 dark:text-zinc-400", children: "Try searching with different keywords" })
         ] }) }),
-        folderResults.length > 0 && /* @__PURE__ */ jsx79(CommandGroup, { heading: "Folders", children: folderResults.map((folder) => /* @__PURE__ */ jsxs54(
+        folderResults.length > 0 && /* @__PURE__ */ jsx78(CommandGroup, { heading: "Folders", children: folderResults.map((folder) => /* @__PURE__ */ jsxs53(
           CommandItem,
           {
             onSelect: () => {
@@ -5513,15 +5480,15 @@ function SearchDialog() {
               handleFolderClick(folder);
             },
             children: [
-              /* @__PURE__ */ jsx79(FolderIcon, { className: "size-4  mr-2 shrink-0", strokeWidth: 1.5 }),
-              /* @__PURE__ */ jsx79("span", { children: middleTruncate(folder.name, 60) })
+              /* @__PURE__ */ jsx78(FolderIcon, { className: "size-4  mr-2 shrink-0", strokeWidth: 1.5 }),
+              /* @__PURE__ */ jsx78("span", { children: middleTruncate(folder.name, 60) })
             ]
           },
           folder.id
         )) }),
-        fileResults.length > 0 && /* @__PURE__ */ jsx79(CommandGroup, { heading: "Files", children: fileResults.map((file) => {
+        fileResults.length > 0 && /* @__PURE__ */ jsx78(CommandGroup, { heading: "Files", children: fileResults.map((file) => {
           const { component: FilePreviewComponent } = getFileComponents(file);
-          return /* @__PURE__ */ jsxs54(
+          return /* @__PURE__ */ jsxs53(
             CommandItem,
             {
               onSelect: () => {
@@ -5529,8 +5496,8 @@ function SearchDialog() {
                 setFileDetailsModalFile(file);
               },
               children: [
-                /* @__PURE__ */ jsx79("div", { className: "size-6 mr-2 shrink-0 flex items-center justify-center", children: /* @__PURE__ */ jsx79(FilePreviewComponent, { file, metaData: file.metaData }) }),
-                /* @__PURE__ */ jsx79("span", { children: middleTruncate(file.name, 60) })
+                /* @__PURE__ */ jsx78("div", { className: "size-6 mr-2 shrink-0 flex items-center justify-center", children: /* @__PURE__ */ jsx78(FilePreviewComponent, { file, metaData: file.metaData }) }),
+                /* @__PURE__ */ jsx78("span", { children: middleTruncate(file.name, 60) })
               ]
             },
             file.id
@@ -5544,7 +5511,7 @@ function SearchDialog() {
 // components/ui/checkbox.tsx
 import { cva as cva9 } from "class-variance-authority";
 import { Checkbox as CheckboxPrimitive } from "radix-ui";
-import { jsx as jsx80, jsxs as jsxs55 } from "react/jsx-runtime";
+import { jsx as jsx79, jsxs as jsxs54 } from "react/jsx-runtime";
 var checkboxVariants = cva9(
   `
     group peer bg-background shrink-0 rounded-md border border-input ring-offset-background focus-visible:outline-none 
@@ -5574,20 +5541,20 @@ function Checkbox(_a) {
     "className",
     "size"
   ]);
-  return /* @__PURE__ */ jsx80(CheckboxPrimitive.Root, __spreadProps(__spreadValues({ "data-slot": "checkbox", className: cn(checkboxVariants({ size }), className) }, props), { children: /* @__PURE__ */ jsxs55(CheckboxPrimitive.Indicator, { className: cn("flex items-center justify-center text-current"), children: [
-    /* @__PURE__ */ jsx80(CheckIcon, { className: "group-data-[state=indeterminate]:hidden" }),
-    /* @__PURE__ */ jsx80(MinusIcon, { className: "hidden group-data-[state=indeterminate]:block" })
+  return /* @__PURE__ */ jsx79(CheckboxPrimitive.Root, __spreadProps(__spreadValues({ "data-slot": "checkbox", className: cn(checkboxVariants({ size }), className) }, props), { children: /* @__PURE__ */ jsxs54(CheckboxPrimitive.Indicator, { className: cn("flex items-center justify-center text-current"), children: [
+    /* @__PURE__ */ jsx79(CheckIcon, { className: "group-data-[state=indeterminate]:hidden" }),
+    /* @__PURE__ */ jsx79(MinusIcon, { className: "hidden group-data-[state=indeterminate]:block" })
   ] }) }));
 }
 
 // components/layout/header-actions.tsx
-import { jsx as jsx81, jsxs as jsxs56 } from "react/jsx-runtime";
+import { jsx as jsx80, jsxs as jsxs55 } from "react/jsx-runtime";
 function SearchAction() {
-  return /* @__PURE__ */ jsx81(SearchDialog, {});
+  return /* @__PURE__ */ jsx80(SearchDialog, {});
 }
 function UploadFileAction() {
   const { setIsUploadModalOpen } = useFileManager();
-  return /* @__PURE__ */ jsxs56(
+  return /* @__PURE__ */ jsxs55(
     Button,
     {
       variant: "outline",
@@ -5596,15 +5563,15 @@ function UploadFileAction() {
       className: "border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-md font-medium",
       onClick: () => setIsUploadModalOpen(true),
       children: [
-        /* @__PURE__ */ jsx81(PlusIcon, { strokeWidth: 2, className: "size-5 text-gray-900 dark:text-zinc-100" }),
-        /* @__PURE__ */ jsx81("span", { className: "hidden sm:inline", children: "Upload File" })
+        /* @__PURE__ */ jsx80(PlusIcon, { strokeWidth: 2, className: "size-5 text-gray-900 dark:text-zinc-100" }),
+        /* @__PURE__ */ jsx80("span", { className: "hidden sm:inline", children: "Upload File" })
       ]
     }
   );
 }
 function CreateFolderAction() {
   const { setIsCreateFolderModalOpen } = useFileManager();
-  return /* @__PURE__ */ jsxs56(
+  return /* @__PURE__ */ jsxs55(
     Button,
     {
       variant: "outline",
@@ -5613,20 +5580,20 @@ function CreateFolderAction() {
       className: "border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900",
       onClick: () => setIsCreateFolderModalOpen(true),
       children: [
-        /* @__PURE__ */ jsx81(UploadFolderIcon, { className: "size-5 text-gray-900 dark:text-zinc-100" }),
-        /* @__PURE__ */ jsx81("span", { className: "hidden", children: "Create Folder" })
+        /* @__PURE__ */ jsx80(UploadFolderIcon, { className: "size-5 text-gray-900 dark:text-zinc-100" }),
+        /* @__PURE__ */ jsx80("span", { className: "hidden", children: "Create Folder" })
       ]
     }
   );
 }
 
 // components/layout/theme-toggle.tsx
-import { useEffect as useEffect8, useState as useState16 } from "react";
+import { useEffect as useEffect7, useState as useState16 } from "react";
 
 // components/icons/theme.tsx
-import { jsx as jsx82, jsxs as jsxs57 } from "react/jsx-runtime";
+import { jsx as jsx81, jsxs as jsxs56 } from "react/jsx-runtime";
 function SunIcon(props) {
-  return /* @__PURE__ */ jsxs57(
+  return /* @__PURE__ */ jsxs56(
     "svg",
     __spreadProps(__spreadValues({
       xmlns: "http://www.w3.org/2000/svg",
@@ -5640,14 +5607,14 @@ function SunIcon(props) {
       strokeLinejoin: "round"
     }, props), {
       children: [
-        /* @__PURE__ */ jsx82("circle", { cx: "12", cy: "12", r: "4" }),
-        /* @__PURE__ */ jsx82("path", { d: "M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" })
+        /* @__PURE__ */ jsx81("circle", { cx: "12", cy: "12", r: "4" }),
+        /* @__PURE__ */ jsx81("path", { d: "M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" })
       ]
     })
   );
 }
 function MoonIcon(props) {
-  return /* @__PURE__ */ jsx82(
+  return /* @__PURE__ */ jsx81(
     "svg",
     __spreadProps(__spreadValues({
       xmlns: "http://www.w3.org/2000/svg",
@@ -5660,16 +5627,16 @@ function MoonIcon(props) {
       strokeLinecap: "round",
       strokeLinejoin: "round"
     }, props), {
-      children: /* @__PURE__ */ jsx82("path", { d: "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" })
+      children: /* @__PURE__ */ jsx81("path", { d: "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" })
     })
   );
 }
 
 // components/layout/theme-toggle.tsx
-import { jsx as jsx83 } from "react/jsx-runtime";
+import { jsx as jsx82 } from "react/jsx-runtime";
 function ThemeToggle() {
   const [isDark, setIsDark] = useState16(false);
-  useEffect8(() => {
+  useEffect7(() => {
     const saved = localStorage.getItem("theme");
     const shouldBeDark = saved === "dark";
     setIsDark(shouldBeDark);
@@ -5681,7 +5648,7 @@ function ThemeToggle() {
     document.documentElement.classList.toggle("dark", next);
     localStorage.setItem("theme", next ? "dark" : "light");
   };
-  return /* @__PURE__ */ jsx83(
+  return /* @__PURE__ */ jsx82(
     Button,
     {
       variant: "outline",
@@ -5690,64 +5657,64 @@ function ThemeToggle() {
       onClick: toggle,
       className: "border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900",
       "aria-label": isDark ? "Switch to light mode" : "Switch to dark mode",
-      children: isDark ? /* @__PURE__ */ jsx83(SunIcon, { className: "size-4 text-yellow-500" }) : /* @__PURE__ */ jsx83(MoonIcon, { className: "size-4 text-gray-700 dark:text-zinc-300" })
+      children: isDark ? /* @__PURE__ */ jsx82(SunIcon, { className: "size-4 text-yellow-500" }) : /* @__PURE__ */ jsx82(MoonIcon, { className: "size-4 text-gray-700 dark:text-zinc-300" })
     }
   );
 }
 
 // components/layout/header-actions-responsive.tsx
-import { Fragment as Fragment3, jsx as jsx84, jsxs as jsxs58 } from "react/jsx-runtime";
+import { Fragment as Fragment3, jsx as jsx83, jsxs as jsxs57 } from "react/jsx-runtime";
 function ResponsiveHeaderActions() {
   const { setIsUploadModalOpen, setIsCreateFolderModalOpen, setIsSearchModalOpen } = useFileManager();
-  return /* @__PURE__ */ jsxs58(Fragment3, { children: [
-    /* @__PURE__ */ jsxs58("div", { className: "hidden md:flex gap-2", children: [
-      /* @__PURE__ */ jsx84(UploadFileAction, {}),
-      /* @__PURE__ */ jsx84(CreateFolderAction, {}),
-      /* @__PURE__ */ jsx84(SearchAction, {}),
-      /* @__PURE__ */ jsx84(ThemeToggle, {})
+  return /* @__PURE__ */ jsxs57(Fragment3, { children: [
+    /* @__PURE__ */ jsxs57("div", { className: "hidden md:flex gap-2", children: [
+      /* @__PURE__ */ jsx83(UploadFileAction, {}),
+      /* @__PURE__ */ jsx83(CreateFolderAction, {}),
+      /* @__PURE__ */ jsx83(SearchAction, {}),
+      /* @__PURE__ */ jsx83(ThemeToggle, {})
     ] }),
-    /* @__PURE__ */ jsx84("div", { className: "flex md:hidden", children: /* @__PURE__ */ jsxs58(DropdownMenu, { children: [
-      /* @__PURE__ */ jsx84(DropdownMenuTrigger, { asChild: true, children: /* @__PURE__ */ jsx84(
+    /* @__PURE__ */ jsx83("div", { className: "flex md:hidden", children: /* @__PURE__ */ jsxs57(DropdownMenu, { children: [
+      /* @__PURE__ */ jsx83(DropdownMenuTrigger, { asChild: true, children: /* @__PURE__ */ jsx83(
         Button,
         {
           variant: "outline",
           size: "icon",
           radius: "full",
           className: "border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900",
-          children: /* @__PURE__ */ jsx84(MoveHorizontalIcon, { className: "size-5" })
+          children: /* @__PURE__ */ jsx83(MoveHorizontalIcon, { className: "size-5" })
         }
       ) }),
-      /* @__PURE__ */ jsxs58(DropdownMenuContent, { align: "end", className: "w-56 rounded-2xl shadow-xl bg-white/50 dark:bg-zinc-900/80 backdrop-blur-2xl border-gray-200 dark:border-zinc-700", children: [
-        /* @__PURE__ */ jsxs58(
+      /* @__PURE__ */ jsxs57(DropdownMenuContent, { align: "end", className: "w-56 rounded-2xl shadow-xl bg-white/50 dark:bg-zinc-900/80 backdrop-blur-2xl border-gray-200 dark:border-zinc-700", children: [
+        /* @__PURE__ */ jsxs57(
           DropdownMenuItem,
           {
             onClick: () => setIsUploadModalOpen(true),
             className: "cursor-pointer",
             children: [
-              /* @__PURE__ */ jsx84(PlusIcon, { className: "size-5 text-gray-900 dark:text-zinc-100" }),
-              /* @__PURE__ */ jsx84("span", { className: "inline", children: "Upload File" })
+              /* @__PURE__ */ jsx83(PlusIcon, { className: "size-5 text-gray-900 dark:text-zinc-100" }),
+              /* @__PURE__ */ jsx83("span", { className: "inline", children: "Upload File" })
             ]
           }
         ),
-        /* @__PURE__ */ jsxs58(
+        /* @__PURE__ */ jsxs57(
           DropdownMenuItem,
           {
             onClick: () => setIsCreateFolderModalOpen(true),
             className: "cursor-pointer",
             children: [
-              /* @__PURE__ */ jsx84(UploadFolderIcon, { className: "size-5 text-gray-900 dark:text-zinc-100" }),
-              /* @__PURE__ */ jsx84("span", { className: "inline", children: "Create Folder" })
+              /* @__PURE__ */ jsx83(UploadFolderIcon, { className: "size-5 text-gray-900 dark:text-zinc-100" }),
+              /* @__PURE__ */ jsx83("span", { className: "inline", children: "Create Folder" })
             ]
           }
         ),
-        /* @__PURE__ */ jsxs58(
+        /* @__PURE__ */ jsxs57(
           DropdownMenuItem,
           {
             onClick: () => setIsSearchModalOpen(true),
             className: "cursor-pointer",
             children: [
-              /* @__PURE__ */ jsx84(SearchIcon, { className: "size-5 text-gray-700 dark:text-zinc-300" }),
-              /* @__PURE__ */ jsx84("span", { className: "inline", children: "Search" })
+              /* @__PURE__ */ jsx83(SearchIcon, { className: "size-5 text-gray-700 dark:text-zinc-300" }),
+              /* @__PURE__ */ jsx83("span", { className: "inline", children: "Search" })
             ]
           }
         )
@@ -5757,11 +5724,11 @@ function ResponsiveHeaderActions() {
 }
 function ModalResponsiveHeaderActions({ onSearchClick }) {
   const { setIsUploadModalOpen, setIsCreateFolderModalOpen } = useFileManager();
-  return /* @__PURE__ */ jsxs58(Fragment3, { children: [
-    /* @__PURE__ */ jsxs58("div", { className: "hidden md:flex gap-2", children: [
-      /* @__PURE__ */ jsx84(UploadFileAction, {}),
-      /* @__PURE__ */ jsx84(CreateFolderAction, {}),
-      onSearchClick ? /* @__PURE__ */ jsxs58(
+  return /* @__PURE__ */ jsxs57(Fragment3, { children: [
+    /* @__PURE__ */ jsxs57("div", { className: "hidden md:flex gap-2", children: [
+      /* @__PURE__ */ jsx83(UploadFileAction, {}),
+      /* @__PURE__ */ jsx83(CreateFolderAction, {}),
+      onSearchClick ? /* @__PURE__ */ jsxs57(
         Button,
         {
           variant: "outline",
@@ -5770,54 +5737,54 @@ function ModalResponsiveHeaderActions({ onSearchClick }) {
           className: "border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900",
           onClick: onSearchClick,
           children: [
-            /* @__PURE__ */ jsx84(SearchIcon, { className: "size-5 text-gray-900 dark:text-zinc-100" }),
-            /* @__PURE__ */ jsx84("span", { className: "hidden", children: "Search" })
+            /* @__PURE__ */ jsx83(SearchIcon, { className: "size-5 text-gray-900 dark:text-zinc-100" }),
+            /* @__PURE__ */ jsx83("span", { className: "hidden", children: "Search" })
           ]
         }
       ) : null
     ] }),
-    /* @__PURE__ */ jsx84("div", { className: "flex md:hidden", children: /* @__PURE__ */ jsxs58(DropdownMenu, { children: [
-      /* @__PURE__ */ jsx84(DropdownMenuTrigger, { asChild: true, children: /* @__PURE__ */ jsx84(
+    /* @__PURE__ */ jsx83("div", { className: "flex md:hidden", children: /* @__PURE__ */ jsxs57(DropdownMenu, { children: [
+      /* @__PURE__ */ jsx83(DropdownMenuTrigger, { asChild: true, children: /* @__PURE__ */ jsx83(
         Button,
         {
           variant: "outline",
           size: "icon",
           radius: "full",
           className: "border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900",
-          children: /* @__PURE__ */ jsx84(MoveHorizontalIcon, { className: "size-5" })
+          children: /* @__PURE__ */ jsx83(MoveHorizontalIcon, { className: "size-5" })
         }
       ) }),
-      /* @__PURE__ */ jsxs58(DropdownMenuContent, { align: "end", className: "w-48", children: [
-        /* @__PURE__ */ jsxs58(
+      /* @__PURE__ */ jsxs57(DropdownMenuContent, { align: "end", className: "w-48", children: [
+        /* @__PURE__ */ jsxs57(
           DropdownMenuItem,
           {
             onClick: () => setIsUploadModalOpen(true),
             className: "cursor-pointer",
             children: [
-              /* @__PURE__ */ jsx84(PlusIcon, { className: "size-5 text-gray-900 dark:text-zinc-100" }),
-              /* @__PURE__ */ jsx84("span", { className: "inline", children: "Upload File" })
+              /* @__PURE__ */ jsx83(PlusIcon, { className: "size-5 text-gray-900 dark:text-zinc-100" }),
+              /* @__PURE__ */ jsx83("span", { className: "inline", children: "Upload File" })
             ]
           }
         ),
-        /* @__PURE__ */ jsxs58(
+        /* @__PURE__ */ jsxs57(
           DropdownMenuItem,
           {
             onClick: () => setIsCreateFolderModalOpen(true),
             className: "cursor-pointer",
             children: [
-              /* @__PURE__ */ jsx84(UploadFolderIcon, { className: "size-5 text-gray-900 dark:text-zinc-100" }),
-              /* @__PURE__ */ jsx84("span", { className: "inline", children: "Create Folder" })
+              /* @__PURE__ */ jsx83(UploadFolderIcon, { className: "size-5 text-gray-900 dark:text-zinc-100" }),
+              /* @__PURE__ */ jsx83("span", { className: "inline", children: "Create Folder" })
             ]
           }
         ),
-        onSearchClick ? /* @__PURE__ */ jsxs58(
+        onSearchClick ? /* @__PURE__ */ jsxs57(
           DropdownMenuItem,
           {
             onClick: onSearchClick,
             className: "cursor-pointer",
             children: [
-              /* @__PURE__ */ jsx84(SearchIcon, { className: "size-5 text-gray-700 dark:text-zinc-300" }),
-              /* @__PURE__ */ jsx84("span", { className: "inline", children: "Search" })
+              /* @__PURE__ */ jsx83(SearchIcon, { className: "size-5 text-gray-700 dark:text-zinc-300" }),
+              /* @__PURE__ */ jsx83("span", { className: "inline", children: "Search" })
             ]
           }
         ) : null
@@ -5831,18 +5798,18 @@ import React from "react";
 
 // components/ui/context-menu.tsx
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu";
-import { jsx as jsx85, jsxs as jsxs59 } from "react/jsx-runtime";
+import { jsx as jsx84, jsxs as jsxs58 } from "react/jsx-runtime";
 function ContextMenu(_a) {
   var props = __objRest(_a, []);
-  return /* @__PURE__ */ jsx85(ContextMenuPrimitive.Root, __spreadValues({ "data-slot": "context-menu" }, props));
+  return /* @__PURE__ */ jsx84(ContextMenuPrimitive.Root, __spreadValues({ "data-slot": "context-menu" }, props));
 }
 function ContextMenuTrigger(_a) {
   var props = __objRest(_a, []);
-  return /* @__PURE__ */ jsx85(ContextMenuPrimitive.Trigger, __spreadValues({ "data-slot": "context-menu-trigger" }, props));
+  return /* @__PURE__ */ jsx84(ContextMenuPrimitive.Trigger, __spreadValues({ "data-slot": "context-menu-trigger" }, props));
 }
 function ContextMenuContent(_a) {
   var _b = _a, { className } = _b, props = __objRest(_b, ["className"]);
-  return /* @__PURE__ */ jsx85(ContextMenuPrimitive.Portal, { children: /* @__PURE__ */ jsx85(
+  return /* @__PURE__ */ jsx84(ContextMenuPrimitive.Portal, { children: /* @__PURE__ */ jsx84(
     ContextMenuPrimitive.Content,
     __spreadValues({
       "data-slot": "context-menu-content",
@@ -5863,7 +5830,7 @@ function ContextMenuItem(_a) {
     "inset",
     "variant"
   ]);
-  return /* @__PURE__ */ jsx85(
+  return /* @__PURE__ */ jsx84(
     ContextMenuPrimitive.Item,
     __spreadValues({
       "data-slot": "context-menu-item",
@@ -5878,7 +5845,7 @@ function ContextMenuItem(_a) {
 }
 function ContextMenuSeparator(_a) {
   var _b = _a, { className } = _b, props = __objRest(_b, ["className"]);
-  return /* @__PURE__ */ jsx85(
+  return /* @__PURE__ */ jsx84(
     ContextMenuPrimitive.Separator,
     __spreadValues({
       "data-slot": "context-menu-separator",
@@ -5888,7 +5855,7 @@ function ContextMenuSeparator(_a) {
 }
 
 // components/cards/card-context-menu.tsx
-import { jsx as jsx86, jsxs as jsxs60 } from "react/jsx-runtime";
+import { jsx as jsx85, jsxs as jsxs59 } from "react/jsx-runtime";
 function CardContextMenu({
   children,
   menuItems,
@@ -5903,8 +5870,8 @@ function CardContextMenu({
       const MenuItemComponent = isDropdown ? DropdownMenuItem : ContextMenuItem;
       const SeparatorComponent = isDropdown ? DropdownMenuSeparator : ContextMenuSeparator;
       const nextItemIsDestructive = index < menuItems.length - 1 && menuItems[index + 1].variant === "destructive";
-      return /* @__PURE__ */ jsxs60(React.Fragment, { children: [
-        /* @__PURE__ */ jsxs60(
+      return /* @__PURE__ */ jsxs59(React.Fragment, { children: [
+        /* @__PURE__ */ jsxs59(
           MenuItemComponent,
           {
             onClick: item.onClick,
@@ -5915,40 +5882,40 @@ function CardContextMenu({
             ]
           }
         ),
-        nextItemIsDestructive && !isLast && /* @__PURE__ */ jsx86(SeparatorComponent, { className: "bg-gray-200 dark:bg-zinc-700" })
+        nextItemIsDestructive && !isLast && /* @__PURE__ */ jsx85(SeparatorComponent, { className: "bg-gray-200 dark:bg-zinc-700" })
       ] }, index);
     });
   };
-  return /* @__PURE__ */ jsxs60(ContextMenu, { children: [
-    /* @__PURE__ */ jsx86(ContextMenuTrigger, { children: /* @__PURE__ */ jsxs60("div", { className: "relative w-full h-full", children: [
+  return /* @__PURE__ */ jsxs59(ContextMenu, { children: [
+    /* @__PURE__ */ jsx85(ContextMenuTrigger, { children: /* @__PURE__ */ jsxs59("div", { className: "relative w-full h-full", children: [
       children,
-      shouldShowMenu && /* @__PURE__ */ jsx86(
+      shouldShowMenu && /* @__PURE__ */ jsx85(
         "div",
         {
           className: "absolute top-0 right-0 z-10 md:hidden",
           onClick: (e) => e.stopPropagation(),
-          children: /* @__PURE__ */ jsxs60(DropdownMenu, { children: [
-            /* @__PURE__ */ jsx86(DropdownMenuTrigger, { asChild: true, children: /* @__PURE__ */ jsx86(
+          children: /* @__PURE__ */ jsxs59(DropdownMenu, { children: [
+            /* @__PURE__ */ jsx85(DropdownMenuTrigger, { asChild: true, children: /* @__PURE__ */ jsx85(
               Button,
               {
                 variant: "ghost",
                 size: "icon",
                 radius: "full",
                 className: "focus-visible:ring-0 focus-visible:ring-offset-0",
-                children: /* @__PURE__ */ jsx86(MoveVerticalIcon, { className: "size-4 text-gray-700 dark:text-zinc-300" })
+                children: /* @__PURE__ */ jsx85(MoveVerticalIcon, { className: "size-4 text-gray-700 dark:text-zinc-300" })
               }
             ) }),
-            /* @__PURE__ */ jsx86(DropdownMenuContent, { className: "w-56 rounded-2xl shadow-xl bg-white/50 dark:bg-zinc-900/80 backdrop-blur-2xl border-gray-200 dark:border-zinc-700", children: renderMenuItems(true) })
+            /* @__PURE__ */ jsx85(DropdownMenuContent, { className: "w-56 rounded-2xl shadow-xl bg-white/50 dark:bg-zinc-900/80 backdrop-blur-2xl border-gray-200 dark:border-zinc-700", children: renderMenuItems(true) })
           ] })
         }
       )
     ] }) }),
-    shouldShowMenu && /* @__PURE__ */ jsx86(ContextMenuContent, { className: "w-56 rounded-2xl shadow-xl bg-white/50 dark:bg-zinc-900/80 backdrop-blur-2xl border-gray-200 dark:border-zinc-700", children: renderMenuItems(false) })
+    shouldShowMenu && /* @__PURE__ */ jsx85(ContextMenuContent, { className: "w-56 rounded-2xl shadow-xl bg-white/50 dark:bg-zinc-900/80 backdrop-blur-2xl border-gray-200 dark:border-zinc-700", children: renderMenuItems(false) })
   ] });
 }
 
 // components/cards/file-card.tsx
-import { jsx as jsx87, jsxs as jsxs61 } from "react/jsx-runtime";
+import { jsx as jsx86, jsxs as jsxs60 } from "react/jsx-runtime";
 function FileCard({
   file,
   isSelected,
@@ -5982,7 +5949,7 @@ function FileCard({
   const handleClick = (e) => {
     onSelect(file, e, false);
   };
-  const handleCheckboxChange = (checked) => {
+  const handleCheckboxChange = () => {
     onSelect(file, void 0, true);
   };
   const handleCheckboxClick = (e) => {
@@ -5994,45 +5961,45 @@ function FileCard({
   const menuItems = [
     {
       label: "Edit",
-      icon: /* @__PURE__ */ jsx87(EditIcon, { className: "size-6" }),
+      icon: /* @__PURE__ */ jsx86(EditIcon, { className: "size-6" }),
       onClick: handleEdit
     },
     {
       label: "Select File",
-      icon: /* @__PURE__ */ jsx87(SelectIcon, { className: "size-6" }),
+      icon: /* @__PURE__ */ jsx86(SelectIcon, { className: "size-6" }),
       onClick: handleSelectFile
     },
     {
       label: "Move to...",
-      icon: /* @__PURE__ */ jsx87(MoveIcon, { className: "size-6" }),
+      icon: /* @__PURE__ */ jsx86(MoveIcon, { className: "size-6" }),
       onClick: handleMove
     },
     {
       label: "Delete",
-      icon: /* @__PURE__ */ jsx87(TrashIcon, { className: "size-6 text-red-600" }),
+      icon: /* @__PURE__ */ jsx86(TrashIcon, { className: "size-6 text-red-600" }),
       onClick: handleDelete,
       variant: "destructive"
     }
   ];
-  return /* @__PURE__ */ jsx87(
+  return /* @__PURE__ */ jsx86(
     CardContextMenu,
     {
       menuItems,
       isInSelectionMode,
       mode,
-      children: /* @__PURE__ */ jsxs61(
+      children: /* @__PURE__ */ jsxs60(
         "div",
         {
           className: "group relative flex flex-col items-center justify-start transition-all duration-200 cursor-pointer w-full select-none",
           onDoubleClick: handleClick,
           onClick: handleClick,
           children: [
-            /* @__PURE__ */ jsxs61("div", { className: `
+            /* @__PURE__ */ jsxs60("div", { className: `
               relative w-full aspect-square flex items-center justify-center mb-1 overflow-hidden rounded-2xl hover:bg-accent/60
               ${isSelected ? "bg-accent/60" : ""}
           `, children: [
-              /* @__PURE__ */ jsx87("div", { className: "w-[75%] h-[75%] flex items-center justify-center", children: /* @__PURE__ */ jsx87(FilePreviewComponent, { file, metaData: file.metaData }) }),
-              (selectionMode === SELECTION_MODE.MULTIPLE || showCheckbox) && /* @__PURE__ */ jsx87("div", { className: `absolute top-2 left-2 z-10 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"} transition-opacity duration-200`, onClick: handleCheckboxClick, children: /* @__PURE__ */ jsx87(
+              /* @__PURE__ */ jsx86("div", { className: "w-[75%] h-[75%] flex items-center justify-center", children: /* @__PURE__ */ jsx86(FilePreviewComponent, { file, metaData: file.metaData }) }),
+              (selectionMode === SELECTION_MODE.MULTIPLE || showCheckbox) && /* @__PURE__ */ jsx86("div", { className: `absolute top-2 left-2 z-10 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"} transition-opacity duration-200`, onClick: handleCheckboxClick, children: /* @__PURE__ */ jsx86(
                 Checkbox,
                 {
                   checked: isSelected,
@@ -6041,14 +6008,14 @@ function FileCard({
                 }
               ) })
             ] }),
-            /* @__PURE__ */ jsxs61("div", { className: "w-full text-center px-0.5 flex flex-col items-center", children: [
-              /* @__PURE__ */ jsx87("span", { className: `
+            /* @__PURE__ */ jsxs60("div", { className: "w-full text-center px-0.5 flex flex-col items-center", children: [
+              /* @__PURE__ */ jsx86("span", { className: `
                   text-[13px] font-semibold leading-[1.3] tracking-tight line-clamp-2 px-2.5 py-[2px] rounded-[6px] transition-colors duration-100 wrap-break-word max-w-full
                   ${isSelected ? "bg-primary text-primary-foreground antialiased shadow-sm" : "text-foreground group-hover:text-foreground/80"}
               `, children: file.name }),
-              /* @__PURE__ */ jsxs61("div", { className: `flex flex-col items-center justify-center gap-0.5 mt-1 transition-opacity duration-200 ${isSelected ? "opacity-60" : "opacity-100"}`, children: [
-                /* @__PURE__ */ jsx87("span", { className: "text-[11px] text-primary font-medium tracking-tight", children: getFileSize(file.size) }),
-                FileMetadataComponent ? /* @__PURE__ */ jsx87("div", { className: "text-[11px] text-muted-foreground flex items-center scale-95", children: /* @__PURE__ */ jsx87(FileMetadataComponent, { file }) }) : null
+              /* @__PURE__ */ jsxs60("div", { className: `flex flex-col items-center justify-center gap-0.5 mt-1 transition-opacity duration-200 ${isSelected ? "opacity-60" : "opacity-100"}`, children: [
+                /* @__PURE__ */ jsx86("span", { className: "text-[11px] text-primary font-medium tracking-tight", children: getFileSize(file.size) }),
+                FileMetadataComponent ? /* @__PURE__ */ jsx86("div", { className: "text-[11px] text-muted-foreground flex items-center scale-95", children: /* @__PURE__ */ jsx86(FileMetadataComponent, { file }) }) : null
               ] })
             ] })
           ]
@@ -6059,12 +6026,11 @@ function FileCard({
 }
 
 // components/cards/folder-card.tsx
-import { jsx as jsx88, jsxs as jsxs62 } from "react/jsx-runtime";
+import { jsx as jsx87, jsxs as jsxs61 } from "react/jsx-runtime";
 function FolderCard({
   folder,
   isSelected,
   onSelect,
-  onRightClick,
   onDelete,
   onRename,
   onMove,
@@ -6096,7 +6062,7 @@ function FolderCard({
   const handleClick = (e) => {
     onSelect(folder, e, false);
   };
-  const handleCheckboxChange = (checked) => {
+  const handleCheckboxChange = () => {
     onSelect(folder, void 0, true);
   };
   const handleCheckboxClick = (e) => {
@@ -6105,45 +6071,45 @@ function FolderCard({
   const menuItems = [
     {
       label: "Rename",
-      icon: /* @__PURE__ */ jsx88(EditIcon, { className: "size-6" }),
+      icon: /* @__PURE__ */ jsx87(EditIcon, { className: "size-6" }),
       onClick: handleRename
     },
     {
       label: "Select Folder",
-      icon: /* @__PURE__ */ jsx88(SelectIcon, { className: "size-6" }),
+      icon: /* @__PURE__ */ jsx87(SelectIcon, { className: "size-6" }),
       onClick: handleSelectFolder
     },
     {
       label: "Move to...",
-      icon: /* @__PURE__ */ jsx88(MoveIcon, { className: "size-5 mr-1" }),
+      icon: /* @__PURE__ */ jsx87(MoveIcon, { className: "size-5 mr-1" }),
       onClick: handleMove
     },
     {
       label: "Delete",
-      icon: /* @__PURE__ */ jsx88(TrashIcon, { className: "size-5 mr-1 text-red-600" }),
+      icon: /* @__PURE__ */ jsx87(TrashIcon, { className: "size-5 mr-1 text-red-600" }),
       onClick: handleDelete,
       variant: "destructive"
     }
   ];
-  return /* @__PURE__ */ jsx88(
+  return /* @__PURE__ */ jsx87(
     CardContextMenu,
     {
       menuItems,
       isInSelectionMode,
       mode,
-      children: /* @__PURE__ */ jsxs62(
+      children: /* @__PURE__ */ jsxs61(
         "div",
         {
           className: "group relative flex flex-col items-center justify-start transition-all duration-200 cursor-pointer w-full select-none",
           onDoubleClick: handleClick,
           onClick: handleClick,
           children: [
-            /* @__PURE__ */ jsxs62("div", { className: `
+            /* @__PURE__ */ jsxs61("div", { className: `
               relative w-full aspect-square flex items-center justify-center mb-1 overflow-hidden rounded-2xl hover:bg-accent/60
               ${isSelected ? "bg-accent/60" : ""}
           `, children: [
-              /* @__PURE__ */ jsx88("div", { className: "w-[75%] h-[75%] flex items-center justify-center transform dark:brightness-[2]", children: /* @__PURE__ */ jsx88(FolderIcon, { className: "w-full h-full text-blue-400 fill-blue-400/20 drop-shadow-sm", strokeWidth: 1.5 }) }),
-              (selectionMode === SELECTION_MODE.MULTIPLE || showCheckbox) && /* @__PURE__ */ jsx88("div", { className: `absolute top-2 left-2 z-10 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"} transition-opacity duration-200`, onClick: handleCheckboxClick, children: /* @__PURE__ */ jsx88(
+              /* @__PURE__ */ jsx87("div", { className: "w-[75%] h-[75%] flex items-center justify-center transform dark:brightness-[2]", children: /* @__PURE__ */ jsx87(FolderIcon, { className: "w-full h-full text-blue-400 fill-blue-400/20 drop-shadow-sm", strokeWidth: 1.5 }) }),
+              (selectionMode === SELECTION_MODE.MULTIPLE || showCheckbox) && /* @__PURE__ */ jsx87("div", { className: `absolute top-2 left-2 z-10 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"} transition-opacity duration-200`, onClick: handleCheckboxClick, children: /* @__PURE__ */ jsx87(
                 Checkbox,
                 {
                   checked: isSelected,
@@ -6152,12 +6118,12 @@ function FolderCard({
                 }
               ) })
             ] }),
-            /* @__PURE__ */ jsxs62("div", { className: "w-full text-center px-0.5 flex flex-col items-center", children: [
-              /* @__PURE__ */ jsx88("span", { className: `
+            /* @__PURE__ */ jsxs61("div", { className: "w-full text-center px-0.5 flex flex-col items-center", children: [
+              /* @__PURE__ */ jsx87("span", { className: `
                   text-[13px] font-semibold leading-[1.3] tracking-tight line-clamp-2 px-2.5 pb-[2px] rounded-[6px] transition-colors duration-100 wrap-break-word max-w-full
                   ${isSelected ? "bg-primary text-primary-foreground antialiased shadow-sm" : "text-foreground group-hover:text-foreground/80"}
               `, children: folder.name }),
-              /* @__PURE__ */ jsx88("div", { className: `flex items-center justify-center gap-1 mt-1 transition-opacity duration-200 ${isSelected ? "opacity-60" : "opacity-100"}`, children: /* @__PURE__ */ jsxs62("span", { className: "text-[11px] text-primary font-medium tracking-tight px-1.5 rounded-full", children: [
+              /* @__PURE__ */ jsx87("div", { className: `flex items-center justify-center gap-1 mt-1 transition-opacity duration-200 ${isSelected ? "opacity-60" : "opacity-100"}`, children: /* @__PURE__ */ jsxs61("span", { className: "text-[11px] text-primary font-medium tracking-tight px-1.5 rounded-full", children: [
                 folder.fileCount,
                 " items"
               ] }) })
@@ -6170,7 +6136,7 @@ function FolderCard({
 }
 
 // components/grid/unified-grid.tsx
-import { jsx as jsx89, jsxs as jsxs63 } from "react/jsx-runtime";
+import { jsx as jsx88, jsxs as jsxs62 } from "react/jsx-runtime";
 function UnifiedGrid() {
   const {
     files,
@@ -6203,16 +6169,19 @@ function UnifiedGrid() {
   };
   const skeletonCount = getSkeletonCount();
   if (isLoading) {
-    return /* @__PURE__ */ jsx89("div", { className: "p-4 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 content-start", children: Array.from({ length: skeletonCount }).map((_, i) => /* @__PURE__ */ jsxs63("div", { className: "flex flex-col items-center justify-start w-full gap-2", children: [
-      /* @__PURE__ */ jsx89("div", { className: "w-full aspect-square bg-muted rounded-2xl animate-pulse" }),
-      /* @__PURE__ */ jsxs63("div", { className: "flex flex-col items-center gap-1 w-full", children: [
-        /* @__PURE__ */ jsx89("div", { className: "h-4 w-20 bg-muted rounded animate-pulse" }),
-        /* @__PURE__ */ jsx89("div", { className: "h-3 w-12 bg-muted rounded animate-pulse" })
-      ] })
-    ] }, i)) });
+    return /* @__PURE__ */ jsx88("div", { className: "p-4 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 content-start", children: Array.from({ length: skeletonCount }).map((_, i) => {
+      var _a;
+      return /* @__PURE__ */ jsxs62("div", { className: "flex flex-col items-center justify-start w-full gap-2", children: [
+        /* @__PURE__ */ jsx88("div", { className: "w-full aspect-square bg-muted rounded-2xl animate-pulse" }),
+        /* @__PURE__ */ jsxs62("div", { className: "flex flex-col items-center gap-1 w-full", children: [
+          /* @__PURE__ */ jsx88("div", { className: "h-4 w-20 bg-muted rounded animate-pulse" }),
+          /* @__PURE__ */ jsx88("div", { className: "h-3 w-12 bg-muted rounded animate-pulse" })
+        ] })
+      ] }, `skeleton-${(_a = currentFolder == null ? void 0 : currentFolder.id) != null ? _a : "root"}-${i}`);
+    }) });
   }
-  return /* @__PURE__ */ jsxs63("div", { className: "p-4 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 content-start", children: [
-    folders.map((folder) => /* @__PURE__ */ jsx89(
+  return /* @__PURE__ */ jsxs62("div", { className: "p-4 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 content-start", children: [
+    folders.map((folder) => /* @__PURE__ */ jsx88(
       FolderCard,
       {
         folder,
@@ -6234,7 +6203,7 @@ function UnifiedGrid() {
       },
       folder.id
     )),
-    files.map((file) => /* @__PURE__ */ jsx89(
+    files.map((file) => /* @__PURE__ */ jsx88(
       FileCard,
       {
         file,
@@ -6260,12 +6229,12 @@ function UnifiedGrid() {
 
 // components/error-boundary.tsx
 import { Component } from "react";
-import { jsx as jsx90, jsxs as jsxs64 } from "react/jsx-runtime";
+import { jsx as jsx89, jsxs as jsxs63 } from "react/jsx-runtime";
 var FileManagerErrorBoundary = class extends Component {
   constructor(props) {
     super(props);
     this.handleReset = () => {
-      window.location.reload();
+      globalThis.location.reload();
     };
     this.state = {
       hasError: false,
@@ -6286,16 +6255,16 @@ var FileManagerErrorBoundary = class extends Component {
       if (this.props.fallback) {
         return this.props.fallback;
       }
-      return /* @__PURE__ */ jsx90("div", { className: "flex items-center justify-center min-h-[400px] p-8 w-full h-full bg-slate-50/50 rounded-lg border border-dashed border-slate-200", children: /* @__PURE__ */ jsxs64("div", { className: "text-center max-w-md flex flex-col items-center", children: [
-        /* @__PURE__ */ jsx90("div", { className: "bg-red-100 p-3 rounded-full mb-4", children: /* @__PURE__ */ jsx90(AlertCircleIcon, { className: "size-8 text-red-600" }) }),
-        /* @__PURE__ */ jsx90("h2", { className: "text-xl font-semibold text-slate-900 mb-2", children: "Something went wrong" }),
-        /* @__PURE__ */ jsx90("p", { className: "text-sm text-slate-500 mb-6", children: "The file manager encountered an unexpected error. Refreshing the page usually resolves this issue." }),
-        this.state.error && /* @__PURE__ */ jsxs64("details", { className: "mb-6 text-left w-full border border-slate-200 rounded-lg overflow-hidden flex-col group", children: [
-          /* @__PURE__ */ jsx90("summary", { className: "cursor-pointer text-xs font-mono bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 transition-colors", children: "View Technical Details" }),
-          /* @__PURE__ */ jsx90("div", { className: "p-3 bg-white dark:bg-zinc-900", children: /* @__PURE__ */ jsx90("pre", { className: "text-[10px] text-slate-600 font-mono whitespace-pre-wrap word-break-all max-h-40 overflow-auto", children: this.state.error.toString() }) })
+      return /* @__PURE__ */ jsx89("div", { className: "flex items-center justify-center min-h-[400px] p-8 w-full h-full bg-slate-50/50 rounded-lg border border-dashed border-slate-200", children: /* @__PURE__ */ jsxs63("div", { className: "text-center max-w-md flex flex-col items-center", children: [
+        /* @__PURE__ */ jsx89("div", { className: "bg-red-100 p-3 rounded-full mb-4", children: /* @__PURE__ */ jsx89(AlertCircleIcon, { className: "size-8 text-red-600" }) }),
+        /* @__PURE__ */ jsx89("h2", { className: "text-xl font-semibold text-slate-900 mb-2", children: "Something went wrong" }),
+        /* @__PURE__ */ jsx89("p", { className: "text-sm text-slate-500 mb-6", children: "The file manager encountered an unexpected error. Refreshing the page usually resolves this issue." }),
+        this.state.error && /* @__PURE__ */ jsxs63("details", { className: "mb-6 text-left w-full border border-slate-200 rounded-lg overflow-hidden flex-col group", children: [
+          /* @__PURE__ */ jsx89("summary", { className: "cursor-pointer text-xs font-mono bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 transition-colors", children: "View Technical Details" }),
+          /* @__PURE__ */ jsx89("div", { className: "p-3 bg-white dark:bg-zinc-900", children: /* @__PURE__ */ jsx89("pre", { className: "text-[10px] text-slate-600 font-mono whitespace-pre-wrap word-break-all max-h-40 overflow-auto", children: this.state.error.toString() }) })
         ] }),
-        /* @__PURE__ */ jsxs64(Button, { onClick: this.handleReset, radius: "full", className: "gap-2", children: [
-          /* @__PURE__ */ jsx90(RefreshCwIcon, { className: "size-4" }),
+        /* @__PURE__ */ jsxs63(Button, { onClick: this.handleReset, radius: "full", className: "gap-2", children: [
+          /* @__PURE__ */ jsx89(RefreshCwIcon, { className: "size-4" }),
           "Reload Application"
         ] })
       ] }) });
@@ -6305,7 +6274,7 @@ var FileManagerErrorBoundary = class extends Component {
 };
 
 // components/keyboard-shortcuts.tsx
-import { useEffect as useEffect9 } from "react";
+import { useEffect as useEffect8 } from "react";
 function KeyboardShortcuts() {
   const {
     handleSelectAllGlobal,
@@ -6318,7 +6287,7 @@ function KeyboardShortcuts() {
     isSearchModalOpen,
     setIsSearchModalOpen
   } = useFileManager();
-  useEffect9(() => {
+  useEffect8(() => {
     const handleKeyDown = (e) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -6349,28 +6318,28 @@ function KeyboardShortcuts() {
 }
 
 // components/file-manager.tsx
-import { jsx as jsx91, jsxs as jsxs65 } from "react/jsx-runtime";
+import { jsx as jsx90, jsxs as jsxs64 } from "react/jsx-runtime";
 function FileManager(props) {
-  return /* @__PURE__ */ jsx91(FileManagerErrorBoundary, { children: /* @__PURE__ */ jsxs65(FileManagerComposition.Page, __spreadProps(__spreadValues({}, props), { children: [
-    /* @__PURE__ */ jsx91(KeyboardShortcuts, {}),
-    /* @__PURE__ */ jsxs65("div", { className: "flex h-full relative pb-12 overflow-hidden", children: [
-      /* @__PURE__ */ jsxs65("div", { className: "flex-1 flex w-full flex-col", children: [
-        /* @__PURE__ */ jsx91(FileManagerComposition.Header, { children: /* @__PURE__ */ jsxs65("div", { className: "flex w-full justify-between gap-2", children: [
-          /* @__PURE__ */ jsx91(HeaderNavigation, {}),
-          /* @__PURE__ */ jsx91(ResponsiveHeaderActions, {})
+  return /* @__PURE__ */ jsx90(FileManagerErrorBoundary, { children: /* @__PURE__ */ jsxs64(FileManagerComposition.Page, __spreadProps(__spreadValues({}, props), { children: [
+    /* @__PURE__ */ jsx90(KeyboardShortcuts, {}),
+    /* @__PURE__ */ jsxs64("div", { className: "flex h-full relative pb-12 overflow-hidden bg-background text-foreground", children: [
+      /* @__PURE__ */ jsxs64("div", { className: "flex-1 flex w-full flex-col", children: [
+        /* @__PURE__ */ jsx90(FileManagerComposition.Header, { children: /* @__PURE__ */ jsxs64("div", { className: "flex w-full justify-between gap-2", children: [
+          /* @__PURE__ */ jsx90(HeaderNavigation, {}),
+          /* @__PURE__ */ jsx90(ResponsiveHeaderActions, {})
         ] }) }),
-        /* @__PURE__ */ jsx91(BulkActionsFloating, { className: "-mb-1" }),
-        /* @__PURE__ */ jsx91(UnifiedGrid, {}),
-        /* @__PURE__ */ jsx91(FileManagerComposition.Footer, { className: "pt-6 pb-10" })
+        /* @__PURE__ */ jsx90(BulkActionsFloating, { className: "-mb-1" }),
+        /* @__PURE__ */ jsx90(UnifiedGrid, {}),
+        /* @__PURE__ */ jsx90(FileManagerComposition.Footer, { className: "pt-6 pb-10" })
       ] }),
-      /* @__PURE__ */ jsx91(FileManagerComposition.Overlays, {})
+      /* @__PURE__ */ jsx90(FileManagerComposition.Overlays, {})
     ] })
   ] })) });
 }
 
 // components/file-manager-modal.tsx
-import { useState as useState17, useRef as useRef4, useEffect as useEffect10 } from "react";
-import { Fragment as Fragment4, jsx as jsx92, jsxs as jsxs66 } from "react/jsx-runtime";
+import { useState as useState17, useRef as useRef5, useEffect as useEffect9 } from "react";
+import { Fragment as Fragment4, jsx as jsx91, jsxs as jsxs65 } from "react/jsx-runtime";
 function FileManagerModal(_a) {
   var _b = _a, {
     open,
@@ -6379,29 +6348,29 @@ function FileManagerModal(_a) {
     "open",
     "onClose"
   ]);
-  return /* @__PURE__ */ jsx92(FileManagerComposition.Modal, __spreadProps(__spreadValues({}, props), { onClose, children: /* @__PURE__ */ jsx92(Dialog, { open, onOpenChange: onClose, children: /* @__PURE__ */ jsx92(ModalContent, { onClose }) }) }));
+  return /* @__PURE__ */ jsx91(FileManagerComposition.Modal, __spreadProps(__spreadValues({}, props), { onClose, children: /* @__PURE__ */ jsx91(Dialog, { open, onOpenChange: onClose, children: /* @__PURE__ */ jsx91(ModalContent, { onClose }) }) }));
 }
 function ModalContent({ onClose }) {
   const { updateSearchQuery } = useFileManager();
   const [isSearchActive, setIsSearchActive] = useState17(false);
   const [searchInput, setSearchInput] = useState17("");
-  const searchInputRef = useRef4(null);
+  const searchInputRef = useRef5(null);
   const debouncedSearch = useDebouncedValue(searchInput, 300);
-  useEffect10(() => {
+  useEffect9(() => {
     updateSearchQuery(debouncedSearch);
   }, [debouncedSearch, updateSearchQuery]);
-  useEffect10(() => {
+  useEffect9(() => {
     if (isSearchActive && searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [isSearchActive]);
-  return /* @__PURE__ */ jsxs66(DialogContent, { className: "p-0", variant: "fullscreen", showCloseButton: false, children: [
-    /* @__PURE__ */ jsxs66(DialogHeader, { className: "pt-5 pb-3 m-0 border-b border-border", children: [
-      /* @__PURE__ */ jsx92(DialogTitle, { className: "px-6 text-base", children: /* @__PURE__ */ jsx92("div", { className: "flex w-full justify-between gap-2", children: isSearchActive ? (
+  return /* @__PURE__ */ jsxs65(DialogContent, { className: "p-0", variant: "fullscreen", showCloseButton: false, children: [
+    /* @__PURE__ */ jsxs65(DialogHeader, { className: "pt-5 pb-3 m-0 border-b border-border", children: [
+      /* @__PURE__ */ jsx91(DialogTitle, { className: "px-6 text-base", children: /* @__PURE__ */ jsx91("div", { className: "flex w-full justify-between gap-2", children: isSearchActive ? (
         /* Inline Search Mode */
-        /* @__PURE__ */ jsxs66("div", { className: "flex items-center gap-4 flex-1", children: [
-          /* @__PURE__ */ jsx92(SearchIcon, { className: "size-5 text-gray-500 shrink-0" }),
-          /* @__PURE__ */ jsx92(
+        /* @__PURE__ */ jsxs65("div", { className: "flex items-center gap-4 flex-1", children: [
+          /* @__PURE__ */ jsx91(SearchIcon, { className: "size-5 text-gray-500 shrink-0" }),
+          /* @__PURE__ */ jsx91(
             Input,
             {
               ref: searchInputRef,
@@ -6419,7 +6388,7 @@ function ModalContent({ onClose }) {
               }
             }
           ),
-          /* @__PURE__ */ jsx92(
+          /* @__PURE__ */ jsx91(
             CloseButton,
             {
               onClick: () => {
@@ -6434,20 +6403,20 @@ function ModalContent({ onClose }) {
         ] })
       ) : (
         /* Normal Header Mode */
-        /* @__PURE__ */ jsxs66(Fragment4, { children: [
-          /* @__PURE__ */ jsx92(HeaderNavigation, {}),
-          /* @__PURE__ */ jsx92(ModalResponsiveHeaderActions, { onSearchClick: () => setIsSearchActive(true) }),
-          /* @__PURE__ */ jsx92(CloseButton, { onClick: onClose })
+        /* @__PURE__ */ jsxs65(Fragment4, { children: [
+          /* @__PURE__ */ jsx91(HeaderNavigation, {}),
+          /* @__PURE__ */ jsx91(ModalResponsiveHeaderActions, { onSearchClick: () => setIsSearchActive(true) }),
+          /* @__PURE__ */ jsx91(CloseButton, { onClick: onClose })
         ] })
       ) }) }),
-      /* @__PURE__ */ jsx92(DialogDescription, { className: "sr-only", children: "Browse and select files from your media library" })
+      /* @__PURE__ */ jsx91(DialogDescription, { className: "sr-only", children: "Browse and select files from your media library" })
     ] }),
-    /* @__PURE__ */ jsxs66("div", { className: "overflow-y-auto flex-1 pb-4", children: [
-      /* @__PURE__ */ jsx92(UnifiedGrid, {}),
-      /* @__PURE__ */ jsx92(FileManagerComposition.Footer, { className: "my-4" }),
-      /* @__PURE__ */ jsx92(FileManagerComposition.Overlays, {})
+    /* @__PURE__ */ jsxs65("div", { className: "overflow-y-auto flex-1 pb-4", children: [
+      /* @__PURE__ */ jsx91(UnifiedGrid, {}),
+      /* @__PURE__ */ jsx91(FileManagerComposition.Footer, { className: "my-4" }),
+      /* @__PURE__ */ jsx91(FileManagerComposition.Overlays, {})
     ] }),
-    /* @__PURE__ */ jsx92(FileManagerModalFooter, { onClose })
+    /* @__PURE__ */ jsx91(FileManagerModalFooter, { onClose })
   ] });
 }
 function FileManagerModalFooter({ onClose }) {
@@ -6469,10 +6438,10 @@ function FileManagerModalFooter({ onClose }) {
       onClose();
     }
   };
-  return /* @__PURE__ */ jsxs66(DialogFooter, { className: "px-6 py-4 border-t border-border w-full sm:justify-between justify-center items-center flex-col sm:flex-row gap-2", children: [
-    /* @__PURE__ */ jsx92(BulkActionsStatic, {}),
-    /* @__PURE__ */ jsx92(DialogClose, { asChild: true, children: /* @__PURE__ */ jsx92(Button, { type: "button", variant: "outline", onClick: onClose, radius: "full", className: "w-full md:w-auto mr-0", children: "Cancel" }) }),
-    /* @__PURE__ */ jsxs66(
+  return /* @__PURE__ */ jsxs65(DialogFooter, { className: "px-6 py-4 border-t border-border w-full sm:justify-between justify-center items-center flex-col sm:flex-row gap-2", children: [
+    /* @__PURE__ */ jsx91(BulkActionsStatic, {}),
+    /* @__PURE__ */ jsx91(DialogClose, { asChild: true, children: /* @__PURE__ */ jsx91(Button, { type: "button", variant: "outline", onClick: onClose, radius: "full", className: "w-full md:w-auto mr-0", children: "Cancel" }) }),
+    /* @__PURE__ */ jsxs65(
       Button,
       {
         type: "button",
@@ -7473,15 +7442,15 @@ var MockProvider = class {
   }
   async getFolders(folderId, page = 1, limit = 20, query = "") {
     await delay(300);
-    const filteredFolders = folderId !== null ? mockFolders.filter((folder) => folder.parentId === folderId) : mockFolders.filter((folder) => folder.parentId === null);
+    const filteredFolders = folderId === null ? mockFolders.filter((folder) => folder.parentId === null) : mockFolders.filter((folder) => folder.parentId === folderId);
     let searchFiltered = filteredFolders;
-    if (query && query.trim()) {
+    if (query == null ? void 0 : query.trim()) {
       const searchLower = query.toLowerCase().trim();
       searchFiltered = filteredFolders.filter(
         (folder) => folder.name.toLowerCase().includes(searchLower)
       );
     }
-    const sortedFolders = searchFiltered.sort(
+    const sortedFolders = searchFiltered.toSorted(
       (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
     const totalFolders = sortedFolders.length;
@@ -7521,7 +7490,7 @@ var MockProvider = class {
         (file) => file.name.toLowerCase().includes(searchLower)
       );
     }
-    const sortedFiles = filteredFiles.sort(
+    const sortedFiles = filteredFiles.toSorted(
       (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
     const currentPage = page != null ? page : 1;
@@ -7533,7 +7502,7 @@ var MockProvider = class {
       startIndex,
       startIndex + filesPerPage
     );
-    return Promise.resolve({
+    return {
       files: paginatedFiles,
       pagination: {
         currentPage,
@@ -7541,7 +7510,7 @@ var MockProvider = class {
         totalFiles,
         filesPerPage
       }
-    });
+    };
   }
   /**
    * Get files and folders separately (folders always come first)
@@ -7550,15 +7519,15 @@ var MockProvider = class {
    */
   async getItems(folderId, fileTypes, page = 1, limit = 24, query = "") {
     await delay(300);
-    let filteredFolders = folderId !== null ? mockFolders.filter((folder) => folder.parentId === folderId) : mockFolders.filter((folder) => folder.parentId === null);
-    let filteredFiles = folderId !== null ? mockFiles.filter((file) => file.folderId === folderId) : mockFiles.filter((file) => file.folderId === null);
+    let filteredFolders = folderId === null ? mockFolders.filter((folder) => folder.parentId === null) : mockFolders.filter((folder) => folder.parentId === folderId);
+    let filteredFiles = folderId === null ? mockFiles.filter((file) => file.folderId === null) : mockFiles.filter((file) => file.folderId === folderId);
     if (fileTypes && fileTypes.length > 0) {
       filteredFiles = filteredFiles.filter((file) => {
         const fileType = getFileTypeFromMime(file.mime, file.ext);
         return fileTypes.includes(fileType);
       });
     }
-    if (query && query.trim()) {
+    if (query == null ? void 0 : query.trim()) {
       const searchLower = query.toLowerCase().trim();
       filteredFolders = filteredFolders.filter(
         (folder) => folder.name.toLowerCase().includes(searchLower)
@@ -7570,10 +7539,10 @@ var MockProvider = class {
         }
       );
     }
-    const sortedFolders = filteredFolders.sort(
+    const sortedFolders = filteredFolders.toSorted(
       (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
-    const sortedFiles = filteredFiles.sort(
+    const sortedFiles = filteredFiles.toSorted(
       (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
     const totalItems = sortedFolders.length + sortedFiles.length;
@@ -7586,7 +7555,6 @@ var MockProvider = class {
     );
     const foldersTaken = foldersToShow.length;
     const fileSlots = limit - foldersTaken;
-    const foldersOnPreviousPages = Math.min(sortedFolders.length, startIndex);
     const fileStartIndex = Math.max(0, startIndex - sortedFolders.length);
     const filesToShow = sortedFiles.slice(fileStartIndex, fileStartIndex + fileSlots);
     return {
@@ -7620,12 +7588,7 @@ var MockProvider = class {
   }
   getMetaDataType(file, videoSource) {
     if (file.type.startsWith("image/")) {
-      return {
-        // Dimensions would normally require reading the image
-        // dimensions: { width: 0, height: 0 },
-        // altText: "",
-        // caption: "",
-      };
+      return {};
     } else if (file.type.startsWith("video/")) {
       return {
         duration: 0,

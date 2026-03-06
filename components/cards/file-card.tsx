@@ -15,21 +15,20 @@ import SelectIcon from "../icons/select";
 
 
 interface FileCardProps {
-  file: FileMetaData;
-  isSelected: boolean;
-  onSelect: (
+  readonly file: FileMetaData;
+  readonly isSelected: boolean;
+  readonly onSelect: (
     file: FileMetaData,
     event?: React.MouseEvent,
     isCheckboxClick?: boolean
   ) => void;
-  onRightClick?: (file: FileMetaData, event: React.MouseEvent) => void;
-  onDelete: (fileId: string | number) => void;
-  onEdit: (file: FileMetaData) => void;
-  onMove: (file: FileMetaData) => void;
-  selectionMode: SelectionMode;
-  showCheckbox?: boolean;
-  mode?: Mode;
-  isInSelectionMode?: boolean;
+  readonly onDelete: (fileId: string | number) => void;
+  readonly onEdit: (file: FileMetaData) => void;
+  readonly onMove: (file: FileMetaData) => void;
+  readonly selectionMode: SelectionMode;
+  readonly showCheckbox?: boolean;
+  readonly mode?: Mode;
+  readonly isInSelectionMode?: boolean;
 }
 
 export function FileCard({
@@ -71,7 +70,7 @@ export function FileCard({
     onSelect(file, e, false); // false = not checkbox click
   };
 
-  const handleCheckboxChange = (checked: boolean | string) => {
+  const handleCheckboxChange = () => {
     onSelect(file, undefined, true); // true = checkbox click
   };
 

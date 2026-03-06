@@ -3,9 +3,9 @@ import { getIconType, Icons } from "@/lib/file-utils";
 /** Props for the DocumentCard component. */
 interface DocumentCardProps {
     /** The document file metadata to display. */
-    file: FileMetaData;
+    readonly file: FileMetaData;
     /** Optional CSS class names to apply to the root SVG icon. */
-    className?: string;
+    readonly className?: string;
 }
 
 /**
@@ -40,7 +40,7 @@ export function DocumentCard({ file, className }: DocumentCardProps) {
  * Renders document-specific metadata in the grid card footer.
  * Displays the total page count if available from the backend.
  */
-export function DocumentCardMetadata({ file }: { file: FileMetaData }) {
+export function DocumentCardMetadata({ file }: { readonly file: FileMetaData }) {
     if (!file.metaData?.pageCount) return null;
     return (
         <p className="text-xs text-primary mb-2">

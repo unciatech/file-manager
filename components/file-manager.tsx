@@ -9,13 +9,13 @@ import { UnifiedGrid } from "./grid/unified-grid";
 import { FileManagerErrorBoundary } from "./error-boundary";
 import { KeyboardShortcuts } from "./keyboard-shortcuts";
 
-export function FileManager(props: FileManagerPageProps) {
+export function FileManager(props: Readonly<FileManagerPageProps>) {
   return (
     <FileManagerErrorBoundary>
       <FileManagerComposition.Page {...props}>
         {/* Keyboard shortcuts - must be inside provider */}
         <KeyboardShortcuts />
-        <div className="flex h-full relative pb-12 overflow-hidden">
+        <div className="flex h-full relative pb-12 overflow-hidden bg-background text-foreground">
           {/* Main Content */}
           <div className="flex-1 flex w-full flex-col">
             <FileManagerComposition.Header>

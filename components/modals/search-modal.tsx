@@ -100,7 +100,7 @@ export default function SearchDialog() {
               <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
                 <SearchIcon className="size-12 text-gray-300 dark:text-zinc-600 mb-3" />
                 <p className="text-sm font-medium text-gray-900 dark:text-zinc-100 mb-1">Search your files and folders</p>
-                <p className="text-xs text-gray-500 dark:text-zinc-400">Start typing to find what you're looking for</p>
+                <p className="text-xs text-gray-500 dark:text-zinc-400">Start typing to find what you&apos;re looking for</p>
                 <p className="text-xs text-gray-500 dark:text-zinc-400 mt-2">
                   <KbdGroup>
                     <Kbd><span className="text-lg">⌘</span> + K</Kbd>

@@ -19,7 +19,7 @@ export function FileManagerModal({
   open,
   onClose,
   ...props
-}: FileManagerModalProps) {
+}: Readonly<FileManagerModalProps>) {
   return (
     <FileManagerComposition.Modal {...props} onClose={onClose}>
       <Dialog open={open} onOpenChange={onClose}>
@@ -29,7 +29,7 @@ export function FileManagerModal({
   );
 }
 
-function ModalContent({ onClose }: { onClose: () => void }) {
+function ModalContent({ onClose }: Readonly<{ onClose: () => void }>) {
   const { updateSearchQuery } = useFileManager();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchInput, setSearchInput] = useState("");
@@ -110,7 +110,7 @@ function ModalContent({ onClose }: { onClose: () => void }) {
   );
 }
 
-function FileManagerModalFooter({ onClose }: { onClose: () => void }) {
+function FileManagerModalFooter({ onClose }: Readonly<{ onClose: () => void }>) {
   const { 
     selectedFiles, 
     onFilesSelected, 
