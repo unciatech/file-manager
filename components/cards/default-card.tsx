@@ -2,7 +2,7 @@ import { FileMetaData } from "@/types/file-manager";
 import { getIconType, Icons } from "@/lib/file-utils";
 
 interface DefaultCardProps {
-    file: FileMetaData;
+    readonly file: FileMetaData;
 }
 
 export function DefaultCard({ file }: DefaultCardProps) {

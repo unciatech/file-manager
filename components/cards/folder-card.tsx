@@ -14,28 +14,26 @@ import SelectIcon from "../icons/select";
 
 
 interface FolderCardProps {
-  folder: Folder;
-  isSelected: boolean;
-  onSelect: (
+  readonly folder: Folder;
+  readonly isSelected: boolean;
+  readonly onSelect: (
     folder: Folder,
     event?: React.MouseEvent,
     isCheckboxClick?: boolean
   ) => void;
-  onRightClick?: (folder: Folder, event: React.MouseEvent) => void;
-  onDelete: (folderId: FolderId) => void;
-  onRename: (folder: Folder) => void;
-  onMove: (folder: Folder) => void;
-  selectionMode: SelectionMode;
-  showCheckbox?: boolean;
-  mode?: Mode;
-  isInSelectionMode?: boolean;
+  readonly onDelete: (folderId: FolderId) => void;
+  readonly onRename: (folder: Folder) => void;
+  readonly onMove: (folder: Folder) => void;
+  readonly selectionMode: SelectionMode;
+  readonly showCheckbox?: boolean;
+  readonly mode?: Mode;
+  readonly isInSelectionMode?: boolean;
 }
 
 export function FolderCard({
   folder,
   isSelected,
   onSelect,
-  onRightClick,
   onDelete,
   onRename,
   onMove,
@@ -72,7 +70,7 @@ export function FolderCard({
     onSelect(folder, e, false); // false = not checkbox click
   };
 
-  const handleCheckboxChange = (checked: boolean | string) => {
+  const handleCheckboxChange = () => {
     onSelect(folder, undefined, true); // true = checkbox click
   };
 

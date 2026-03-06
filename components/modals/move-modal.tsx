@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useFileManager } from "@/context/file-manager-context";
 import {
   Dialog,
@@ -22,7 +22,6 @@ import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 type FolderTreeState = {
   folders: Map<FolderId, Folder[]>; // parentId -> children
   // IDs currently fetching data (including null for root)
-  // We can track which page is loading if needed, but simple boolean per folderId is often enough
   loading: Set<FolderId>; 
   loaded: Set<FolderId>;
   // Store pagination info per folderId (parentId)
@@ -37,12 +36,12 @@ function FolderTreeItem({
   disabledFolderIds = [],
   treeState
 }: {
-  folder: Folder;
-  selectedFolderId: FolderId | undefined;
-  onSelect: (folderId: FolderId) => void;
-  onLoadChildren: (folderId: FolderId, page?: number) => Promise<void>;
-  disabledFolderIds?: FolderId[];
-  treeState: FolderTreeState;
+  readonly folder: Folder;
+  readonly selectedFolderId: FolderId | undefined;
+  readonly onSelect: (folderId: FolderId) => void;
+  readonly onLoadChildren: (folderId: FolderId, page?: number) => Promise<void>;
+  readonly disabledFolderIds?: FolderId[];
+  readonly treeState: FolderTreeState;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const hasChildren = (folder.folderCount ?? 0) > 0;
@@ -68,7 +67,6 @@ function FolderTreeItem({
     }
   }, [entry?.isIntersecting, hasMore, isLoading, isOpen, pagination, folder.id, onLoadChildren]);
 
-
   const handleToggle = async () => {
     if (!hasChildren) return;
 
@@ -87,8 +85,19 @@ function FolderTreeItem({
     }
   };
 
+  const selectedClassName = 'bg-blue-100 text-blue-600 dark:text-blue-400 font-semibold';
+  const disabledClassName = 'opacity-50 cursor-not-allowed';
+  const defaultClassName = 'hover:bg-gray-100 dark:hover:bg-zinc-700';
+
+  let buttonClassName = defaultClassName;
+  if (isSelected) {
+    buttonClassName = selectedClassName;
+  } else if (isDisabled) {
+    buttonClassName = disabledClassName;
+  }
+
   return (
-    <li >
+    <li>
       <div className="flex items-center gap-1.5 py-1">
         {hasChildren ? (
           <button
@@ -108,12 +117,7 @@ function FolderTreeItem({
           onClick={handleSelect}
           disabled={isDisabled}
           title={folder.name}
-          className={`flex items-center gap-1.5 px-2 py-1 rounded-xl flex-1 text-left transition-colors min-w-0 ${isSelected
-              ? 'bg-blue-100 text-blue-600 dark:text-blue-400 font-semibold'
-              : isDisabled
-                ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-gray-100 dark:hover:bg-zinc-700'
-            }`}
+          className={`flex items-center gap-1.5 px-2 py-1 rounded-xl flex-1 text-left transition-colors min-w-0 ${buttonClassName}`}
         >
           <FolderIcon className="size-8 text-white shrink-0" strokeWidth={1.5} />
           <div className="flex flex-col gap-1">
@@ -175,6 +179,10 @@ export function MoveModal() {
     loaded: new Set(),
     pagination: new Map()
   });
+
+  // Refs to prevent dependency loops and race conditions
+  const fetchingRef = useRef<Set<FolderId>>(new Set());
+  const hasInitializedRef = useRef(false);
   
   // Intersection Observer for Root list infinite scroll
   const { ref: rootObserverRef, entry: rootEntry } = useIntersectionObserver({
@@ -186,40 +194,23 @@ export function MoveModal() {
   const rootHasMore = rootPagination && rootPagination.currentPage < rootPagination.totalPages;
   const isRootLoading = treeState.loading.has(null);
 
-  // Get list of folder IDs that should be disabled (can't move into themselves or their children)
+  // Get list of folder IDs that should be disabled
   const disabledFolderIds = selectedFolders.map(f => f.id);
-
-  // Get root folders from tree state
   const rootFolders = treeState.folders.get(null) || [];
 
-  // Load root folders when modal opens
-  useEffect(() => {
-    if (isMoveFileModalOpen && !treeState.loaded.has(null) && !treeState.loading.has(null)) {
-      loadFolders(null, 1);
-    }
-  }, [isMoveFileModalOpen]);
+  // loadFolders no longer depends on treeState, avoiding the cascade entirely
+  const loadFolders = useCallback(async (folderId: FolderId, page: number = 1) => {
+    // Prevent duplicate loading using our mutable ref
+    if (fetchingRef.current.has(folderId)) return;
+    fetchingRef.current.add(folderId);
 
-   // Trigger load more for root
-   useEffect(() => {
-    if (isMoveFileModalOpen && rootEntry?.isIntersecting && rootHasMore && !isRootLoading) {
-        const nextPage = (rootPagination?.currentPage || 1) + 1;
-        loadFolders(null, nextPage);
-    }
-  }, [rootEntry?.isIntersecting, rootHasMore, isRootLoading, rootPagination, isMoveFileModalOpen]);
-
-
-  const loadFolders = async (folderId: FolderId, page: number = 1) => {
-    // Prevent duplicate loading
-    if (treeState.loading.has(folderId)) return;
-
-    // Mark as loading
+    // Update UI loading state
     setTreeState(prev => ({
       ...prev,
       loading: new Set(prev.loading).add(folderId)
     }));
 
     try {
-      // Assuming 20 items per page for the modal list to be performant but substantial
       const result = await provider.getFolders(folderId, page, 20);
 
       setTreeState(prev => {
@@ -232,7 +223,6 @@ export function MoveModal() {
         const newFolders = new Map(prev.folders);
         const existingFolders = newFolders.get(folderId) || [];
         
-        // Append if page > 1, otherwise replace (shouldn't really happen with this logic but safer)
         if (page > 1) {
             newFolders.set(folderId, [...existingFolders, ...result.folders]);
         } else {
@@ -251,19 +241,36 @@ export function MoveModal() {
       });
     } catch (error) {
       console.error(`Failed to load folders for ${folderId}:`, error);
-
-      // Reset loading state on error
       setTreeState(prev => {
         const newLoading = new Set(prev.loading);
         newLoading.delete(folderId);
-
-        return {
-          ...prev,
-          loading: newLoading
-        };
+        return { ...prev, loading: newLoading };
       });
+    } finally {
+      // Clear the ref flag when done, regardless of success/fail
+      fetchingRef.current.delete(folderId);
     }
-  };
+  }, [provider]);
+
+  // Safely trigger initial load once per open session
+  useEffect(() => {
+    if (isMoveFileModalOpen) {
+      if (!hasInitializedRef.current) {
+        hasInitializedRef.current = true;
+        loadFolders(null, 1);
+      }
+    } else {
+      hasInitializedRef.current = false; // Reset when modal closes
+    }
+  }, [isMoveFileModalOpen, loadFolders]);
+
+  // Trigger load more for root
+  useEffect(() => {
+    if (isMoveFileModalOpen && rootEntry?.isIntersecting && rootHasMore && !isRootLoading) {
+        const nextPage = (rootPagination?.currentPage || 1) + 1;
+        loadFolders(null, nextPage);
+    }
+  }, [isMoveFileModalOpen, rootEntry?.isIntersecting, rootHasMore, isRootLoading, rootPagination, loadFolders]);
 
   const handleMove = () => {
     if (targetFolderId !== undefined) {
@@ -281,9 +288,7 @@ export function MoveModal() {
 
   const handleOpenChange = (open: boolean) => {
     setIsMoveFileModalOpen(open);
-    if (open) {
-      loadFolders(null, 1);
-    } else {
+    if (!open) {
       setTargetFolderId(undefined);
       setTreeState({
         folders: new Map(),
@@ -291,6 +296,7 @@ export function MoveModal() {
         loaded: new Set(),
         pagination: new Map()
       });
+      fetchingRef.current.clear(); // Safety cleanup
     }
   };
 
@@ -320,12 +326,12 @@ export function MoveModal() {
         <div className="text-sm my-3 px-6 flex-1 flex flex-col min-h-0">
           <div className="space-y-4 flex flex-col flex-1 min-h-0">
             <div className="flex flex-col flex-1 min-h-0">
-              <label className="block mb-2 font-medium text-gray-900 dark:text-zinc-100">
+              <label htmlFor="destination-folder" className="block mb-2 font-medium text-gray-900 dark:text-zinc-100">
                 Select destination folder:
               </label>
 
                {/* Root List */}
-               <ul className="border  rounded-xl  p-2 shadow-inner overflow-y-auto flex-1 min-h-0">
+               <ul id="destination-folder" className="border rounded-xl p-2 shadow-inner overflow-y-auto flex-1 min-h-0">
                   {/* Root selection item */}
                   <li>
                     <div className="flex items-center gap-1.5 py-1">

@@ -33,8 +33,8 @@ export function useFileState(options: FileStateOptions) {
   const pathname = usePathname();
   
   // Read pagination from URL
-  const pageFromUrl = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-  const limitFromUrl = Math.max(1, parseInt(searchParams.get('limit') || '24', 10));
+  const pageFromUrl = Math.max(1, Number.parseInt(searchParams.get('page') || '1', 10));
+  const limitFromUrl = Math.max(1, Number.parseInt(searchParams.get('limit') || '24', 10));
   const queryFromUrl = searchParams.get('query') || '';
 
 
@@ -102,7 +102,7 @@ export function useFileState(options: FileStateOptions) {
     params.set('limit', limit.toString());
     
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [router, pathname]); // Removed searchParams - it's read fresh on each call
+  }, [router, pathname, searchParams]);
   
   // Sync state when URL changes (browser back/forward)
   useEffect(() => {

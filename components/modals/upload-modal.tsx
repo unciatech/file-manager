@@ -76,11 +76,13 @@ export function UploadModal() {
           return {
             ...existingFile,
             ...file,
+            file: file.file as File,
           };
         } else {
           // New file - mark as completed immediately (no simulation)
           return {
             ...file,
+            file: file.file as File,
             progress: 100,
             status: 'completed' as const,
           };
@@ -312,8 +314,8 @@ export function UploadModal() {
               <AlertContent>
                 <AlertTitle>File upload error(s)</AlertTitle>
                 <AlertDescription>
-                  {errors.map((error, index) => (
-                    <p key={index} className="last:mb-0">
+                  {errors.map((error) => (
+                    <p key={error} className="last:mb-0">
                       {error}
                     </p>
                   ))}

@@ -43,7 +43,7 @@ function CommandInput({ className, ...props }: React.ComponentProps<typeof Comma
       <SearchIcon className="me-2 h-4 w-4 shrink-0 opacity-50" />
       <CommandPrimitive.Input
         className={cn(
-          'flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-hidden text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+          'flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none! shadow-none! focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 border-none text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
           className,
         )}
         {...props}

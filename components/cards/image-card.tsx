@@ -6,7 +6,7 @@ import { useState } from "react";
 /** Props for the ImageCard component. */
 interface ImageCardProps {
     /** The image file metadata to display. */
-    file: FileMetaData;
+    readonly file: FileMetaData;
 }
 
 /**
@@ -35,7 +35,7 @@ export function ImageCard({ file }: ImageCardProps) {
  * Renders image-specific metadata in the grid card footer.
  * Displays the intrinsic dimensions (WxH) of the image.
  */
-export function ImageCardMetadata({ file }: { file: FileMetaData }) {
+export function ImageCardMetadata({ file }: { readonly file: FileMetaData }) {
     if (!file.caption) return null;
     return (
         <p className="text-xs text-primary line-clamp-2 mb-2">

@@ -6,9 +6,9 @@ import { useState } from "react";
 /** Props for the VideoCard component. */
 interface VideoCardProps {
     /** The video file metadata to display. */
-    file: FileMetaData;
+    readonly file: FileMetaData;
     /** Optional CSS class names to apply to the root SVG icon. */
-    className?: string;
+    readonly className?: string;
 }
 
 /**
@@ -78,7 +78,7 @@ export function VideoCard({ file, className }: VideoCardProps) {
  * Renders video-specific metadata in the grid card footer.
  * Displays the formatted video duration (MM:SS) if available.
  */
-export function VideoCardMetadata({ file }: { file: FileMetaData }) {
+export function VideoCardMetadata({ file }: { readonly file: FileMetaData }) {
     if (!file.metaData?.duration) return null;
     
     return (

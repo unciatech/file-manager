@@ -48,7 +48,7 @@ export function UnifiedGrid() {
         return (
             <div className="p-4 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 content-start">
                 {Array.from({ length: skeletonCount }).map((_, i) => (
-                    <div key={i} className="flex flex-col items-center justify-start w-full gap-2">
+                    <div key={`skeleton-${currentFolder?.id ?? 'root'}-${i}`} className="flex flex-col items-center justify-start w-full gap-2">
                         <div className="w-full aspect-square bg-muted rounded-2xl animate-pulse" />
                         <div className="flex flex-col items-center gap-1 w-full">
                             <div className="h-4 w-20 bg-muted rounded animate-pulse" />

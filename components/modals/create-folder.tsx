@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useFileManager } from "@/context/file-manager-context";
 import {
   Dialog,
@@ -25,20 +25,16 @@ export function CreateFolderModal() {
     setFolderToRename
   } = useFileManager();
 
-  const [folderName, setFolderName] = useState("");
+  // Track ONLY the user's text inputs. 
+  // null means the user hasn't typed anything yet in this session.
+  const [editedName, setEditedName] = useState<string | null>(null);
 
-  // Determine if we're in rename mode
   const isRenameMode = isRenameFolderModalOpen;
   const isOpen = isCreateFolderModalOpen || isRenameFolderModalOpen;
 
-  // Pre-fill the folder name when in rename mode
-  useEffect(() => {
-    if (isRenameFolderModalOpen && folderToRename) {
-      setFolderName(folderToRename.name);
-    } else if (!isCreateFolderModalOpen) {
-      setFolderName("");
-    }
-  }, [isRenameFolderModalOpen, isCreateFolderModalOpen, folderToRename]);
+  // Derive the active folder name dynamically during the render
+  const defaultFolderName = isRenameMode && folderToRename ? folderToRename.name : "";
+  const folderName = editedName ?? defaultFolderName;
 
   const handleSubmit = async () => {
     if (folderName.trim() !== "") {
@@ -48,23 +44,23 @@ export function CreateFolderModal() {
           await renameFolder(folderId, folderName.trim());
         }
         setIsRenameFolderModalOpen(false);
-        setFolderToRename(null); // Clear the folder being renamed
+        setFolderToRename(null); 
       } else {
         createFolder(folderName.trim());
         setIsCreateFolderModalOpen(false);
       }
-      setFolderName("");
+      setEditedName(null); // Reset edit state for next time
     }
   };
 
   const handleClose = () => {
     if (isRenameMode) {
       setIsRenameFolderModalOpen(false);
-      setFolderToRename(null); // Clear the folder being renamed
+      setFolderToRename(null); 
     } else {
       setIsCreateFolderModalOpen(false);
     }
-    setFolderName("");
+    setEditedName(null); // Reset edit state for next time
   };
 
   if (!isOpen) return null;
@@ -76,12 +72,10 @@ export function CreateFolderModal() {
           <DialogTitle className="px-6 text-base">
             <div className="flex w-full items-center justify-between gap-2">
               <span>{isRenameMode ? "Rename Folder" : "Create New Folder"}
-
                 {!isRenameMode && <span className="ml-4"><KbdGroup>
                   <Kbd><span className="text-lg">⌘</span> + F</Kbd>
                 </KbdGroup></span>}
               </span>
-              
               <CloseButton onClick={handleClose} />
             </div>
           </DialogTitle>
@@ -92,7 +86,7 @@ export function CreateFolderModal() {
             id="folder-name"
             name="folder-name"
             value={folderName}
-            onChange={(e) => setFolderName(e.target.value)}
+            onChange={(e) => setEditedName(e.target.value)}
             placeholder="Enter folder name"
             autoFocus
             onKeyDown={(e) => {

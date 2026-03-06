@@ -1,4 +1,4 @@
-import { Folder, Tag, FileMetaData, FILE_TYPE } from "@/types/file-manager";
+import { Folder, Tag, FileMetaData } from "@/types/file-manager";
 
 // Mock data
 export const mockFolders: Folder[] = [

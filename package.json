@@ -1,6 +1,6 @@
 {
   "name": "@unciatech/file-manager",
-  "version": "0.0.24",
+  "version": "0.0.28",
   "description": "Modern file manager component for React and Next.js",
   "author": "Avi",
   "license": "MIT",
@@ -45,9 +45,6 @@
   "sideEffects": [
     "*.css"
   ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "engines": {
     "node": ">=18"
   },
@@ -56,7 +53,7 @@
     "build": "next build",
     "build:pkg": "tsup && cp styles.css dist/styles.css",
     "clean": "rm -rf dist .next",
-    "prepublishOnly": "npm run build:pkg",
+    "prepublish": "npm run build:pkg",
     "release": "npm run build:pkg && npm publish",
     "lint": "next lint"
   },

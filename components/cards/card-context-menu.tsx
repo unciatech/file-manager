@@ -39,7 +39,7 @@ export function CardContextMenu({
   menuItems,
   isInSelectionMode = false,
   mode,
-}: CardContextMenuProps) {
+}: Readonly<CardContextMenuProps>) {
   const shouldShowMenu = !isInSelectionMode && mode !== "modal";
 
   const renderMenuItems = (isDropdown: boolean = false) => {

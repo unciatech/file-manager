@@ -23,7 +23,7 @@ function getPageNumbers(current: number, total: number) {
   return pages;
 }
 
-export function FileManagerFooter({ className }: { className?: string }) {
+export function FileManagerFooter({ className }: { readonly className?: string }) {
   const { pagination, handlePageChange, files, folders } = useFileManager();
   const { currentPage, totalPages } = pagination;
   

@@ -12,12 +12,12 @@ export const throttle = (func: (...args: unknown[]) => void, limit: number): ((.
       }
       lastFunc = setTimeout(
         () => {
-          if (Date.now() - (lastRan as number) >= limit) {
+          if (lastRan !== null && Date.now() - lastRan >= limit) {
             func.apply(this, args);
             lastRan = Date.now();
           }
         },
-        limit - (Date.now() - (lastRan as number)),
+        limit - (Date.now() - (lastRan ?? 0)),
       );
     }
   };
@@ -167,8 +167,8 @@ export const getTimeZones = (): { label: string; value: string }[] => {
 
       return {
         value: timezone,
-        label: `(${formattedOffset}) ${timezone.replace(/_/g, ' ')}`,
-        numericOffset: parseInt(formattedOffset.replace('GMT', '').replace('+', '') || '0'),
+        label: `(${formattedOffset}) ${timezone.replaceAll('_', ' ')}`,
+        numericOffset: Number.parseInt(formattedOffset.replace('GMT', '').replace('+', '') || '0'),
       };
     })
     .sort((a, b) => a.numericOffset - b.numericOffset);
@@ -189,9 +189,9 @@ export function getSlug(title: string): string {
     .toLowerCase() // Convert to lowercase for consistency
     .trim() // Remove leading/trailing whitespace
     .normalize('NFD') // Normalize unicode (e.g., "é" -> "e")
-    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except spaces/hyphens
+    .replaceAll(/[\u0300-\u036f]/g, '') // Remove diacritics
+    .replaceAll(/[^a-z0-9\s-]/g, '') // Remove special characters except spaces/hyphens
     .replaceAll(/\s+/g, '-') // Replace spaces with single hyphen
-    .replace(/-+/g, '-') // Collapse multiple hyphens
-    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+    .replaceAll(/-+/g, '-') // Collapse multiple hyphens
+    .replaceAll(/^-|-$/g, ''); // Remove leading/trailing hyphens
 }

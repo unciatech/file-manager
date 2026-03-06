@@ -1,9 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
- 
 @custom-variant dark (&:where(.dark, .dark *));
-
 
 @theme {
   --font-sans:
@@ -133,7 +131,7 @@
   }
  
   *:focus-visible {
-    @apply outline-ring rounded-xs shadow-none outline-2 outline-offset-3 transition-none!;
+    @apply outline-none! shadow-none transition-none!;
   }
 }
  

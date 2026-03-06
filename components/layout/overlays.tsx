@@ -12,7 +12,7 @@ import { useFileManager } from "@/context/file-manager-context";
 import { getFileTypeFromMime } from "@/lib/file-utils";
 import { FILE_TYPE, FileMetaData } from "@/types/file-manager";
 
-export function FileManagerOverlays({ className }: { className?: string }) {
+export function FileManagerOverlays({ className }: { readonly className?: string }) {
   const {
     fileDetailsModalFile,
     setFileDetailsModalFile,

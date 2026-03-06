@@ -4,9 +4,7 @@ import { getFileTypeFromMime, Icons } from "@/lib/file-utils";
 /** Props for the generic OtherCard component. */
 interface OtherCardProps {
     /** The fallback or unknown file metadata to display. */
-    file: FileMetaData;
-    /** Legacy pass-through metadata prop. */
-    metaData: FileMetaData['metaData'] | null;
+    readonly file: FileMetaData;
 }
 
 /**

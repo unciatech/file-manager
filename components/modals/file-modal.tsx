@@ -20,7 +20,7 @@ interface FileModalProps {
   onSave?: (updates: Partial<FileMetaData>) => Promise<void> | void;
 }
 
-export function FileModal({ file, onClose, onSave }: FileModalProps) {
+export function FileModal({ file, onClose, onSave }: Readonly<FileModalProps>) {
   const [isSaving, setIsSaving] = useState(false);
   const [fileName, setFileName] = useState(file.name);
   const [description, setDescription] = useState(file.metaData?.description || '');

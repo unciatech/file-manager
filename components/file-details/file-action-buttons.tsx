@@ -1,10 +1,9 @@
 'use client';
 
 import { FileMetaData } from '@/types/file-manager';
-import { Loader2Icon } from '../icons';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { DownloadIcon, FullscreenIcon, LinkIcon, TrashIcon } from '../icons';
+import { Loader2Icon, DownloadIcon, FullscreenIcon, LinkIcon, TrashIcon } from '../icons';
 import { useState } from 'react';
 import { useFileManager } from '@/context/file-manager-context';
 import CheckIcon from '../icons/check';
@@ -16,7 +15,7 @@ interface FileButtonProps {
   file: FileMetaData;
 }
 
-export function FileDeleteButton({ file }: FileButtonProps) {
+export function FileDeleteButton({ file }: Readonly<FileButtonProps>) {
   const { provider, setFileDetailsModalFile, refreshData } = useFileManager();
   const [deleting, setDeleting] = useState(false);
 
@@ -35,7 +34,7 @@ export function FileDeleteButton({ file }: FileButtonProps) {
       toast.success('File Deleted', {
         description: `${middleTruncate(file.name, 20)} has been deleted`,
       });
-    } catch (error) {
+    } catch {
       toast.error('Delete failed');
       setDeleting(false);
     }
@@ -60,7 +59,7 @@ export function FileDeleteButton({ file }: FileButtonProps) {
   );
 }
 
-export function FileDownloadButton({ file }: FileButtonProps) {
+export function FileDownloadButton({ file }: Readonly<FileButtonProps>) {
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
@@ -74,7 +73,7 @@ export function FileDownloadButton({ file }: FileButtonProps) {
       toast.success('Download Started', {
         description: `Downloading ${middleTruncate(file.name, 20)}`,
       });
-    } catch (error) {
+    } catch {
       toast.error('Download failed');
     } finally {
       setDownloading(false);
@@ -100,7 +99,7 @@ export function FileDownloadButton({ file }: FileButtonProps) {
   );
 }
 
-export function FileCopyLinkButton({ file }: FileButtonProps) {
+export function FileCopyLinkButton({ file }: Readonly<FileButtonProps>) {
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = async () => {
@@ -113,7 +112,7 @@ export function FileCopyLinkButton({ file }: FileButtonProps) {
 
       // Reset after 2 seconds
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch {
       toast.error('Failed to copy link');
     }
   };
@@ -142,11 +141,10 @@ export function FileCopyLinkButton({ file }: FileButtonProps) {
 }
 
 interface FileFullscreenButtonProps {
-  file: FileMetaData;
-  onFullscreen: () => void;
+  readonly onFullscreen: () => void;
 }
 
-export function FileFullscreenButton({ file, onFullscreen }: FileFullscreenButtonProps) {
+export function FileFullscreenButton({  onFullscreen }: FileFullscreenButtonProps) {
   return (
     <Button
       variant="outline"
