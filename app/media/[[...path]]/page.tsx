@@ -13,6 +13,7 @@ export default function MediaPage() {
       allowedFileTypes={["audios", "videos", "images", "files"]}
       viewMode="grid"
       provider={provider}
+      basePath="/media"
     />
   );
 }

@@ -1,6 +1,6 @@
 # 🗂️ File Manager
 
-A robust, production-ready React / Next.js file management system designed to mirror the capabilities of professional asset managers (like Google Drive, macOS Finder, or Strapi Media Library).
+A robust, production-ready file management component for any **React** application — works with Vite, Next.js, Remix, CRA, and more.
 
 It supports deep folder nesting, drag-and-drop file uploads, metadata management for various file types (Images, Videos, Audio, Documents), unified grid layouts, and fully optimized loading states.
 
@@ -14,7 +14,7 @@ It supports deep folder nesting, drag-and-drop file uploads, metadata management
 - **Graceful Error Handling**: Resilient `<FileManagerErrorBoundary>` that captures catastrophic failures and allows users to hard-reload safely without app crashes.
 
 ## 🛠️ Tech Stack
-- **Framework**: Next.js / React
+- **Framework**: React (any — Vite, Next.js, Remix, CRA)
 - **Styling**: Tailwind CSS
 - **Icons**: Custom SVG Icons
 - **Notifications**: Sonner
@@ -22,9 +22,32 @@ It supports deep folder nesting, drag-and-drop file uploads, metadata management
 > [!WARNING]
 > This library is currently in **BETA**. Please report any bugs or feature requests on the GitHub issues page.
 
-## 🚀 How to Install and Use in Your Project
+## Setup & Requirements
 
-If you want to integrate this File Manager into your own Next.js or React application, follow this step-by-step guide.
+Because this library relies heavily on Tailwind CSS for minimal zero-config styling, ensure your app is configured to scan the library's components for Tailwind utility classes.
+
+### Tailwind v4
+If you are using **Tailwind CSS v4** (like in newer Next.js or Vite projects), add this to your main CSS file (`globals.css` or `index.css`). This pulls in the required theme configuration and ensures the library is scanned:
+
+```css
+@import "tailwindcss";
+@import "@unciatech/file-manager/styles";
+@source "../node_modules/@unciatech/file-manager";
+```
+
+### Tailwind v3
+If you are still on **Tailwind v3**, add the library path to your `tailwind.config.ts`:
+
+```ts
+content: [
+  // ... your other paths
+  "./node_modules/@unciatech/file-manager/dist/**/*.{js,ts,jsx,tsx}",
+],
+```
+
+## Basic Usage in Your Project
+
+If you want to integrate this File Manager into your own React application (Next.js, Vite, Remix, CRA, etc.), follow this step-by-step guide.
 
 ### Step 1: Install the Package
 
@@ -44,30 +67,6 @@ npx @unciatech/file-manager init my-media-app
 The init script includes this automatically, but if you are installing manually, add this import to your root layout / entry file:
 ```ts
 import '@unciatech/file-manager/styles';
-```
-
-**(CRITICAL) Configure Tailwind CSS:**
-Because this library uses Tailwind CSS, you MUST tell your Tailwind compiler to scan the library components for utility classes, otherwise it will render with zero styles!
-
-**For Tailwind v3 (`tailwind.config.ts`):**
-```typescript
-import type { Config } from "tailwindcss";
-
-const config: Config = {
-  content: [
-    // Your existing paths...
-    "./node_modules/@unciatech/file-manager/dist/**/*.js",
-    "./node_modules/@unciatech/file-manager/dist/**/*.mjs",
-  ],
-  // ...
-};
-export default config;
-```
-
-**For Tailwind v4 (`globals.css`):**
-```css
-@import "tailwindcss";
-@source "../node_modules/@unciatech/file-manager/dist";
 ```
 
 ### Step 2: Create your Custom API Provider
@@ -129,10 +128,11 @@ export class MyCustomApiProvider implements IFileManagerProvider {
 > If you are just prototyping and don't have a backend ready yet, you can skip Step 2 entirely! We included a fully functional `MockProvider` that fakes network latency and stores data in memory. Just import it and use it right away to see the UI in action.
 
 // app/media/page.tsx
-import { FileManagerProvider } from "@/context/file-manager-context";
-import { FileManager } from "@/components/file-manager";
-import { MockProvider } from "@/providers/mock-provider";
+import { FileManager, MockProvider } from "@unciatech/file-manager";
+import "@unciatech/file-manager/styles";
 
+// **Tailwind v4 Users:** Make sure your `globals.css` or `index.css` includes:
+// @source "../node_modules/@unciatech/file-manager";
 // OR import your real provider
 import { MyCustomApiProvider } from "@/lib/my-api-provider"; 
 
@@ -148,12 +148,105 @@ export default function MediaLibraryPage() {
         allowedFileTypes={["images", "videos", "audios", "files"]}
         provider={apiProvider}
       >
-        <FileManager />
+        <FileManager basePath="/media" />
       </FileManagerProvider>
     </div>
   );
 }
 ```
+
+---
+
+## 🔀 Framework Router Integration
+
+By default, the file manager uses the browser's native `history.pushState` API for navigation — no full page reloads, no dependencies. This works out of the box in any bare React app (Vite, CRA, etc.).
+
+However, if your app already has its own router (React Router, Next.js, TanStack Router), you should pass the `onNavigate` prop so the file manager delegates all navigation to your router instead of calling `history.pushState` directly. This keeps your router's internal state in sync.
+
+### React Router v6
+
+```tsx
+import { useNavigate } from 'react-router-dom';
+
+function MyPage() {
+  const navigate = useNavigate();
+
+  return (
+    <FileManager
+      provider={provider}
+      allowedFileTypes={['images', 'videos']}
+      onNavigate={(url) => navigate(url)}
+      basePath="/media"
+    />
+  );
+}
+```
+
+### Next.js (App Router)
+
+```tsx
+'use client';
+import { useRouter } from 'next/navigation';
+
+export default function MediaPage() {
+  const router = useRouter();
+
+  return (
+    <FileManager
+      provider={provider}
+      allowedFileTypes={['images', 'videos']}
+      onNavigate={(url) => router.push(url)}
+      basePath="/media"
+    />
+  );
+}
+```
+
+### TanStack Router
+
+```tsx
+import { useRouter } from '@tanstack/react-router';
+
+function MyPage() {
+  const router = useRouter();
+
+  return (
+    <FileManager
+      provider={provider}
+      allowedFileTypes={['images', 'videos']}
+      onNavigate={(url) => router.navigate({ href: url })}
+      basePath="/media"
+    />
+  );
+}
+```
+
+```tsx
+<FileManager
+  provider={provider}
+  allowedFileTypes={['images', 'videos']}
+  basePath="/media"
+  // no onNavigate needed
+/>
+```
+
+## 🎮 Playgrounds & Reference Implementations
+
+For complete, working examples of how to integrate the File Manager into different application architectures, check out the [playgrounds](file:///Users/avi/Developer/Uncia/file-manager/playgrounds) directory. These are fully functional Vite-based projects that demonstrate real-world integration patterns.
+
+- **[React Router v7 Playground](file:///Users/avi/Developer/Uncia/file-manager/playgrounds/test-react-router)**: Demonstrates integration with `react-router-dom` using `useNavigate` and route-based navigation.
+- **[TanStack Router Playground](file:///Users/avi/Developer/Uncia/file-manager/playgrounds/test-tanstack)**: Demonstrates integration with `@tanstack/react-router` using the `router` object and `href` based navigation.
+
+These playgrounds are a great starting point for seeing how to handle:
+- Styling with Tailwind CSS v4
+- Mapping `onNavigate` to your framework's router
+- Using the `MockProvider` for rapid prototyping
+- Configuring `FileManagerModal` v/s full-page `FileManager`
+
+---
+
+> [!NOTE]
+> The `onNavigate` prop is also available on `<FileManagerModal>` for modal mode.
 
 ---
 

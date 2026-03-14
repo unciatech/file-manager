@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Blocking script: applies .dark before first paint to prevent flash in all browsers including Safari */}
         <script dangerouslySetInnerHTML={{ __html: `

@@ -179,7 +179,7 @@ export function UploadModal() {
           {/* Upload Area */}
           <div
             className={cn(
-              'relative rounded-lg border-dashed border-[2.5px] bg-muted border-border px-6 py-16 text-center transition-colors mb-4',
+              'relative w-full rounded-xl border-2 border-dashed bg-muted border-muted-foreground/25 px-6 py-16 text-center transition-colors mb-4',
               isDragging
                 ? 'border-primary bg-primary/5'
                 : 'border-muted-foreground/25 hover:border-muted-foreground/50',
@@ -234,9 +234,9 @@ export function UploadModal() {
                     />
 
                     {/* Wrapper */}
-                    <div className="relative overflow-hidden rounded-lg border bg-card transition-colors">
+                    <div className="relative overflow-hidden rounded-lg border border-muted-foreground/25 bg-card transition-colors">
                       {/* File preview area - uses component registry */}
-                      <div className="relative aspect-square bg-muted border-b border-border">
+                      <div className="relative aspect-square bg-muted border-muted-foreground/25">
                         <div className="flex h-full items-center justify-center p-4">
                           <div className="w-[75%] h-[75%] flex items-center justify-center">
                             {fileItem.status === 'uploading' ? (

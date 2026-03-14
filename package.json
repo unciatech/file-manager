@@ -1,7 +1,7 @@
 {
   "name": "@unciatech/file-manager",
-  "version": "0.0.28",
-  "description": "Modern file manager component for React and Next.js",
+  "version": "0.0.33",
+  "description": "Modern file manager component for React applications",
   "author": "Avi",
   "license": "MIT",
   "homepage": "https://github.com/unciatech/file-manager",
@@ -35,7 +35,11 @@
       "import": "./dist/mock.js",
       "require": "./dist/mock.cjs"
     },
-    "./styles": "./dist/styles.css"
+    "./styles": {
+      "types": "./dist/styles.d.ts",
+      "style": "./dist/styles.css",
+      "default": "./dist/styles.css"
+    }
   },
   "files": [
     "dist",
@@ -51,7 +55,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:pkg": "tsup && cp styles.css dist/styles.css",
+    "build:pkg": "tsup && cp styles.css dist/styles.css && echo 'declare const styles: any; export default styles;' > dist/styles.d.ts",
     "clean": "rm -rf dist .next",
     "prepublish": "npm run build:pkg",
     "release": "npm run build:pkg && npm publish",
@@ -74,7 +78,6 @@
     "@radix-ui/react-context-menu": "^2",
     "@radix-ui/react-dialog": "^1",
     "@radix-ui/react-tooltip": "^1",
-    "next": "^14 || ^15 || ^16",
     "react": "^18 || ^19",
     "react-dom": "^18 || ^19"
   },
