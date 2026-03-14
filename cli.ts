@@ -18,7 +18,7 @@ const askQuestion = (query: string): Promise<string> => {
   return new Promise(resolve => rl.question(query, resolve));
 };
 
-const TEMPLATE = `"use client";
+const getTemplate = (basePath = "/media") => `"use client";
 
 import React, { Suspense } from "react";
 import { FileManager, MockProvider } from "@unciatech/file-manager";
@@ -33,6 +33,7 @@ export default function FileManagerDemo() {
           allowedFileTypes={["audios", "videos", "images", "files"]}
           viewMode="grid"
           provider={mockProvider}
+          basePath="${basePath}"
         />
       </Suspense>
     </div>
@@ -64,7 +65,7 @@ async function main() {
       process.exit(1);
     }
 
-    fs.writeFileSync(targetFile, TEMPLATE, 'utf-8');
+    fs.writeFileSync(targetFile, getTemplate("/"), 'utf-8');
     console.log(`✅ Success! Created ${targetFile}`);
     console.log('');
     console.log("You can now import and render <FileManagerDemo /> anywhere in your application.");
@@ -118,10 +119,10 @@ async function scaffoldNextjs(projectName: string, targetDir: string) {
   console.log('\n📦 Installing dependencies (@unciatech/file-manager, tailwindcss-animate)...');
   execSync('npm install @unciatech/file-manager tailwindcss-animate', { cwd: targetDir, stdio: 'inherit' });
 
-  // Add the demo component
+  // Add the demo component (Next.js default basePath is /media)
   const componentsDir = path.join(targetDir, 'src', 'components');
   if (!fs.existsSync(componentsDir)) fs.mkdirSync(componentsDir, { recursive: true });
-  fs.writeFileSync(path.join(componentsDir, 'FileManagerDemo.tsx'), TEMPLATE, 'utf-8');
+  fs.writeFileSync(path.join(componentsDir, 'FileManagerDemo.tsx'), getTemplate("/media"), 'utf-8');
 
   // Replace default Home page
   const pagePath = path.join(targetDir, 'src', 'app', 'page.tsx');
@@ -135,10 +136,11 @@ async function scaffoldNextjs(projectName: string, targetDir: string) {
     `import FileManagerDemo from "@/components/FileManagerDemo";\n\nexport default function MediaPage() {\n  return (\n    <main className="min-h-screen bg-neutral-50">\n      <FileManagerDemo />\n    </main>\n  );\n}\n`
   );
 
-  // Inject package styles import into layout.tsx
+  // Inject package styles import into layout.tsx (Optional, handled by globals.css)
   const layoutPath = path.join(targetDir, 'src', 'app', 'layout.tsx');
   if (fs.existsSync(layoutPath)) {
     let layoutContent = fs.readFileSync(layoutPath, 'utf8');
+    // If not already present, we can add it here as a fallback or for JS-based tools
     if (!layoutContent.includes('@unciatech/file-manager/styles')) {
       layoutContent = layoutContent.replace(
         /^(import type)/m,
@@ -150,112 +152,15 @@ async function scaffoldNextjs(projectName: string, targetDir: string) {
 
   // Replace consumer globals.css with the package's full Tailwind v4 setup
   const cssPath = path.join(targetDir, 'src', 'app', 'globals.css');
-  fs.writeFileSync(cssPath, `@import 'tailwindcss';
-@import 'tw-animate-css';
-@source "../../node_modules/@unciatech/file-manager/dist";
+  fs.writeFileSync(cssPath, `@import "tailwindcss";
+@import "@unciatech/file-manager/styles";
+@import "tw-animate-css";
 
-/** Dark Mode Variant **/
-@custom-variant dark (&:is(.dark *));
+@source "../../node_modules/@unciatech/file-manager";
 
 @theme {
-  --font-sans: 'Geist', 'Geist Fallback', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-}
-
-/** Colors **/
-:root {
-  --background: var(--color-white);
-  --foreground: var(--color-zinc-950);
-  --card: var(--color-white);
-  --card-foreground: var(--color-zinc-950);
-  --popover: var(--color-white);
-  --popover-foreground: var(--color-zinc-950);
-  --primary: var(--color-blue-500);
-  --primary-foreground: var(--color-white);
-  --secondary: var(--color-zinc-100);
-  --secondary-foreground: var(--color-zinc-900);
-  --muted: var(--color-zinc-100);
-  --muted-foreground: var(--color-zinc-500);
-  --accent: var(--color-zinc-100);
-  --accent-foreground: var(--color-zinc-900);
-  --destructive: var(--color-red-600);
-  --destructive-foreground: var(--color-white);
-  --border: oklch(94% 0.004 286.32);
-  --input: var(--color-zinc-200);
-  --ring: var(--color-zinc-400);
-  --radius: 0.5rem;
-}
-
-.dark {
-  --background: var(--color-zinc-950);
-  --foreground: var(--color-zinc-50);
-  --card: var(--color-zinc-950);
-  --card-foreground: var(--color-zinc-50);
-  --popover: var(--color-zinc-950);
-  --popover-foreground: var(--color-zinc-50);
-  --primary: var(--color-blue-600);
-  --primary-foreground: var(--color-white);
-  --secondary: var(--color-zinc-800);
-  --secondary-foreground: var(--color-zinc-50);
-  --muted: var(--color-zinc-900);
-  --muted-foreground: var(--color-zinc-500);
-  --accent: var(--color-zinc-900);
-  --accent-foreground: var(--color-zinc-50);
-  --destructive: var(--color-red-600);
-  --destructive-foreground: var(--color-white);
-  --border: var(--color-zinc-800);
-  --input: var(--color-zinc-800);
-  --ring: var(--color-zinc-600);
-}
-
-/** Theme Setup **/
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
-}
-
-/** Global Styles **/
-@layer base {
-  * {
-    @apply border-border;
-  }
-  *:focus-visible {
-    @apply outline-ring rounded-xs shadow-none outline-2 outline-offset-3 transition-none!;
-  }
-}
-
-/** Custom Scrollbar **/
-@layer base {
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--input); border-radius: 5px; }
-  * { scrollbar-width: thin; scrollbar-color: var(--input) transparent; }
-}
-
-/** Smooth scroll **/
-html {
-  scroll-behavior: smooth;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 `);
 
@@ -281,12 +186,15 @@ async function scaffoldVite(projectName: string, targetDir: string) {
 
   // Setup index.css
   const cssPath = path.join(targetDir, 'src', 'index.css');
-  fs.writeFileSync(cssPath, `@import "tailwindcss";\n@source "../../node_modules/@unciatech/file-manager/dist";\n`);
+  fs.writeFileSync(cssPath, `@import "tailwindcss";
+@import "@unciatech/file-manager/styles";
+@source "../node_modules/@unciatech/file-manager";
+`);
 
-  // Add demo component
+  // Add demo component (Vite default basePath is often /)
   const componentsDir = path.join(targetDir, 'src', 'components');
   if (!fs.existsSync(componentsDir)) fs.mkdirSync(componentsDir, { recursive: true });
-  fs.writeFileSync(path.join(componentsDir, 'FileManagerDemo.tsx'), TEMPLATE, 'utf-8');
+  fs.writeFileSync(path.join(componentsDir, 'FileManagerDemo.tsx'), getTemplate("/"), 'utf-8');
 
   // Overwrite App.tsx
   const appPath = path.join(targetDir, 'src', 'App.tsx');

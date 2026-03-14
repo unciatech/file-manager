@@ -181,7 +181,17 @@ export interface FileManagerPageProps {
     viewMode: ViewMode;
     initialFolderId?: FolderId;
     provider: IFileManagerProvider;
-    basePath?: string;
+    basePath: string;
+    /**
+     * Optional navigation callback. When provided, the library delegates all
+     * URL navigation to this function instead of calling history.pushState
+     * directly. Use this to plug in your own router:
+     *   - React Router:    onNavigate={(url, opts) => navigate(url, { replace: opts?.replace })}
+     *   - Next.js:         onNavigate={(url, opts) => opts?.replace ? router.replace(url) : router.push(url)}
+     *   - TanStack Router: onNavigate={(url, opts) => router.navigate({ href: url, replace: opts?.replace })}
+     * If omitted, falls back to history.pushState (works in any bare React app).
+     */
+    onNavigate?: (url: string, options?: { replace?: boolean; scroll?: boolean }) => void;
 }
 
 // Props for modal view (file picker/selector)
@@ -200,7 +210,9 @@ export interface FileManagerModalProps {
     viewMode?: ViewMode; // default: "grid"
     initialFolderId?: FolderId;
     provider: IFileManagerProvider;
-    basePath?: string;
+    basePath: string;
+    /** @see FileManagerPageProps.onNavigate */
+    onNavigate?: (url: string, options?: { replace?: boolean; scroll?: boolean }) => void;
 }
 
 
@@ -213,11 +225,13 @@ export interface FileManagerRootProps {
   initialFolderId?: FolderId;
   acceptedFileTypesForModal?: FileType[];
   provider: IFileManagerProvider;
-  basePath?: string;
+  basePath: string;
   onFilesSelected?: (files: FileMetaData[]) => void;
   onClose?: () => void;
   maxUploadFiles?: number; // default: 50
   maxUploadSize?: number; // in bytes, default: 100MB
+  /** @see FileManagerPageProps.onNavigate */
+  onNavigate?: (url: string, options?: { replace?: boolean; scroll?: boolean }) => void;
 }
 
 export interface FileStateOptions {
@@ -227,9 +241,12 @@ export interface FileStateOptions {
   acceptedFileTypesForModal?: FileType[];
   allowedFileTypes?: FileType[];
   provider: IFileManagerProvider;
-  basePath?: string;
+  basePath: string;
 
   //Modal Callbacks
   onFilesSelected?: (files: FileMetaData[]) => void;
   onClose?: () => void;
+
+  /** @see FileManagerPageProps.onNavigate */
+  onNavigate?: (url: string, options?: { replace?: boolean; scroll?: boolean }) => void;
 }

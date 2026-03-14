@@ -62,8 +62,89 @@ var VIDEO_SOURCE = {
 var VIDEO_SOURCES = Object.values(VIDEO_SOURCE);
 
 // hooks/use-file-handlers.ts
-import { useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback as useCallback2 } from "react";
+
+// hooks/use-browser-router.ts
+import { useCallback, useEffect, useMemo, useState } from "react";
+var LOCATION_CHANGE_EVENT = "locationchange";
+if (typeof window !== "undefined" && !window.__navigationPatched) {
+  window.__navigationPatched = true;
+  const originalPushState = window.history.pushState;
+  const originalReplaceState = window.history.replaceState;
+  window.history.pushState = function(...args) {
+    const result = originalPushState.apply(this, args);
+    setTimeout(() => window.dispatchEvent(new Event(LOCATION_CHANGE_EVENT)), 0);
+    return result;
+  };
+  window.history.replaceState = function(...args) {
+    const result = originalReplaceState.apply(this, args);
+    setTimeout(() => window.dispatchEvent(new Event(LOCATION_CHANGE_EVENT)), 0);
+    return result;
+  };
+}
+function useBrowserRouter({ basePath, onNavigate } = {}) {
+  const [pathname, setPathname] = useState(
+    () => typeof window !== "undefined" ? window.location.pathname : "/"
+  );
+  const [search, setSearch] = useState(
+    () => typeof window !== "undefined" ? window.location.search : ""
+  );
+  useEffect(() => {
+    const onUpdate = () => {
+      setPathname(window.location.pathname);
+      setSearch(window.location.search);
+    };
+    window.addEventListener("popstate", onUpdate);
+    window.addEventListener(LOCATION_CHANGE_EVENT, onUpdate);
+    return () => {
+      window.removeEventListener("popstate", onUpdate);
+      window.removeEventListener(LOCATION_CHANGE_EVENT, onUpdate);
+    };
+  }, []);
+  const push = useCallback(
+    (url, options) => {
+      if (onNavigate) {
+        onNavigate(url, options);
+      } else {
+        history.pushState(null, "", url);
+        if ((options == null ? void 0 : options.scroll) !== false) {
+          window.scrollTo(0, 0);
+        }
+      }
+    },
+    [onNavigate]
+  );
+  const replace = useCallback(
+    (url) => {
+      if (onNavigate) {
+        onNavigate(url, { replace: true });
+      } else {
+        history.replaceState(null, "", url);
+      }
+    },
+    [onNavigate]
+  );
+  const back = useCallback(() => {
+    history.back();
+  }, []);
+  const searchParams = useMemo(
+    () => new URLSearchParams(search),
+    [search]
+  );
+  const params = useMemo(() => {
+    if (!basePath) return {};
+    const base = basePath.replace(/\/$/, "");
+    const normalizedBase = base.startsWith("/") ? base : `/${base}`;
+    if (!pathname.startsWith(normalizedBase)) return {};
+    const rest = pathname.slice(normalizedBase.length).replace(/^\//, "");
+    if (!rest) return {};
+    const segments = rest.split("/").filter(Boolean);
+    return { path: segments[0] };
+  }, [pathname, basePath]);
+  return { push, replace, back, pathname, searchParams, params };
+}
+
+// hooks/use-file-handlers.ts
 import { toast } from "sonner";
 var toggleFilesInSelection = (prev, filesToToggle) => {
   let updated = [...prev];
@@ -113,8 +194,8 @@ function useFileHandlers(state) {
     setIsLoading,
     setFileDetailsModalFile
   } = state;
-  const router = useRouter();
-  const handleFileClick = useCallback(
+  const { push } = useBrowserRouter({ basePath: state.basePath, onNavigate: state.onNavigate });
+  const handleFileClick = useCallback2(
     (file, event, isCheckboxClick = false) => {
       const fileArray = [file];
       const isExplicitSelection = isCheckboxClick || event && (event.metaKey || event.ctrlKey);
@@ -140,7 +221,7 @@ function useFileHandlers(state) {
     },
     [mode, selectionMode, isInSelectionMode, setSelectedFiles, onFilesSelected, onClose, setFileDetailsModalFile]
   );
-  const handleFolderClick = useCallback(
+  const handleFolderClick = useCallback2(
     (folder, event, isCheckboxClick = false) => {
       const folderId = folder ? folder.id : null;
       const isExplicitSelection = isCheckboxClick || event && (event.metaKey || event.ctrlKey);
@@ -155,8 +236,9 @@ function useFileHandlers(state) {
       if (mode === MODE.PAGE) {
         setIsLoading(true);
         const path = basePath != null ? basePath : "/media";
-        const newUrl = folderId === null ? path : `${path}/${folderId}`;
-        router.push(newUrl);
+        const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+        const newUrl = folderId === null ? normalizedPath : `${normalizedPath}/${folderId}`;
+        push(newUrl);
       } else {
         setIsLoading(true);
         setSelectedFiles([]);
@@ -169,16 +251,16 @@ function useFileHandlers(state) {
         }
         params.set("page", "1");
         const newUrl = `${globalThis.location.pathname}?${params.toString()}`;
-        router.push(newUrl, { scroll: false });
+        push(newUrl, { scroll: false });
       }
     },
-    [isInSelectionMode, mode, router, setSelectedFolders, setSelectedFiles, basePath, setIsLoading]
+    [isInSelectionMode, mode, push, setSelectedFolders, setSelectedFiles, basePath, setIsLoading]
   );
-  const handleClearSelection = useCallback(() => {
+  const handleClearSelection = useCallback2(() => {
     setSelectedFiles([]);
     setSelectedFolders([]);
   }, [setSelectedFiles, setSelectedFolders]);
-  const handleSelectAllGlobal = useCallback(
+  const handleSelectAllGlobal = useCallback2(
     (checked) => {
       if (checked) {
         setSelectedFiles(files);
@@ -190,10 +272,10 @@ function useFileHandlers(state) {
     },
     [files, folders, mode, setSelectedFiles, setSelectedFolders]
   );
-  const refreshData = useCallback(async (silent = false) => {
+  const refreshData = useCallback2(async (silent = false) => {
     await loadData(silent);
   }, [loadData]);
-  const uploadFiles = useCallback(
+  const uploadFiles = useCallback2(
     async (fileUploadInput) => {
       var _a;
       try {
@@ -213,7 +295,7 @@ function useFileHandlers(state) {
     },
     [currentFolder, provider, refreshData, setSelectedFiles]
   );
-  const createFolder = useCallback(
+  const createFolder = useCallback2(
     async (name) => {
       var _a;
       try {
@@ -233,7 +315,7 @@ function useFileHandlers(state) {
     },
     [currentFolder, provider, refreshData, setSelectedFiles]
   );
-  const bulkMove = useCallback(
+  const bulkMove = useCallback2(
     async (targetFolderId) => {
       try {
         if (selectedFiles.length > 0) {
@@ -272,7 +354,7 @@ function useFileHandlers(state) {
       setSelectedFolders
     ]
   );
-  const renameFolder = useCallback(
+  const renameFolder = useCallback2(
     async (folderId, newName) => {
       try {
         setFolders(
@@ -293,7 +375,7 @@ function useFileHandlers(state) {
     },
     [provider, refreshData, setFolders]
   );
-  const updateFileMetadata = useCallback(
+  const updateFileMetadata = useCallback2(
     async (fileId, metadata) => {
       try {
         setFiles(
@@ -319,7 +401,7 @@ function useFileHandlers(state) {
     },
     [provider, refreshData, setFiles]
   );
-  const bulkDelete = useCallback(async () => {
+  const bulkDelete = useCallback2(async () => {
     try {
       if (selectedFiles.length > 0) {
         await provider.deleteFiles(selectedFiles.map((f) => f.id));
@@ -367,8 +449,7 @@ function useFileHandlers(state) {
 }
 
 // hooks/use-file-state.ts
-import { useParams, useSearchParams, useRouter as useRouter2, usePathname } from "next/navigation";
-import { useCallback as useCallback2, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback as useCallback3, useEffect as useEffect2, useMemo as useMemo2, useRef, useState as useState2 } from "react";
 import { toast as toast2 } from "sonner";
 function useFileState(options) {
   const {
@@ -380,16 +461,14 @@ function useFileState(options) {
     provider,
     onFilesSelected,
     onClose,
-    basePath
+    basePath,
+    onNavigate
   } = options;
-  const params = useParams();
-  const searchParams = useSearchParams();
-  const router = useRouter2();
-  const pathname = usePathname();
+  const { params, searchParams, push, replace, pathname } = useBrowserRouter({ basePath, onNavigate });
   const pageFromUrl = Math.max(1, Number.parseInt(searchParams.get("page") || "1", 10));
   const limitFromUrl = Math.max(1, Number.parseInt(searchParams.get("limit") || "24", 10));
   const queryFromUrl = searchParams.get("query") || "";
-  const folderId = useMemo(() => {
+  const folderId = useMemo2(() => {
     if (mode === MODE.PAGE && (params == null ? void 0 : params.path)) {
       const path = Array.isArray(params.path) ? params.path[0] : params.path;
       return typeof path === "string" && /^\d+$/.test(path) ? Number(path) : null;
@@ -402,13 +481,13 @@ function useFileState(options) {
     }
     return initialFolderId != null ? initialFolderId : null;
   }, [mode, params, searchParams, initialFolderId]);
-  const [files, setFiles] = useState([]);
-  const [folders, setFolders] = useState([]);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [selectedFolders, setSelectedFolders] = useState([]);
-  const [currentFolder, setCurrentFolder] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [pagination, setPagination] = useState({
+  const [files, setFiles] = useState2([]);
+  const [folders, setFolders] = useState2([]);
+  const [selectedFiles, setSelectedFiles] = useState2([]);
+  const [selectedFolders, setSelectedFolders] = useState2([]);
+  const [currentFolder, setCurrentFolder] = useState2(null);
+  const [isLoading, setIsLoading] = useState2(true);
+  const [pagination, setPagination] = useState2({
     currentPage: pageFromUrl,
     totalPages: 1,
     totalFiles: 0,
@@ -416,39 +495,44 @@ function useFileState(options) {
   });
   const currentFolderRef = useRef(null);
   currentFolderRef.current = currentFolder;
-  const [searchQuery, setSearchQuery] = useState(queryFromUrl);
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(queryFromUrl);
-  useEffect(() => {
+  const [searchQuery, setSearchQuery] = useState2(queryFromUrl);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState2(queryFromUrl);
+  useEffect2(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
     }, 300);
     return () => clearTimeout(handler);
   }, [searchQuery]);
   const prevFolderIdRef = useRef(folderId);
-  const updateUrlParams = useCallback2((page, limit) => {
-    const params2 = new URLSearchParams(searchParams.toString());
-    params2.set("page", page.toString());
-    params2.set("limit", limit.toString());
-    router.push(`${pathname}?${params2.toString()}`, { scroll: false });
-  }, [router, pathname, searchParams]);
-  useEffect(() => {
+  const updateUrlParams = useCallback3((page, limit, replaceUrl = false) => {
+    const urlParams = new URLSearchParams(searchParams.toString());
+    urlParams.set("page", page.toString());
+    urlParams.set("limit", limit.toString());
+    const newUrl = `${pathname}?${urlParams.toString()}`;
+    if (replaceUrl) {
+      replace(newUrl);
+    } else {
+      push(newUrl, { scroll: false });
+    }
+  }, [push, replace, pathname, searchParams]);
+  useEffect2(() => {
     setPagination((prev) => __spreadProps(__spreadValues({}, prev), {
       currentPage: pageFromUrl,
       filesPerPage: limitFromUrl
     }));
     setSearchQuery(queryFromUrl);
   }, [pageFromUrl, limitFromUrl, queryFromUrl]);
-  useEffect(() => {
+  useEffect2(() => {
     if (folderId !== prevFolderIdRef.current) {
       if (mode === MODE.PAGE) {
-        updateUrlParams(1, limitFromUrl);
+        updateUrlParams(1, limitFromUrl, true);
       }
       prevFolderIdRef.current = folderId;
     }
   }, [folderId, limitFromUrl, updateUrlParams, mode]);
   const currentPage = pagination.currentPage;
   const filesPerPage = pagination.filesPerPage;
-  useEffect(() => {
+  useEffect2(() => {
     let cancelled = false;
     const syncAndLoad = async () => {
       if (folderId && (!currentFolderRef.current || currentFolderRef.current.id !== folderId)) {
@@ -527,18 +611,18 @@ function useFileState(options) {
     filesPerPage,
     debouncedSearchQuery
   ]);
-  useEffect(() => {
+  useEffect2(() => {
     setSelectedFolders([]);
     setSelectedFiles([]);
   }, [currentFolder]);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [isMoveFileModalOpen, setIsMoveFileModalOpen] = useState(false);
-  const [isRenameFolderModalOpen, setIsRenameFolderModalOpen] = useState(false);
-  const [folderToRename, setFolderToRename] = useState(null);
-  const [fileDetailsModalFile, setFileDetailsModalFile] = useState(null);
-  const loadData = useCallback2(async (silent = false) => {
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState2(false);
+  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState2(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState2(false);
+  const [isMoveFileModalOpen, setIsMoveFileModalOpen] = useState2(false);
+  const [isRenameFolderModalOpen, setIsRenameFolderModalOpen] = useState2(false);
+  const [folderToRename, setFolderToRename] = useState2(null);
+  const [fileDetailsModalFile, setFileDetailsModalFile] = useState2(null);
+  const loadData = useCallback3(async (silent = false) => {
     var _a;
     if (!silent) {
       setIsLoading(true);
@@ -574,7 +658,7 @@ function useFileState(options) {
   }, [currentFolder, mode, acceptedFileTypesForModal, allowedFileTypes, provider, currentPage, filesPerPage, debouncedSearchQuery]);
   const isInSelectionMode = () => selectedFiles.length > 0 || selectedFolders.length > 0;
   const getCurrentFolder = () => currentFolder;
-  const getSelectionState = useMemo(() => {
+  const getSelectionState = useMemo2(() => {
     return () => {
       const totalItems = files.length + (mode === MODE.PAGE ? folders.length : 0);
       const selectedItems = selectedFiles.length + selectedFolders.length;
@@ -583,23 +667,23 @@ function useFileState(options) {
       return "indeterminate";
     };
   }, [files.length, folders.length, selectedFiles.length, selectedFolders.length, mode]);
-  const handlePageChange = useCallback2((newPage) => {
+  const handlePageChange = useCallback3((newPage) => {
     setPagination((prev) => __spreadProps(__spreadValues({}, prev), { currentPage: newPage }));
     if (mode === MODE.PAGE) {
       updateUrlParams(newPage, filesPerPage);
     }
   }, [updateUrlParams, filesPerPage, mode]);
-  const updateSearchQuery = useCallback2((newQuery) => {
+  const updateSearchQuery = useCallback3((newQuery) => {
     setSearchQuery(newQuery);
-    const params2 = new URLSearchParams(searchParams.toString());
+    const urlParams = new URLSearchParams(searchParams.toString());
     if (newQuery.trim()) {
-      params2.set("query", newQuery);
-      params2.set("page", "1");
+      urlParams.set("query", newQuery);
+      urlParams.set("page", "1");
     } else {
-      params2.delete("query");
+      urlParams.delete("query");
     }
-    router.push(`${pathname}?${params2.toString()}`, { scroll: false });
-  }, [router, pathname, searchParams]);
+    replace(`${pathname}?${urlParams.toString()}`);
+  }, [replace, pathname, searchParams]);
   return {
     // State
     files,
@@ -650,12 +734,13 @@ function useFileState(options) {
     provider,
     onFilesSelected,
     onClose,
-    basePath
+    basePath,
+    onNavigate
   };
 }
 
 // context/file-manager-context.tsx
-import { createContext, useContext, useMemo as useMemo2 } from "react";
+import { createContext, useContext, useMemo as useMemo3 } from "react";
 import { jsx } from "react/jsx-runtime";
 var FileManagerContext = createContext(void 0);
 function FileManagerProvider({
@@ -670,8 +755,9 @@ function FileManagerProvider({
   provider,
   basePath = "/media",
   maxUploadFiles = 50,
-  maxUploadSize = 100 * 1024 * 1024
+  maxUploadSize = 100 * 1024 * 1024,
   // 100MB
+  onNavigate
 }) {
   const state = useFileState({
     mode,
@@ -682,10 +768,11 @@ function FileManagerProvider({
     provider,
     onFilesSelected,
     onClose,
-    basePath
+    basePath,
+    onNavigate
   });
   const handlers = useFileHandlers(state);
-  const value = useMemo2(() => ({
+  const value = useMemo3(() => ({
     // State
     files: state.files,
     folders: state.folders,
@@ -2228,14 +2315,14 @@ function FileManagerHeader({
 }
 
 // components/modals/upload-modal.tsx
-import { useState as useState5 } from "react";
+import { useState as useState6 } from "react";
 
 // components/ui/dialog.tsx
 import { cva as cva2 } from "class-variance-authority";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { jsx as jsx45, jsxs as jsxs30 } from "react/jsx-runtime";
 var dialogContentVariants = cva2(
-  "flex flex-col fixed outline-0 z-50 border border-border bg-background shadow-lg shadow-black/5 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 rounded-2xl",
+  "flex flex-col fixed outline-0 z-50 border border-border bg-background text-foreground shadow-lg shadow-black/5 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 rounded-2xl",
   {
     variants: {
       variant: {
@@ -2624,7 +2711,7 @@ function getFileSize(bytes) {
 }
 
 // hooks/use-file-upload.ts
-import { useCallback as useCallback3, useRef as useRef2, useState as useState2, useEffect as useEffect2 } from "react";
+import { useCallback as useCallback4, useRef as useRef2, useState as useState3, useEffect as useEffect3 } from "react";
 var useFileUpload = (options = {}) => {
   const {
     maxFiles = Number.POSITIVE_INFINITY,
@@ -2636,7 +2723,7 @@ var useFileUpload = (options = {}) => {
     onFilesAdded,
     onError
   } = options;
-  const [state, setState] = useState2({
+  const [state, setState] = useState3({
     files: initialFiles.map((file) => ({
       file,
       id: file.id,
@@ -2646,7 +2733,7 @@ var useFileUpload = (options = {}) => {
     errors: []
   });
   const inputRef = useRef2(null);
-  useEffect2(() => {
+  useEffect3(() => {
     return () => {
       state.files.forEach((file) => {
         if (file.preview && file.file instanceof File) {
@@ -2655,7 +2742,7 @@ var useFileUpload = (options = {}) => {
       });
     };
   }, [state.files]);
-  const validateFile = useCallback3(
+  const validateFile = useCallback4(
     (file) => {
       if (file.size > maxSize) {
         return `File "${file.name}" exceeds the maximum size of ${getFileSize(maxSize)}.`;
@@ -2682,19 +2769,19 @@ var useFileUpload = (options = {}) => {
     },
     [accept, maxSize]
   );
-  const createPreview = useCallback3((file) => {
+  const createPreview = useCallback4((file) => {
     if (file instanceof File) {
       return URL.createObjectURL(file);
     }
     return file.url;
   }, []);
-  const generateUniqueId = useCallback3((file) => {
+  const generateUniqueId = useCallback4((file) => {
     if (file instanceof File) {
       return `${file.name}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     }
     return file.id.toString();
   }, []);
-  const clearFiles = useCallback3(() => {
+  const clearFiles = useCallback4(() => {
     setState((prev) => {
       for (const file of prev.files) {
         if (file.preview && file.file instanceof File && file.file.type.startsWith("image/")) {
@@ -2712,7 +2799,7 @@ var useFileUpload = (options = {}) => {
       return newState;
     });
   }, [onFilesChange]);
-  const addFiles = useCallback3(
+  const addFiles = useCallback4(
     (newFiles) => {
       if (!newFiles || newFiles.length === 0) return;
       const newFilesArray = Array.from(newFiles);
@@ -2787,7 +2874,7 @@ var useFileUpload = (options = {}) => {
       onError
     ]
   );
-  const removeFile = useCallback3(
+  const removeFile = useCallback4(
     (id) => {
       setState((prev) => {
         const fileToRemove = prev.files.find((file) => file.id === id);
@@ -2804,17 +2891,17 @@ var useFileUpload = (options = {}) => {
     },
     [onFilesChange]
   );
-  const clearErrors = useCallback3(() => {
+  const clearErrors = useCallback4(() => {
     setState((prev) => __spreadProps(__spreadValues({}, prev), {
       errors: []
     }));
   }, []);
-  const handleDragEnter = useCallback3((e) => {
+  const handleDragEnter = useCallback4((e) => {
     e.preventDefault();
     e.stopPropagation();
     setState((prev) => __spreadProps(__spreadValues({}, prev), { isDragging: true }));
   }, []);
-  const handleDragLeave = useCallback3((e) => {
+  const handleDragLeave = useCallback4((e) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.currentTarget.contains(e.relatedTarget)) {
@@ -2822,11 +2909,11 @@ var useFileUpload = (options = {}) => {
     }
     setState((prev) => __spreadProps(__spreadValues({}, prev), { isDragging: false }));
   }, []);
-  const handleDragOver = useCallback3((e) => {
+  const handleDragOver = useCallback4((e) => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
-  const handleDrop = useCallback3(
+  const handleDrop = useCallback4(
     (e) => {
       var _a;
       e.preventDefault();
@@ -2846,7 +2933,7 @@ var useFileUpload = (options = {}) => {
     },
     [addFiles, multiple]
   );
-  const handleFileChange = useCallback3(
+  const handleFileChange = useCallback4(
     (e) => {
       if (e.target.files && e.target.files.length > 0) {
         addFiles(e.target.files);
@@ -2854,12 +2941,12 @@ var useFileUpload = (options = {}) => {
     },
     [addFiles]
   );
-  const openFileDialog = useCallback3(() => {
+  const openFileDialog = useCallback4(() => {
     if (inputRef.current) {
       inputRef.current.click();
     }
   }, []);
-  const getInputProps = useCallback3(
+  const getInputProps = useCallback4(
     (props = {}) => {
       var _a;
       return __spreadProps(__spreadValues({}, props), {
@@ -3131,11 +3218,11 @@ var CloseButton = forwardRef(
 CloseButton.displayName = "CloseButton";
 
 // components/cards/image-card.tsx
-import { useState as useState3 } from "react";
+import { useState as useState4 } from "react";
 import { jsx as jsx51, jsxs as jsxs35 } from "react/jsx-runtime";
 function ImageCard({ file }) {
   var _a;
-  const [hasError, setHasError] = useState3(false);
+  const [hasError, setHasError] = useState4(false);
   const imageSrc = file.previewUrl || file.url;
   if (imageSrc && !hasError) {
     return /* @__PURE__ */ jsx51(
@@ -3160,10 +3247,10 @@ function ImageCardMetadata({ file }) {
 }
 
 // components/cards/video-card.tsx
-import { useState as useState4 } from "react";
+import { useState as useState5 } from "react";
 import { jsx as jsx52, jsxs as jsxs36 } from "react/jsx-runtime";
 function VideoCard({ file, className }) {
-  const [hasError, setHasError] = useState4(false);
+  const [hasError, setHasError] = useState5(false);
   if (file.previewUrl && !hasError) {
     return /* @__PURE__ */ jsxs36("div", { className: "relative w-full h-full", children: [
       /* @__PURE__ */ jsx52(
@@ -3314,7 +3401,7 @@ function UploadModal() {
   } = useFileManager();
   const acceptString = fileTypesToAccept(allowedFileTypes);
   const fileTypesDescription = getFileTypesDescription(allowedFileTypes);
-  const [uploadItems, setUploadItems] = useState5([]);
+  const [uploadItems, setUploadItems] = useState6([]);
   const [
     { isDragging, errors },
     {
@@ -3419,7 +3506,7 @@ function UploadModal() {
         "div",
         {
           className: cn(
-            "relative rounded-lg border-dashed border-[2.5px] bg-muted border-border px-6 py-16 text-center transition-colors mb-4",
+            "relative w-full rounded-xl border-2 border-dashed bg-muted border-muted-foreground/25 px-6 py-16 text-center transition-colors mb-4",
             isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-muted-foreground/50"
           ),
           onDragEnter: handleDragEnter,
@@ -3474,8 +3561,8 @@ function UploadModal() {
             iconClassName: "size-3"
           }
         ),
-        /* @__PURE__ */ jsxs39("div", { className: "relative overflow-hidden rounded-lg border bg-card transition-colors", children: [
-          /* @__PURE__ */ jsx57("div", { className: "relative aspect-square bg-muted border-b border-border", children: /* @__PURE__ */ jsx57("div", { className: "flex h-full items-center justify-center p-4", children: /* @__PURE__ */ jsx57("div", { className: "w-[75%] h-[75%] flex items-center justify-center", children: fileItem.status === "uploading" ? /* @__PURE__ */ jsxs39("div", { className: "relative w-full h-full flex items-center justify-center", children: [
+        /* @__PURE__ */ jsxs39("div", { className: "relative overflow-hidden rounded-lg border border-muted-foreground/25 bg-card transition-colors", children: [
+          /* @__PURE__ */ jsx57("div", { className: "relative aspect-square bg-muted border-muted-foreground/25", children: /* @__PURE__ */ jsx57("div", { className: "flex h-full items-center justify-center p-4", children: /* @__PURE__ */ jsx57("div", { className: "w-[75%] h-[75%] flex items-center justify-center", children: fileItem.status === "uploading" ? /* @__PURE__ */ jsxs39("div", { className: "relative w-full h-full flex items-center justify-center", children: [
             /* @__PURE__ */ jsxs39("svg", { className: "size-12 -rotate-90 absolute", viewBox: "0 0 48 48", children: [
               /* @__PURE__ */ jsx57(
                 "circle",
@@ -3547,7 +3634,7 @@ function UploadModal() {
 }
 
 // components/modals/create-folder.tsx
-import { useState as useState6 } from "react";
+import { useState as useState7 } from "react";
 
 // components/ui/input.tsx
 import { cva as cva4 } from "class-variance-authority";
@@ -3695,7 +3782,7 @@ function CreateFolderModal() {
     folderToRename,
     setFolderToRename
   } = useFileManager();
-  const [editedName, setEditedName] = useState6(null);
+  const [editedName, setEditedName] = useState7(null);
   const isRenameMode = isRenameFolderModalOpen;
   const isOpen = isCreateFolderModalOpen || isRenameFolderModalOpen;
   const defaultFolderName = isRenameMode && folderToRename ? folderToRename.name : "";
@@ -3774,7 +3861,7 @@ function CreateFolderModal() {
 }
 
 // components/modals/move-modal.tsx
-import { useState as useState8, useEffect as useEffect4, useCallback as useCallback4, useRef as useRef4 } from "react";
+import { useState as useState9, useEffect as useEffect5, useCallback as useCallback5, useRef as useRef4 } from "react";
 
 // lib/truncate-name.ts
 function middleTruncate(text, maxLength = 30) {
@@ -3785,16 +3872,16 @@ function middleTruncate(text, maxLength = 30) {
 }
 
 // hooks/use-intersection-observer.ts
-import { useEffect as useEffect3, useRef as useRef3, useState as useState7 } from "react";
+import { useEffect as useEffect4, useRef as useRef3, useState as useState8 } from "react";
 function useIntersectionObserver({
   threshold = 0,
   root = null,
   rootMargin = "0%"
 } = {}) {
-  const [entry, setEntry] = useState7();
-  const [node, setNode] = useState7(null);
+  const [entry, setEntry] = useState8();
+  const [node, setNode] = useState8(null);
   const observer = useRef3(null);
-  useEffect3(() => {
+  useEffect4(() => {
     if (observer.current) {
       observer.current.disconnect();
     }
@@ -3829,7 +3916,7 @@ function FolderTreeItem({
   treeState
 }) {
   var _a;
-  const [isOpen, setIsOpen] = useState8(false);
+  const [isOpen, setIsOpen] = useState9(false);
   const hasChildren = ((_a = folder.folderCount) != null ? _a : 0) > 0;
   const isSelected = selectedFolderId === folder.id;
   const isDisabled = disabledFolderIds.includes(folder.id);
@@ -3842,7 +3929,7 @@ function FolderTreeItem({
     rootMargin: "100px"
   });
   const hasMore = pagination && pagination.currentPage < pagination.totalPages;
-  useEffect4(() => {
+  useEffect5(() => {
     if (isOpen && (entry == null ? void 0 : entry.isIntersecting) && hasMore && !isLoading) {
       const nextPage = ((pagination == null ? void 0 : pagination.currentPage) || 1) + 1;
       onLoadChildren(folder.id, nextPage);
@@ -3930,8 +4017,8 @@ function MoveModal() {
     bulkMove,
     provider
   } = useFileManager();
-  const [targetFolderId, setTargetFolderId] = useState8(void 0);
-  const [treeState, setTreeState] = useState8({
+  const [targetFolderId, setTargetFolderId] = useState9(void 0);
+  const [treeState, setTreeState] = useState9({
     folders: /* @__PURE__ */ new Map(),
     loading: /* @__PURE__ */ new Set(),
     loaded: /* @__PURE__ */ new Set(),
@@ -3948,7 +4035,7 @@ function MoveModal() {
   const isRootLoading = treeState.loading.has(null);
   const disabledFolderIds = selectedFolders.map((f) => f.id);
   const rootFolders = treeState.folders.get(null) || [];
-  const loadFolders = useCallback4(async (folderId, page = 1) => {
+  const loadFolders = useCallback5(async (folderId, page = 1) => {
     if (fetchingRef.current.has(folderId)) return;
     fetchingRef.current.add(folderId);
     setTreeState((prev) => __spreadProps(__spreadValues({}, prev), {
@@ -3988,7 +4075,7 @@ function MoveModal() {
       fetchingRef.current.delete(folderId);
     }
   }, [provider]);
-  useEffect4(() => {
+  useEffect5(() => {
     if (isMoveFileModalOpen) {
       if (!hasInitializedRef.current) {
         hasInitializedRef.current = true;
@@ -3998,7 +4085,7 @@ function MoveModal() {
       hasInitializedRef.current = false;
     }
   }, [isMoveFileModalOpen, loadFolders]);
-  useEffect4(() => {
+  useEffect5(() => {
     if (isMoveFileModalOpen && (rootEntry == null ? void 0 : rootEntry.isIntersecting) && rootHasMore && !isRootLoading) {
       const nextPage = ((rootPagination == null ? void 0 : rootPagination.currentPage) || 1) + 1;
       loadFolders(null, nextPage);
@@ -4094,7 +4181,7 @@ function MoveModal() {
 }
 
 // components/modals/image-modal.tsx
-import { useState as useState10 } from "react";
+import { useState as useState11 } from "react";
 
 // components/file-details/details-layout.tsx
 import { jsx as jsx61, jsxs as jsxs42 } from "react/jsx-runtime";
@@ -4132,11 +4219,11 @@ function DetailsLayout({
 
 // components/file-details/file-action-buttons.tsx
 import { toast as toast3 } from "sonner";
-import { useState as useState9 } from "react";
+import { useState as useState10 } from "react";
 import { jsx as jsx62 } from "react/jsx-runtime";
 function FileDeleteButton({ file }) {
   const { provider, setFileDetailsModalFile, refreshData } = useFileManager();
-  const [deleting, setDeleting] = useState9(false);
+  const [deleting, setDeleting] = useState10(false);
   const handleDelete = async () => {
     setDeleting(true);
     try {
@@ -4166,7 +4253,7 @@ function FileDeleteButton({ file }) {
   );
 }
 function FileDownloadButton({ file }) {
-  const [downloading, setDownloading] = useState9(false);
+  const [downloading, setDownloading] = useState10(false);
   const handleDownload = async () => {
     setDownloading(true);
     try {
@@ -4198,7 +4285,7 @@ function FileDownloadButton({ file }) {
   );
 }
 function FileCopyLinkButton({ file }) {
-  const [copied, setCopied] = useState9(false);
+  const [copied, setCopied] = useState10(false);
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(file.url);
@@ -4319,7 +4406,7 @@ function formatDuration(seconds) {
 }
 
 // components/ui/field.tsx
-import { useMemo as useMemo3 } from "react";
+import { useMemo as useMemo4 } from "react";
 import { cva as cva7 } from "class-variance-authority";
 import { jsx as jsx65, jsxs as jsxs43 } from "react/jsx-runtime";
 var fieldVariants = cva7(
@@ -4501,10 +4588,10 @@ function InputGroupInput(_a) {
 import { jsx as jsx67, jsxs as jsxs44 } from "react/jsx-runtime";
 function ImageModal({ file, onClose, onSave }) {
   var _a;
-  const [isSaving, setIsSaving] = useState10(false);
-  const [fileName, setFileName] = useState10(file.name);
-  const [alternativeText, setAlternativeText] = useState10(file.alternativeText || "");
-  const [caption, setCaption] = useState10(file.caption || "");
+  const [isSaving, setIsSaving] = useState11(false);
+  const [fileName, setFileName] = useState11(file.name);
+  const [alternativeText, setAlternativeText] = useState11(file.alternativeText || "");
+  const [caption, setCaption] = useState11(file.caption || "");
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -4627,13 +4714,13 @@ function ImageModal({ file, onClose, onSave }) {
 }
 
 // components/modals/video-modal.tsx
-import { useState as useState11 } from "react";
+import { useState as useState12 } from "react";
 import { jsx as jsx68, jsxs as jsxs45 } from "react/jsx-runtime";
 function VideoModal({ file, onClose, onSave }) {
   var _a, _b, _c;
-  const [isSaving, setIsSaving] = useState11(false);
-  const [fileName, setFileName] = useState11(file.name);
-  const [caption, setCaption] = useState11(file.caption || "");
+  const [isSaving, setIsSaving] = useState12(false);
+  const [fileName, setFileName] = useState12(file.name);
+  const [caption, setCaption] = useState12(file.caption || "");
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -4734,13 +4821,13 @@ function VideoModal({ file, onClose, onSave }) {
 }
 
 // components/modals/audio-modal.tsx
-import { useState as useState12 } from "react";
+import { useState as useState13 } from "react";
 import { jsx as jsx69, jsxs as jsxs46 } from "react/jsx-runtime";
 function AudioModal({ file, onClose, onSave }) {
   var _a, _b, _c;
-  const [isSaving, setIsSaving] = useState12(false);
-  const [fileName, setFileName] = useState12(file.name);
-  const [caption, setCaption] = useState12(file.caption || "");
+  const [isSaving, setIsSaving] = useState13(false);
+  const [fileName, setFileName] = useState13(file.name);
+  const [caption, setCaption] = useState13(file.caption || "");
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -4842,13 +4929,13 @@ function AudioModal({ file, onClose, onSave }) {
 }
 
 // components/modals/file-modal.tsx
-import { useState as useState13 } from "react";
+import { useState as useState14 } from "react";
 import { jsx as jsx70, jsxs as jsxs47 } from "react/jsx-runtime";
 function FileModal({ file, onClose, onSave }) {
   var _a, _b, _c, _d;
-  const [isSaving, setIsSaving] = useState13(false);
-  const [fileName, setFileName] = useState13(file.name);
-  const [description, setDescription] = useState13(((_a = file.metaData) == null ? void 0 : _a.description) || "");
+  const [isSaving, setIsSaving] = useState14(false);
+  const [fileName, setFileName] = useState14(file.name);
+  const [description, setDescription] = useState14(((_a = file.metaData) == null ? void 0 : _a.description) || "");
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -5162,7 +5249,6 @@ function Skeleton(_a) {
 }
 
 // components/layout/header-navigation.tsx
-import { useRouter as useRouter3 } from "next/navigation";
 import { Fragment, jsx as jsx75, jsxs as jsxs50 } from "react/jsx-runtime";
 function HeaderNavigation() {
   const {
@@ -5170,9 +5256,8 @@ function HeaderNavigation() {
     handleFolderClick,
     isLoading
   } = useFileManager();
-  const router = useRouter3();
   const handleBackClick = () => {
-    router.back();
+    history.back();
   };
   if (isLoading) {
     return /* @__PURE__ */ jsxs50("div", { className: "flex item-center w-full", children: [
@@ -5279,7 +5364,7 @@ function DropdownMenuSeparator(_a) {
 }
 
 // components/modals/search-modal.tsx
-import { useCallback as useCallback5, useEffect as useEffect6, useState as useState15 } from "react";
+import { useCallback as useCallback6, useEffect as useEffect7, useState as useState16 } from "react";
 
 // components/ui/command.tsx
 import { Command as CommandPrimitive } from "cmdk";
@@ -5368,10 +5453,10 @@ function CommandItem(_a) {
 }
 
 // hooks/use-debounced-value.ts
-import { useEffect as useEffect5, useState as useState14 } from "react";
+import { useEffect as useEffect6, useState as useState15 } from "react";
 function useDebouncedValue(value, delay2 = 500) {
-  const [debouncedValue, setDebouncedValue] = useState14(value);
-  useEffect5(() => {
+  const [debouncedValue, setDebouncedValue] = useState15(value);
+  useEffect6(() => {
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay2);
@@ -5386,13 +5471,13 @@ function useDebouncedValue(value, delay2 = 500) {
 import { toast as toast4 } from "sonner";
 import { Fragment as Fragment2, jsx as jsx78, jsxs as jsxs53 } from "react/jsx-runtime";
 function SearchDialog() {
-  const [searchQuery, setSearchQuery] = useState15("");
-  const [fileResults, setFileResults] = useState15([]);
-  const [folderResults, setFolderResults] = useState15([]);
-  const [loading, setLoading] = useState15(false);
+  const [searchQuery, setSearchQuery] = useState16("");
+  const [fileResults, setFileResults] = useState16([]);
+  const [folderResults, setFolderResults] = useState16([]);
+  const [loading, setLoading] = useState16(false);
   const { provider, handleFolderClick, handleClearSelection, isSearchModalOpen, setIsSearchModalOpen, setFileDetailsModalFile } = useFileManager();
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
-  const doSearch = useCallback5(async (q) => {
+  const doSearch = useCallback6(async (q) => {
     setLoading(true);
     try {
       const [files, folders] = await Promise.all([
@@ -5412,7 +5497,7 @@ function SearchDialog() {
       setLoading(false);
     }
   }, [provider]);
-  useEffect6(() => {
+  useEffect7(() => {
     if (isSearchModalOpen && debouncedSearchQuery.length > 0) {
       doSearch(debouncedSearchQuery);
     } else {
@@ -5588,7 +5673,7 @@ function CreateFolderAction() {
 }
 
 // components/layout/theme-toggle.tsx
-import { useEffect as useEffect7, useState as useState16 } from "react";
+import { useEffect as useEffect8, useState as useState17 } from "react";
 
 // components/icons/theme.tsx
 import { jsx as jsx81, jsxs as jsxs56 } from "react/jsx-runtime";
@@ -5635,8 +5720,8 @@ function MoonIcon(props) {
 // components/layout/theme-toggle.tsx
 import { jsx as jsx82 } from "react/jsx-runtime";
 function ThemeToggle() {
-  const [isDark, setIsDark] = useState16(false);
-  useEffect7(() => {
+  const [isDark, setIsDark] = useState17(false);
+  useEffect8(() => {
     const saved = localStorage.getItem("theme");
     const shouldBeDark = saved === "dark";
     setIsDark(shouldBeDark);
@@ -6274,7 +6359,7 @@ var FileManagerErrorBoundary = class extends Component {
 };
 
 // components/keyboard-shortcuts.tsx
-import { useEffect as useEffect8 } from "react";
+import { useEffect as useEffect9 } from "react";
 function KeyboardShortcuts() {
   const {
     handleSelectAllGlobal,
@@ -6287,7 +6372,7 @@ function KeyboardShortcuts() {
     isSearchModalOpen,
     setIsSearchModalOpen
   } = useFileManager();
-  useEffect8(() => {
+  useEffect9(() => {
     const handleKeyDown = (e) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -6323,7 +6408,7 @@ function FileManager(props) {
   return /* @__PURE__ */ jsx90(FileManagerErrorBoundary, { children: /* @__PURE__ */ jsxs64(FileManagerComposition.Page, __spreadProps(__spreadValues({}, props), { children: [
     /* @__PURE__ */ jsx90(KeyboardShortcuts, {}),
     /* @__PURE__ */ jsxs64("div", { className: "flex h-full relative pb-12 overflow-hidden bg-background text-foreground", children: [
-      /* @__PURE__ */ jsxs64("div", { className: "flex-1 flex w-full flex-col", children: [
+      /* @__PURE__ */ jsxs64("div", { className: "flex-1 flex w-full flex-col overflow-y-auto", children: [
         /* @__PURE__ */ jsx90(FileManagerComposition.Header, { children: /* @__PURE__ */ jsxs64("div", { className: "flex w-full justify-between gap-2", children: [
           /* @__PURE__ */ jsx90(HeaderNavigation, {}),
           /* @__PURE__ */ jsx90(ResponsiveHeaderActions, {})
@@ -6338,7 +6423,7 @@ function FileManager(props) {
 }
 
 // components/file-manager-modal.tsx
-import { useState as useState17, useRef as useRef5, useEffect as useEffect9 } from "react";
+import { useState as useState18, useRef as useRef5, useEffect as useEffect10 } from "react";
 import { Fragment as Fragment4, jsx as jsx91, jsxs as jsxs65 } from "react/jsx-runtime";
 function FileManagerModal(_a) {
   var _b = _a, {
@@ -6352,14 +6437,14 @@ function FileManagerModal(_a) {
 }
 function ModalContent({ onClose }) {
   const { updateSearchQuery } = useFileManager();
-  const [isSearchActive, setIsSearchActive] = useState17(false);
-  const [searchInput, setSearchInput] = useState17("");
+  const [isSearchActive, setIsSearchActive] = useState18(false);
+  const [searchInput, setSearchInput] = useState18("");
   const searchInputRef = useRef5(null);
   const debouncedSearch = useDebouncedValue(searchInput, 300);
-  useEffect9(() => {
+  useEffect10(() => {
     updateSearchQuery(debouncedSearch);
   }, [debouncedSearch, updateSearchQuery]);
-  useEffect9(() => {
+  useEffect10(() => {
     if (isSearchActive && searchInputRef.current) {
       searchInputRef.current.focus();
     }

@@ -4,7 +4,7 @@ import { useCallback, MouseEvent } from "react";
 import { FileState } from "./use-file-state";
 import { FileMetaData, Folder, FolderId, MODE } from "@/types/file-manager";
 import { FileUploadInput } from "@/types/provider";
-import { useRouter } from "next/navigation";
+import { useBrowserRouter } from "./use-browser-router";
 import { toast } from "sonner";
 
 /**
@@ -76,7 +76,7 @@ export function useFileHandlers(state: FileState) {
     setFileDetailsModalFile,
   } = state;
 
-  const router = useRouter();
+  const { push } = useBrowserRouter({ basePath: state.basePath, onNavigate: state.onNavigate });
 
 
   /**
@@ -170,8 +170,9 @@ export function useFileHandlers(state: FileState) {
         // PAGE mode: Navigate via URL - let URL change trigger state updates
         setIsLoading(true);
         const path = basePath ?? '/media';
-        const newUrl = folderId === null ? path : `${path}/${folderId}`;
-        router.push(newUrl);
+        const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+        const newUrl = folderId === null ? normalizedPath : `${normalizedPath}/${folderId}`;
+        push(newUrl);
       } else {
         // MODAL mode: Update URL with folderId and let state sync from URL
         setIsLoading(true);
@@ -191,10 +192,10 @@ export function useFileHandlers(state: FileState) {
         params.set('page', '1');
         
         const newUrl = `${globalThis.location.pathname}?${params.toString()}`;
-        router.push(newUrl, { scroll: false });
+        push(newUrl, { scroll: false });
       }
     },
-    [isInSelectionMode, mode, router, setSelectedFolders, setSelectedFiles, basePath, setIsLoading]
+    [isInSelectionMode, mode, push, setSelectedFolders, setSelectedFiles, basePath, setIsLoading]
   );
 
   /**

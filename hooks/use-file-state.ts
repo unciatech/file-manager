@@ -9,7 +9,7 @@ import {
   MODE,
   PaginationInfo,
 } from "@/types/file-manager";
-import { useParams, useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useBrowserRouter } from "./use-browser-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -24,13 +24,11 @@ export function useFileState(options: FileStateOptions) {
     onFilesSelected,
     onClose,
     basePath,
+    onNavigate,
   } = options;
 
 
-  const params = useParams();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  const { params, searchParams, push, replace, pathname } = useBrowserRouter({ basePath, onNavigate });
   
   // Read pagination from URL
   const pageFromUrl = Math.max(1, Number.parseInt(searchParams.get('page') || '1', 10));
@@ -96,13 +94,19 @@ export function useFileState(options: FileStateOptions) {
 
 
   // Update URL params helper
-  const updateUrlParams = useCallback((page: number, limit: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('page', page.toString());
-    params.set('limit', limit.toString());
+  const updateUrlParams = useCallback((page: number, limit: number, replaceUrl = false) => {
+    const urlParams = new URLSearchParams(searchParams.toString());
+    urlParams.set('page', page.toString());
+    urlParams.set('limit', limit.toString());
     
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [router, pathname, searchParams]);
+    const qs = urlParams.toString();
+    const newUrl = qs ? `${pathname}?${qs}` : pathname;
+    if (replaceUrl) {
+      replace(newUrl);
+    } else {
+      push(newUrl, { scroll: false });
+    }
+  }, [push, replace, pathname, searchParams]);
   
   // Sync state when URL changes (browser back/forward)
   useEffect(() => {
@@ -119,7 +123,8 @@ export function useFileState(options: FileStateOptions) {
     if (folderId !== prevFolderIdRef.current) {
       // Only update URL params in PAGE mode, not MODAL mode
       if (mode === MODE.PAGE) {
-        updateUrlParams(1, limitFromUrl);
+        // Use replace to avoid double history entries when clicking a folder
+        updateUrlParams(1, limitFromUrl, true);
       }
       prevFolderIdRef.current = folderId;
     }
@@ -318,17 +323,19 @@ export function useFileState(options: FileStateOptions) {
     setSearchQuery(newQuery);
     
     // Update URL param dynamically based on input length
-    const params = new URLSearchParams(searchParams.toString());
+    const urlParams = new URLSearchParams(searchParams.toString());
     if (newQuery.trim()) {
-      params.set('query', newQuery);
-      params.set('page', '1'); // Reset to page 1 on new search
+      urlParams.set('query', newQuery);
+      urlParams.set('page', '1'); // Reset to page 1 on new search
     } else {
-      params.delete('query');
+      urlParams.delete('query');
     }
     
     // We intentionally ignore scroll updates for smooth inline typing
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [router, pathname, searchParams]); // Now searchParams is intentionally tracked
+    // Use replace for search queries so we don't spam the back button history
+    const qs = urlParams.toString();
+    replace(qs ? `${pathname}?${qs}` : pathname);
+  }, [replace, pathname, searchParams]); // searchParams is intentionally tracked
 
   return {
     // State
@@ -388,6 +395,7 @@ export function useFileState(options: FileStateOptions) {
     onFilesSelected,
     onClose,
     basePath,
+    onNavigate,
   };
 }
 

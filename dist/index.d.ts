@@ -1,5 +1,5 @@
-import { F as FileManagerPageProps, a as FileManagerModalProps, b as FileManagerRootProps, c as FileMetaData, d as Folder, P as PaginationInfo, M as Mode, S as SelectionMode, e as FileType, I as IFileManagerProvider, f as FileUploadInput, g as FolderId, E as EntityId } from './mock-provider-nCBvw7nl.js';
-export { h as FILE_TYPE, i as FILE_TYPES, j as FileStateOptions, k as FormatDetails, l as MODE, m as MODES, n as MetaDataType, o as MockProvider, p as SELECTION_MODE, q as SELECTION_MODES, T as Tag, V as VIDEO_SOURCE, r as VIDEO_SOURCES, s as VIEW_MODE, t as VIEW_MODES, u as VideoSource, v as ViewMode } from './mock-provider-nCBvw7nl.js';
+import { F as FileManagerPageProps, a as FileManagerModalProps, b as FileManagerRootProps, c as FileMetaData, d as Folder, P as PaginationInfo, M as Mode, S as SelectionMode, e as FileType, I as IFileManagerProvider, f as FileUploadInput, g as FolderId, E as EntityId } from './mock-provider-CyWDSTkN.js';
+export { h as FILE_TYPE, i as FILE_TYPES, j as FileStateOptions, k as FormatDetails, l as MODE, m as MODES, n as MetaDataType, o as MockProvider, p as SELECTION_MODE, q as SELECTION_MODES, T as Tag, V as VIDEO_SOURCE, r as VIDEO_SOURCES, s as VIEW_MODE, t as VIEW_MODES, u as VideoSource, v as ViewMode } from './mock-provider-CyWDSTkN.js';
 import * as react_jsx_runtime from 'react/jsx-runtime';
 
 declare function FileManager(props: Readonly<FileManagerPageProps>): react_jsx_runtime.JSX.Element;
@@ -58,7 +58,8 @@ interface FileManagerContextType {
     onClose?: () => void;
     onFilesSelected?: (files: FileMetaData[]) => void;
 }
-declare function FileManagerProvider({ children, mode, selectionMode, allowedFileTypes, onFilesSelected, onClose, acceptedFileTypesForModal, initialFolderId, provider, basePath, maxUploadFiles, maxUploadSize, }: FileManagerRootProps & {
+declare function FileManagerProvider({ children, mode, selectionMode, allowedFileTypes, onFilesSelected, onClose, acceptedFileTypesForModal, initialFolderId, provider, basePath, maxUploadFiles, maxUploadSize, // 100MB
+onNavigate, }: FileManagerRootProps & {
     children: React.ReactNode;
 }): react_jsx_runtime.JSX.Element;
 declare function useFileManager(): FileManagerContextType;

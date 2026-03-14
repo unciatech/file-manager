@@ -17,7 +17,7 @@ export function FileManager(props: Readonly<FileManagerPageProps>) {
         <KeyboardShortcuts />
         <div className="flex h-full relative pb-12 overflow-hidden bg-background text-foreground">
           {/* Main Content */}
-          <div className="flex-1 flex w-full flex-col">
+          <div className="flex-1 flex w-full flex-col overflow-y-auto">
             <FileManagerComposition.Header>
               <div className="flex w-full justify-between gap-2">
                 <HeaderNavigation />

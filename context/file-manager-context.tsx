@@ -99,6 +99,7 @@ export function FileManagerProvider({
   basePath = "/media",
   maxUploadFiles = 50,
   maxUploadSize = 100 * 1024 * 1024, // 100MB
+  onNavigate,
 }: FileManagerRootProps & { children: React.ReactNode }) {
   
    // Use the state hook
@@ -112,6 +113,7 @@ export function FileManagerProvider({
     onFilesSelected,
     onClose,
     basePath,
+    onNavigate,
   });
 
     // Use the handlers hook

@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { middleTruncate } from "@/lib/truncate-name";
 import { ChevronLeftIcon, HomeIcon } from "../icons";
 import { Skeleton } from "../ui/skeleton";
-import { useRouter } from "next/navigation";
+
 
 export function HeaderNavigation() {
   const {
@@ -12,10 +12,8 @@ export function HeaderNavigation() {
     isLoading,
   } = useFileManager();
 
-  const router = useRouter();
-
   const handleBackClick = () => {
-    router.back();
+    history.back();
   };
 
   if(isLoading) {

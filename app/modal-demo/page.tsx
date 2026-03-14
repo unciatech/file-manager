@@ -66,6 +66,7 @@ function ModalDemoContent() {
         allowedFileTypes={["images", "videos", "audios", "files"]}
         fileSelectionMode={SELECTION_MODE.MULTIPLE}
         onFilesSelected={handleFilesSelected}
+        basePath="/media"
       />
     </div>
   );
