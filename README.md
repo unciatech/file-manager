@@ -1,517 +1,398 @@
 # 🗂️ File Manager
 
-A robust, production-ready file management component for any **React** application — works with Vite, Next.js, Remix, CRA, and more.
+A robust, production-ready file management component for **React applications**.
 
-It supports deep folder nesting, drag-and-drop file uploads, metadata management for various file types (Images, Videos, Audio, Documents), unified grid layouts, and fully optimized loading states.
+It works with **Vite, Next.js, Remix, CRA**, and other React frameworks.
 
-## 🌟 Key Features
-- **Dual Operating Modes**: Use it as a standalone full-page media library or instantiate it as a picker modal for form inputs.
-- **Unified Grid View**: Beautiful, responsive layout that intelligently renders thumbnails, icons, and metadata based on the file's MIME type.
-- **Nested Folder Structure**: Infinite folder depth with smooth virtualized/paginated fetching.
-- **Provider Agnostic**: Built on an `IFileManagerProvider` interface. You can easily hot-swap the mock data provider for a real backend (Node.js, Supabase, Strapi, etc.).
-- **Bulk Actions**: Select multiple files/folders at once to bulk move or bulk delete.
-- **Optimistic UI Updates**: Instant visual feedback when renaming folders or updating file descriptions, with silent background synchronization.
-- **Graceful Error Handling**: Resilient `<FileManagerErrorBoundary>` that captures catastrophic failures and allows users to hard-reload safely without app crashes.
+The library supports deep folder hierarchies, drag-and-drop uploads, metadata management for multiple file types (Images, Videos, Audio, Documents), and a responsive grid interface optimized for large media libraries.
 
-## 🛠️ Tech Stack
-- **Framework**: React (any — Vite, Next.js, Remix, CRA)
-- **Styling**: Tailwind CSS
-- **Icons**: Custom SVG Icons
-- **Notifications**: Sonner
+---
 
-> [!WARNING]
-> This library is currently in **BETA**. Please report any bugs or feature requests on the GitHub issues page.
+# 🌟 Key Features
 
-## Setup & Requirements
+* **Dual Operating Modes** - Use as a full-page media library or as a picker modal.
+* **Unified Grid View** - Responsive layout that intelligently renders thumbnails, icons, and metadata.
+* **Nested Folder Structure** - Infinite folder depth with smooth paginated fetching.
+* **Provider Agnostic** - Integrates with any backend through the `IFileManagerProvider` interface.
+* **Bulk Actions** - Select and move/delete multiple files or folders.
+* **Optimistic UI Updates** - Instant UI feedback with background synchronization.
+* **Error Boundary Protection** - Built-in `<FileManagerErrorBoundary>` prevents crashes.
 
-Because this library relies heavily on Tailwind CSS for minimal zero-config styling, ensure your app is configured to scan the library's components for Tailwind utility classes.
+---
 
-### Tailwind v4
-If you are using **Tailwind CSS v4** (like in newer Next.js or Vite projects), add this to your main CSS file (`globals.css` or `index.css`). This pulls in the required theme configuration and ensures the library is scanned:
+# 📦 Installation
 
-```css
-@import "tailwindcss";
-@import "@unciatech/file-manager/styles";
-@source "../node_modules/@unciatech/file-manager";
-```
+Install the file manager and required utilities:
 
-### Tailwind v3
-If you are still on **Tailwind v3**, add the library path to your `tailwind.config.ts`:
-
-```ts
-content: [
-  // ... your other paths
-  "./node_modules/@unciatech/file-manager/dist/**/*.{js,ts,jsx,tsx}",
-],
-```
-
-## Basic Usage in Your Project
-
-Integrating the File Manager into your React application (Next.js, Vite, Remix, CRA, etc.) is easy. 
-
-### Step 1: Install Dependencies
-
-Install the core library along with its Radix UI and Tailwind dependencies:
 ```bash
 npm install @unciatech/file-manager class-variance-authority clsx tailwind-merge
 ```
 
-> **Note:** The file manager uses **Tailwind CSS**. Ensure your project has Tailwind properly configured.
+> ⚠️ This library relies on **Tailwind CSS** for styling.
+> If your project does not use Tailwind yet, install it in Step 3.
 
-**(CRITICAL) Import the styles:**
-Import the styles in your root layout (`layout.tsx` for Next.js) or top-level file (`main.tsx` / `App.tsx` for Vite):
-```ts
-import '@unciatech/file-manager/styles';
-```
+---
 
-### Step 2: Create your Custom API Provider
+# ⚡ Quick Start
 
-The file manager is completely agnostic to your backend database. You simply need to create a class that implements the `IFileManagerProvider` interface.
+You can instantly test the UI using the built-in `MockProvider`.
 
-Here is an example of what your custom provider might look like, making real API calls to your backend using `fetch`:
+```tsx
+import { FileManager, MockProvider } from "@unciatech/file-manager"
 
-```typescript
-// lib/my-api-provider.ts
-import { 
-  IFileManagerProvider, 
-  FolderId, 
-  FileUploadInput 
-} from "@/types/file-manager"; // Or "@unciatech/file-manager" for external users
+const provider = new MockProvider()
 
-export class MyCustomApiProvider implements IFileManagerProvider {
-  private baseUrl = "https://api.mybackend.com/v1";
-
-  // Example 1: Fetching folders from your Real API
-  async getFolders(folderId: FolderId, page = 1, limit = 24) {
-    const parentQuery = folderId ? `&parentId=${folderId}` : "&isRoot=true";
-    
-    // Simulate real API Call
-    const res = await fetch(`${this.baseUrl}/folders?page=${page}&limit=${limit}${parentQuery}`);
-    
-    if (!res.ok) throw new Error("Failed to fetch folders");
-    
-    const data = await res.json();
-    
-    return {
-      folders: data.folders, // Array of Folder objects matching our interface
-      pagination: data.pagination // { currentPage, totalPages, totalFiles, filesPerPage }
-    };
-  }
-
-  // Example 2: Uploading files via multipart/form-data
-  async uploadFiles(filesInput: FileUploadInput[], folderId?: FolderId) {
-    const formData = new FormData();
-    if (folderId) formData.append("folderId", String(folderId));
-    
-    filesInput.forEach(({ file }) => {
-      formData.append("files", file);
-    });
-
-    const res = await fetch(`${this.baseUrl}/upload`, {
-      method: 'POST',
-      body: formData
-    });
-
-    return res.json(); // Returns array of FileMetaData
-  }
-
-  // ... Implement the remaining interface methods (getFiles, renameFolder, bulkMove, etc.)
+export default function App() {
+  return (
+    <FileManager
+      provider={provider}
+      basePath="/"
+      viewMode="grid"
+      allowedFileTypes={["images", "videos", "files"]}
+    />
+  )
 }
 ```
 
-> **💡 Pro Tip - The Mock Provider:**
-> If you are just prototyping and don't have a backend ready yet, you can skip Step 2 entirely! We included a fully functional `MockProvider` that fakes network latency and stores data in memory. Just import it and use it right away to see the UI in action.
+---
 
-### Step 3: Application Setup  
+# 🛠 Setup & Requirements
 
-Below are the complete setup guides for integrating the components into the two most popular React frameworks.  
+## Step 1 - Install the Library
 
-<details open>
-<summary><b>Example A: Vite (React Router)</b></summary>
-<br>
+```bash
+npm install @unciatech/file-manager class-variance-authority clsx tailwind-merge
+```
 
-**1. Set up the Router Shell (`src/main.tsx`)**
-Wrap your application in `BrowserRouter`:
+---
+
+## Step 2 - Import Styles
+
+Import the file manager styles in your root file.
+
+### Vite / React
+
+```ts
+import "@unciatech/file-manager/styles"
+```
+
+Place this inside:
+
+```
+main.tsx or App.tsx
+```
+
+### Next.js
+
+Import inside your root layout:
+
+```ts
+import "@unciatech/file-manager/styles"
+```
+
+Place this in:
+
+```
+app/layout.tsx
+```
+
+---
+
+# Step 3 - Configure Tailwind CSS
+
+This library relies heavily on **Tailwind CSS**.
+
+If your project **already uses Tailwind**, follow Option A.
+If **not**, follow Option B.
+
+---
+
+## Option A - Project Already Uses Tailwind
+
+### Tailwind v4
+
+Add this to your main CSS file (`globals.css` or `index.css`):
+
+```css
+@import "tailwindcss";
+@import "@unciatech/file-manager/styles";
+
+@source "../node_modules/@unciatech/file-manager";
+```
+
+---
+
+### Tailwind v3
+
+Update your `tailwind.config.ts`:
+
+```ts
+content: [
+  "./node_modules/@unciatech/file-manager/dist/**/*.{js,ts,jsx,tsx}",
+]
+```
+
+---
+
+## Option B - Install Tailwind CSS
+
+```bash
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+```
+
+Update `tailwind.config.ts`:
+
+```ts
+content: [
+  "./index.html",
+  "./src/**/*.{js,ts,jsx,tsx}",
+  "./node_modules/@unciatech/file-manager/dist/**/*.{js,ts,jsx,tsx}",
+]
+```
+
+Add to `index.css` or `globals.css`:
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "@unciatech/file-manager/styles";
+```
+
+---
+
+# Step 4 - Create Your Custom API Provider
+
+> 💡 **Pro Tip - The Mock Provider**
+> If you are just prototyping and don't have a backend ready yet, you can skip this step entirely.
+>
+> The library includes a fully functional `MockProvider` that simulates network latency and stores data in memory.
+
+Example:
+
 ```tsx
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App';
-import './index.css';
+import { FileManager, MockProvider } from "@unciatech/file-manager"
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const provider = new MockProvider()
+
+<FileManager provider={provider} basePath="/" viewMode="grid" />
+```
+
+---
+
+### Using Your Own Backend
+
+The file manager is **backend-agnostic**.
+
+Create a class implementing `IFileManagerProvider`.
+
+```ts
+import {
+  IFileManagerProvider,
+  FolderId,
+  FileUploadInput,
+} from "@unciatech/file-manager"
+
+export class MyCustomApiProvider implements IFileManagerProvider {
+  private baseUrl = "https://api.mybackend.com/v1"
+
+  async getFolders(folderId: FolderId, page = 1, limit = 24) {
+    const parentQuery = folderId ? `&parentId=${folderId}` : "&isRoot=true"
+
+    const res = await fetch(
+      `${this.baseUrl}/folders?page=${page}&limit=${limit}${parentQuery}`
+    )
+
+    if (!res.ok) throw new Error("Failed to fetch folders")
+
+    const data = await res.json()
+
+    return {
+      folders: data.folders,
+      pagination: data.pagination,
+    }
+  }
+
+  async uploadFiles(filesInput: FileUploadInput[], folderId?: FolderId) {
+    const formData = new FormData()
+
+    if (folderId) {
+      formData.append("folderId", String(folderId))
+    }
+
+    filesInput.forEach(({ file }) => {
+      formData.append("files", file)
+    })
+
+    const res = await fetch(`${this.baseUrl}/upload`, {
+      method: "POST",
+      body: formData,
+    })
+
+    return res.json()
+  }
+}
+```
+
+---
+
+# 🔀 Router Integration
+
+By default the file manager uses `history.pushState`.
+
+If your app uses a router, pass the `onNavigate` prop.
+
+---
+
+# Example - React Router
+
+### Install
+
+```bash
+npm install react-router-dom
+```
+
+### main.tsx
+
+```tsx
+import React from "react"
+import ReactDOM from "react-dom/client"
+import { BrowserRouter } from "react-router-dom"
+import App from "./App"
+import "./index.css"
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <App />
     </BrowserRouter>
   </React.StrictMode>
-);
+)
 ```
-
-**2. Add Components & Routes (`src/App.tsx`)**
-```tsx
-import { useState } from 'react';
-import { useNavigate, Routes, Route, Link } from 'react-router-dom';
-import { FileManager, FileManagerModal, MockProvider } from '@unciatech/file-manager';
-
-const provider = new MockProvider();
-
-function FullPage() {
-  const navigate = useNavigate();
-  return (
-    <div className="h-screen w-full flex flex-col">
-      <div className="flex justify-between p-4 border-b">
-        <h1 className="text-xl font-bold">Media Library</h1>
-        <Link to="/" className="text-blue-600 hover:underline">Back to Demo</Link>
-      </div>
-      <div className="flex-1 overflow-hidden relative">
-        <FileManager
-          provider={provider}
-          basePath="full"
-          allowedFileTypes={["images", "videos", "audios", "files"]}
-          onNavigate={(url, opts) => navigate(url, { replace: opts?.replace })}
-        />
-      </div>
-    </div>
-  );
-}
-
-function ModalDemo() {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <div className="p-10 flex flex-col gap-4">
-      <div className="flex gap-4">
-        <button
-          onClick={() => setIsOpen(true)}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md"
-        >
-          Open File Picker
-        </button>
-        <Link to="/full" className="px-6 py-2 bg-zinc-200 rounded-md">
-          Go to Full Page View
-        </Link>
-      </div>
-
-      <FileManagerModal
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-        provider={provider}
-        basePath="/"
-        onFilesSelected={(files) => console.log(files)}
-      />
-    </div>
-  );
-}
-
-export default function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<ModalDemo />} />
-      <Route path="/full/*" element={<FullPage />} />
-    </Routes>
-  );
-}
-```
-
-</details>
-
-<details open>
-<summary><b>Example B: Next.js (App Router)</b></summary>
-<br>
-
-**1. Create the Full Page View (`app/media/[[...path]]/page.tsx`)**
-The `[[...path]]` catch-all route handles all folder navigations.
-```tsx
-'use client';
-import { useRouter } from 'next/navigation';
-import { FileManager, MockProvider } from '@unciatech/file-manager';
-
-// Instantiate outside the component or in a context
-const provider = new MockProvider();
-
-export default function MediaLibraryPage() {
-  const router = useRouter();
-
-  return (
-    <div className="h-screen w-full flex flex-col">
-      <div className="flex justify-between items-center p-4 border-b border-border">
-        <h1 className="text-xl font-bold">Media Library</h1>
-      </div>
-      <div className="flex-1 relative overflow-hidden">
-        <FileManager
-          provider={provider}
-          basePath="/media"
-          allowedFileTypes={["images", "videos", "audios", "files"]}
-          viewMode="grid"
-          onNavigate={(url, opts) => 
-            opts?.replace ? router.replace(url) : router.push(url)
-          }
-        />
-      </div>
-    </div>
-  );
-}
-```
-
-**2. Create the Modal Demo View (`app/modal-demo/page.tsx`)**
-```tsx
-'use client';
-import { useState } from 'react';
-import { FileManagerModal, MockProvider } from '@unciatech/file-manager';
-
-const provider = new MockProvider();
-
-export default function ModalDemoPage() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="p-10">
-      <button
-        onClick={() => setIsOpen(true)}
-        className="px-6 py-2 bg-blue-600 text-white rounded-md"
-      >
-        Open File Picker
-      </button>
-
-      <FileManagerModal
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-        provider={provider}
-        basePath="/"
-        onFilesSelected={(files) => {
-          console.log("Selected:", files);
-          setIsOpen(false);
-        }}
-      />
-    </div>
-  );
-}
-```
-</details>
 
 ---
 
-## 🔀 Framework Router Integration
+# Example - TanStack Router
 
-By default, the file manager uses the browser's native `history.pushState` API for navigation — no full page reloads, no dependencies. This works out of the box in any bare React app (Vite, CRA, etc.).
+### Install
 
-However, if your app already has its own router (React Router, Next.js, TanStack Router), you should pass the `onNavigate` prop so the file manager delegates all navigation to your router instead of calling `history.pushState` directly. This keeps your router's internal state in sync.
+```bash
+npm install @tanstack/react-router
+```
 
-### React Router v6
+### main.tsx
 
 ```tsx
-import { useNavigate } from 'react-router-dom';
+import React from "react"
+import ReactDOM from "react-dom/client"
+import {
+  RouterProvider,
+  createRouter,
+  createRoute,
+  createRootRoute,
+} from "@tanstack/react-router"
 
-function MyPage() {
-  const navigate = useNavigate();
+import App, { ModalPage } from "./App"
+import "./index.css"
 
-  return (
-    <FileManager
-      provider={provider}
-      allowedFileTypes={['images', 'videos']}
-      onNavigate={(url) => navigate(url)}
-      basePath="/media"
-    />
-  );
+const rootRoute = createRootRoute()
+
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/",
+  component: ModalPage,
+})
+
+const fullRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/full",
+  component: App,
+})
+
+const catchAllRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "$",
+  component: App,
+})
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  fullRoute,
+  catchAllRoute,
+])
+
+const router = createRouter({ routeTree })
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router
+  }
 }
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>
+)
 ```
-
-### Next.js (App Router)
-
-```tsx
-'use client';
-import { useRouter } from 'next/navigation';
-
-export default function MediaPage() {
-  const router = useRouter();
-
-  return (
-    <FileManager
-      provider={provider}
-      allowedFileTypes={['images', 'videos']}
-      onNavigate={(url) => router.push(url)}
-      basePath="/media"
-    />
-  );
-}
-```
-
-### TanStack Router
-
-```tsx
-import { useRouter } from '@tanstack/react-router';
-
-function MyPage() {
-  const router = useRouter();
-
-  return (
-    <FileManager
-      provider={provider}
-      allowedFileTypes={['images', 'videos']}
-      onNavigate={(url) => router.navigate({ href: url })}
-      basePath="/media"
-    />
-  );
-}
-```
-
-```tsx
-<FileManager
-  provider={provider}
-  allowedFileTypes={['images', 'videos']}
-  basePath="/media"
-  // no onNavigate needed
-/>
-```
-
-## 🎮 Playgrounds & Reference Implementations
-
-For complete, working examples of how to integrate the File Manager into different application architectures, check out the [playgrounds](file:///Users/avi/Developer/Uncia/file-manager/playgrounds) directory. These are fully functional Vite-based projects that demonstrate real-world integration patterns.
-
-- **[React Router v7 Playground](file:///Users/avi/Developer/Uncia/file-manager/playgrounds/test-react-router)**: Demonstrates integration with `react-router-dom` using `useNavigate` and route-based navigation.
-- **[TanStack Router Playground](file:///Users/avi/Developer/Uncia/file-manager/playgrounds/test-tanstack)**: Demonstrates integration with `@tanstack/react-router` using the `router` object and `href` based navigation.
-
-These playgrounds are a great starting point for seeing how to handle:
-- Styling with Tailwind CSS v4
-- Mapping `onNavigate` to your framework's router
-- Using the `MockProvider` for rapid prototyping
-- Configuring `FileManagerModal` v/s full-page `FileManager`
 
 ---
 
-> [!NOTE]
-> The `onNavigate` prop is also available on `<FileManagerModal>` for modal mode.
+# 🗄️ Database Schema (Optional)
 
----
+Using **PostgreSQL** with JSON support is recommended.
 
-## 💾 Database Schema Design
-
-Because this application relies heavily on tree structures (Folders inside Folders) and varied JSON metadata (Video durations vs Document page counts), using a relational database with JSONB support (like PostgreSQL) is highly recommended. 
-
-Below are production-ready schema examples using **Prisma** and **Drizzle ORM**.
-
-### Option A: Prisma Schema (PostgreSQL/MySQL)
+Example Prisma schema:
 
 ```prisma
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql" // or "mysql"
-  url      = env("DATABASE_URL")
-}
-
 model Folder {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
-  
-  // Self-referencing relationship for infinite folder depth
-  parentId    Int?      
-  parent      Folder?   @relation("FolderHierarchy", fields: [parentId], references: [id])
-  children    Folder[]  @relation("FolderHierarchy")
-  
-  // Cached counts for fast UI rendering
-  folderCount Int       @default(0)
-  fileCount   Int       @default(0)
-  
-  // Path optimization
-  pathId      Int       @default(0)
-  path        String?   // e.g. "/1/5/12"
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
+  parentId    Int?
+
+  folderCount Int      @default(0)
+  fileCount   Int      @default(0)
+
+  pathId      Int      @default(0)
+  path        String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   files       File[]
 
   @@index([parentId])
 }
 
 model File {
-  id              Int       @id @default(autoincrement())
-  name            String
-  
-  // Foreign Key to Folder
-  folderId        Int?
-  folder          Folder?   @relation(fields: [folderId], references: [id], onDelete: Cascade)
-  folderPath      String?
-  
-  // Core Asset Data
-  size            Int
-  url             String
-  previewUrl      String?   // Lightweight thumbnail URL
-  mime            String    // e.g. "image/jpeg", "video/mp4"
-  ext             String?
-  hash            String?
-  
-  // Common Media Details
-  alternativeText String?
-  caption         String?
-  width           Int?
-  height          Int?
-  
-  // JSONB storage for flexible metadata 
-  // (e.g., formats: { thumbnail: {...}, small: {...} })
-  formats         Json?     
-  // (e.g., metaData: { duration: 120, bitrate: 320, pageCount: 15 })
-  metaData        Json?     
-  
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String
+  folderId  Int?
 
-  @@index([folderId])
+  size      Int
+  url       String
+  mime      String
+
+  formats   Json?
+  metaData  Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 ```
 
+---
 
-### Option B: Drizzle ORM Schema (PostgreSQL)
+# ⚠️ Status
 
-If you prefer a lighter, TypeScript-first approach using Drizzle:
+> This library is currently in **BETA**.
 
-```typescript
-import { pgTable, serial, varchar, integer, timestamp, jsonb, text } from "drizzle-orm/pg-core";
+Please report bugs or feature requests through **GitHub Issues**.
 
-export const folders = pgTable("folders", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  
-  // Nullable parentId allows root-level folders
-  parentId: integer("parent_id"), // Needs recursive FK setup in relations
-  
-  folderCount: integer("folder_count").default(0),
-  fileCount: integer("file_count").default(0),
-  
-  pathId: integer("path_id").default(0),
-  path: varchar("path", { length: 255 }),
-  
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+---
 
-export const files = pgTable("files", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  
-  folderId: integer("folder_id").references(() => folders.id, { onDelete: "cascade" }),
-  folderPath: varchar("folder_path", { length: 255 }),
-  
-  size: integer("size").notNull(),
-  url: text("url").notNull(),
-  previewUrl: text("preview_url"),
-  mime: varchar("mime", { length: 100 }).notNull(),
-  ext: varchar("ext", { length: 20 }),
-  hash: varchar("hash", { length: 255 }),
-  
-  alternativeText: text("alternative_text"),
-  caption: text("caption"),
-  width: integer("width"),
-  height: integer("height"),
-  
-  // JSONB is perfect for storing our dynamic metadata & responsive formats
-  formats: jsonb("formats"),
-  metaData: jsonb("meta_data"), 
-  
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-```
+# License
+
+MIT
