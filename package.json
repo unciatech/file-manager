@@ -1,6 +1,6 @@
 {
   "name": "@unciatech/file-manager",
-  "version": "0.0.34",
+  "version": "0.0.42",
   "description": "Modern file manager component for React applications",
   "author": "Avi",
   "license": "MIT",
@@ -21,9 +21,6 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "file-manager": "./dist/cli.cjs"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

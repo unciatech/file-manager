@@ -4,7 +4,6 @@ import pkg from './package.json'
 export default defineConfig({
   entry: {
     index: "index.ts",
-    cli: "cli.ts",
     mock: "providers/mock-provider.ts",
   },
   format: ["esm", "cjs"],

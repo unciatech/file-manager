@@ -1,0 +1,1125 @@
+{
+  "mockFolders": [
+    {
+      "id": 1,
+      "name": "Documents",
+      "pathId": 1,
+      "path": "/1",
+      "parentId": null,
+      "fileCount": 20,
+      "folderCount": 0,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "name": "Images",
+      "pathId": 2,
+      "path": "/2",
+      "parentId": null,
+      "fileCount": 10,
+      "folderCount": 3,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "name": "Videos",
+      "pathId": 3,
+      "path": "/3",
+      "parentId": null,
+      "fileCount": 5,
+      "folderCount": 0,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "name": "Music Some Long Name Streched also so long to fit in the card Music Some Long Name Streched also so long to fit in the card",
+      "pathId": 4,
+      "path": "/4",
+      "parentId": null,
+      "fileCount": 5,
+      "folderCount": 0,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 5,
+      "name": "Archives",
+      "pathId": 5,
+      "path": "/5",
+      "parentId": null,
+      "fileCount": 5,
+      "folderCount": 0,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 6,
+      "name": "Album 01",
+      "pathId": 6,
+      "path": "/2/6",
+      "parentId": 2,
+      "fileCount": 0,
+      "folderCount": 0,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 7,
+      "name": "Album 02",
+      "pathId": 7,
+      "path": "/2/7",
+      "parentId": 2,
+      "fileCount": 0,
+      "folderCount": 0,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 8,
+      "name": "Squirrels",
+      "pathId": 8,
+      "path": "/2/8",
+      "parentId": 2,
+      "fileCount": 1,
+      "folderCount": 0,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+  "mockTags": [
+    {
+      "id": 1,
+      "name": "Important",
+      "color": "#ef4444"
+    },
+    {
+      "id": 2,
+      "name": "Work",
+      "color": "#3b82f6"
+    },
+    {
+      "id": 3,
+      "name": "Personal",
+      "color": "#10b981"
+    },
+    {
+      "id": 4,
+      "name": "Project",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": 5,
+      "name": "Archive",
+      "color": "#6b7280"
+    }
+  ],
+  "mockFiles": [
+    {
+      "id": 101,
+      "name": "welcome.pdf",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 245000,
+      "createdAt": "2024-05-15T10:00:00.000Z",
+      "updatedAt": "2024-05-15T10:00:00.000Z",
+      "folderId": null,
+      "tags": [
+        "important"
+      ],
+      "mime": "application/pdf",
+      "ext": ".pdf",
+      "metaData": {
+        "pageCount": 2,
+        "author": "Admin"
+      }
+    },
+    {
+      "id": 102,
+      "name": "desktop_wallpaper.jpg",
+      "url": "https://images.unsplash.com/photo-1557683316-973673baf926",
+      "size": 4200000,
+      "createdAt": "2024-05-14T15:30:00.000Z",
+      "updatedAt": "2024-05-14T15:30:00.000Z",
+      "folderId": null,
+      "tags": [
+        "personal"
+      ],
+      "mime": "image/jpeg",
+      "ext": ".jpg",
+      "width": 5000,
+      "height": 3333,
+      "formats": {
+        "thumbnail": {
+          "ext": ".jpg",
+          "url": "https://images.unsplash.com/photo-1557683316-973673baf926?w=156",
+          "hash": "thumbnail_desktop_wallpaper_abc123",
+          "mime": "image/jpeg",
+          "name": "thumbnail_desktop_wallpaper.jpg",
+          "path": null,
+          "size": 5.57,
+          "width": 156,
+          "height": 104
+        },
+        "small": {
+          "ext": ".jpg",
+          "url": "https://images.unsplash.com/photo-1557683316-973673baf926?w=500",
+          "hash": "small_desktop_wallpaper_abc123",
+          "mime": "image/jpeg",
+          "name": "small_desktop_wallpaper.jpg",
+          "path": null,
+          "size": 47.27,
+          "width": 500,
+          "height": 333
+        },
+        "medium": {
+          "ext": ".jpg",
+          "url": "https://images.unsplash.com/photo-1557683316-973673baf926?w=750",
+          "hash": "medium_desktop_wallpaper_abc123",
+          "mime": "image/jpeg",
+          "name": "medium_desktop_wallpaper.jpg",
+          "path": null,
+          "size": 97.89,
+          "width": 750,
+          "height": 500
+        },
+        "large": {
+          "ext": ".jpg",
+          "url": "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000",
+          "hash": "large_desktop_wallpaper_abc123",
+          "mime": "image/jpeg",
+          "name": "large_desktop_wallpaper.jpg",
+          "path": null,
+          "size": 159.48,
+          "width": 1000,
+          "height": 667
+        }
+      },
+      "metaData": {}
+    },
+    {
+      "id": 103,
+      "name": "quick_notes.txt",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 3500,
+      "createdAt": "2024-05-13T09:45:00.000Z",
+      "updatedAt": "2024-05-13T09:45:00.000Z",
+      "folderId": null,
+      "tags": [],
+      "mime": "text/plain",
+      "ext": ".txt",
+      "metaData": {}
+    },
+    {
+      "id": 104,
+      "name": "intro_video.mp4",
+      "url": "https://docs.material-tailwind.com/demo.mp4",
+      "size": 12000000,
+      "createdAt": "2024-05-12T14:00:00.000Z",
+      "updatedAt": "2024-05-12T14:00:00.000Z",
+      "folderId": null,
+      "tags": [],
+      "mime": "video/mp4",
+      "ext": ".mp4",
+      "width": 1920,
+      "height": 1080,
+      "metaData": {
+        "duration": 90,
+        "videoSource": "local"
+      }
+    },
+    {
+      "id": 105,
+      "name": "profile_photo.png",
+      "url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde",
+      "size": 850000,
+      "createdAt": "2024-05-11T11:20:00.000Z",
+      "updatedAt": "2024-05-11T11:20:00.000Z",
+      "folderId": null,
+      "tags": [
+        "personal"
+      ],
+      "mime": "image/png",
+      "ext": ".png",
+      "width": 2000,
+      "height": 2000,
+      "formats": {
+        "thumbnail": {
+          "ext": ".png",
+          "url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=156",
+          "hash": "thumbnail_profile_photo_def456",
+          "mime": "image/png",
+          "name": "thumbnail_profile_photo.png",
+          "path": null,
+          "size": 8.2,
+          "width": 156,
+          "height": 156
+        },
+        "small": {
+          "ext": ".png",
+          "url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500",
+          "hash": "small_profile_photo_def456",
+          "mime": "image/png",
+          "name": "small_profile_photo.png",
+          "path": null,
+          "size": 52.3,
+          "width": 500,
+          "height": 500
+        },
+        "medium": {
+          "ext": ".png",
+          "url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=750",
+          "hash": "medium_profile_photo_def456",
+          "mime": "image/png",
+          "name": "medium_profile_photo.png",
+          "path": null,
+          "size": 110.5,
+          "width": 750,
+          "height": 750
+        },
+        "large": {
+          "ext": ".png",
+          "url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=1000",
+          "hash": "large_profile_photo_def456",
+          "mime": "image/png",
+          "name": "large_profile_photo.png",
+          "path": null,
+          "size": 185.7,
+          "width": 1000,
+          "height": 1000
+        }
+      },
+      "metaData": {}
+    },
+    {
+      "id": 106,
+      "name": "todo_list.md",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 6200,
+      "createdAt": "2024-05-10T08:30:00.000Z",
+      "updatedAt": "2024-05-10T08:30:00.000Z",
+      "folderId": null,
+      "tags": [
+        "important"
+      ],
+      "mime": "text/markdown",
+      "ext": ".md",
+      "metaData": {}
+    },
+    {
+      "id": 107,
+      "name": "app_settings.json",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 4800,
+      "createdAt": "2024-05-09T16:15:00.000Z",
+      "updatedAt": "2024-05-09T16:15:00.000Z",
+      "folderId": null,
+      "tags": [],
+      "mime": "application/json",
+      "ext": ".json",
+      "metaData": {}
+    },
+    {
+      "id": 108,
+      "name": "mountain_landscape.webp",
+      "url": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4",
+      "size": 1200000,
+      "createdAt": "2024-05-08T13:00:00.000Z",
+      "updatedAt": "2024-05-08T13:00:00.000Z",
+      "folderId": null,
+      "tags": [
+        "personal"
+      ],
+      "mime": "image/webp",
+      "ext": ".webp",
+      "width": 4000,
+      "height": 2667,
+      "metaData": {}
+    },
+    {
+      "id": 1,
+      "name": "Key-Monastery-img.avif",
+      "url": "https://unciatrails.com/wp-content/uploads/2024/07/Key-Monastery-img.avif",
+      "size": 2621440,
+      "createdAt": "2023-10-26T10:30:00.000Z",
+      "updatedAt": "2023-10-26T10:30:00.000Z",
+      "folderId": 8,
+      "tags": [
+        "personal",
+        "important"
+      ],
+      "mime": "image/avif",
+      "ext": ".avif",
+      "caption": "A cute squirrel in the park",
+      "alternativeText": "Gray squirrel sitting on wooden fence",
+      "width": 3024,
+      "height": 4032,
+      "metaData": {}
+    },
+    {
+      "id": 2,
+      "name": "project_proposal thoda sa.pdf",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 1048576,
+      "createdAt": "2024-05-10T14:20:00.000Z",
+      "updatedAt": "2024-05-10T14:20:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "work",
+        "important"
+      ],
+      "mime": "application/pdf",
+      "ext": ".pdf",
+      "metaData": {
+        "pageCount": 15,
+        "author": "John Doe"
+      }
+    },
+    {
+      "id": 3,
+      "name": "quarterly_report.xlsx",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 524288,
+      "createdAt": "2024-05-08T09:15:00.000Z",
+      "updatedAt": "2024-05-08T09:15:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "work"
+      ],
+      "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "ext": ".xlsx",
+      "metaData": {
+        "pageCount": 10
+      }
+    },
+    {
+      "id": 4,
+      "name": "presentation.pptx",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 2097152,
+      "createdAt": "2024-05-05T16:45:00.000Z",
+      "updatedAt": "2024-05-05T16:45:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "work",
+        "project"
+      ],
+      "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "ext": ".pptx",
+      "metaData": {
+        "pageCount": 20
+      }
+    },
+    {
+      "id": 8,
+      "name": "documnet.doc",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 2097152,
+      "createdAt": "2024-05-05T16:45:00.000Z",
+      "updatedAt": "2024-05-05T16:45:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "work",
+        "project"
+      ],
+      "mime": "application/msword",
+      "ext": ".doc",
+      "metaData": {
+        "pageCount": 20
+      }
+    },
+    {
+      "id": 5,
+      "name": "demo_video.mp4",
+      "url": "https://docs.material-tailwind.com/demo.mp4",
+      "size": 10485760,
+      "createdAt": "2024-05-03T11:30:00.000Z",
+      "updatedAt": "2024-05-03T11:30:00.000Z",
+      "folderId": 3,
+      "tags": [
+        "project"
+      ],
+      "mime": "video/mp4",
+      "ext": ".mp4",
+      "width": 1920,
+      "height": 1080,
+      "metaData": {
+        "duration": 120,
+        "videoSource": "remote"
+      }
+    },
+    {
+      "id": 6,
+      "name": "podcast_episode.mp3",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 5242880,
+      "createdAt": "2024-05-02T10:00:00.000Z",
+      "updatedAt": "2024-05-02T10:00:00.000Z",
+      "folderId": 4,
+      "tags": [
+        "personal"
+      ],
+      "mime": "audio/mpeg",
+      "ext": ".mp3",
+      "metaData": {
+        "duration": 3600
+      }
+    },
+    {
+      "id": 7,
+      "name": "notes.txt",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 1024,
+      "createdAt": "2024-05-01T09:00:00.000Z",
+      "updatedAt": "2024-05-01T09:00:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "work"
+      ],
+      "mime": "text/plain",
+      "ext": ".txt",
+      "metaData": {}
+    },
+    {
+      "id": 9,
+      "name": "data.json",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 2048,
+      "createdAt": "2024-04-30T15:00:00.000Z",
+      "updatedAt": "2024-04-30T15:00:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "project"
+      ],
+      "mime": "application/json",
+      "ext": ".json",
+      "metaData": {}
+    },
+    {
+      "id": 10,
+      "name": "archive.zip",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 104857600,
+      "createdAt": "2024-04-29T12:00:00.000Z",
+      "updatedAt": "2024-04-29T12:00:00.000Z",
+      "folderId": 5,
+      "tags": [
+        "archive"
+      ],
+      "mime": "application/zip",
+      "ext": ".zip",
+      "metaData": {
+        "description": "Project backup"
+      }
+    },
+    {
+      "id": 11,
+      "name": "setup.exe",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 52428800,
+      "createdAt": "2024-04-28T11:00:00.000Z",
+      "updatedAt": "2024-04-28T11:00:00.000Z",
+      "folderId": 5,
+      "tags": [
+        "software"
+      ],
+      "mime": "application/x-msdownload",
+      "ext": ".exe",
+      "metaData": {
+        "description": "Installer"
+      }
+    },
+    {
+      "id": 12,
+      "name": "old_stuff.rar",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 20971520,
+      "createdAt": "2024-04-27T10:00:00.000Z",
+      "updatedAt": "2024-04-27T10:00:00.000Z",
+      "folderId": 5,
+      "tags": [
+        "archive"
+      ],
+      "mime": "application/x-rar-compressed",
+      "ext": ".rar",
+      "metaData": {
+        "description": "Old files"
+      }
+    },
+    {
+      "id": 13,
+      "name": "meeting_notes_q1.pdf",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 856000,
+      "createdAt": "2024-03-15T09:00:00.000Z",
+      "updatedAt": "2024-03-15T09:00:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "work"
+      ],
+      "mime": "application/pdf",
+      "ext": ".pdf",
+      "metaData": {
+        "pageCount": 8,
+        "author": "Sarah Johnson"
+      }
+    },
+    {
+      "id": 14,
+      "name": "budget_2024.xlsx",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 425000,
+      "createdAt": "2024-03-10T14:30:00.000Z",
+      "updatedAt": "2024-03-10T14:30:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "work",
+        "important"
+      ],
+      "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "ext": ".xlsx",
+      "metaData": {
+        "pageCount": 5
+      }
+    },
+    {
+      "id": 15,
+      "name": "team_photo.jpg",
+      "url": "https://images.unsplash.com/photo-1522071820081-009f0129c71c",
+      "size": 3200000,
+      "createdAt": "2024-02-28T11:00:00.000Z",
+      "updatedAt": "2024-02-28T11:00:00.000Z",
+      "folderId": 2,
+      "tags": [
+        "work"
+      ],
+      "mime": "image/jpeg",
+      "ext": ".jpg",
+      "width": 4000,
+      "height": 3000,
+      "metaData": {}
+    },
+    {
+      "id": 16,
+      "name": "logo_design.png",
+      "url": "https://images.unsplash.com/photo-1611162617474-5b21e879e113",
+      "size": 1500000,
+      "createdAt": "2024-02-20T10:00:00.000Z",
+      "updatedAt": "2024-02-20T10:00:00.000Z",
+      "folderId": 2,
+      "tags": [
+        "project"
+      ],
+      "mime": "image/png",
+      "ext": ".png",
+      "width": 2000,
+      "height": 2000,
+      "metaData": {}
+    },
+    {
+      "id": 17,
+      "name": "product_demo.mp4",
+      "url": "https://docs.material-tailwind.com/demo.mp4",
+      "size": 15000000,
+      "createdAt": "2024-02-15T16:00:00.000Z",
+      "updatedAt": "2024-02-15T16:00:00.000Z",
+      "folderId": 3,
+      "tags": [
+        "project"
+      ],
+      "mime": "video/mp4",
+      "ext": ".mp4",
+      "width": 1920,
+      "height": 1080,
+      "metaData": {
+        "duration": 180,
+        "videoSource": "local"
+      }
+    },
+    {
+      "id": 18,
+      "name": "training_video.mp4",
+      "url": "https://docs.material-tailwind.com/demo.mp4",
+      "size": 25000000,
+      "createdAt": "2024-02-10T09:30:00.000Z",
+      "updatedAt": "2024-02-10T09:30:00.000Z",
+      "folderId": 3,
+      "tags": [
+        "work"
+      ],
+      "mime": "video/mp4",
+      "ext": ".mp4",
+      "width": 1920,
+      "height": 1080,
+      "metaData": {
+        "duration": 300,
+        "videoSource": "local"
+      }
+    },
+    {
+      "id": 19,
+      "name": "background_music.mp3",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 4500000,
+      "createdAt": "2024-02-05T14:00:00.000Z",
+      "updatedAt": "2024-02-05T14:00:00.000Z",
+      "folderId": 4,
+      "tags": [
+        "personal"
+      ],
+      "mime": "audio/mpeg",
+      "ext": ".mp3",
+      "metaData": {
+        "duration": 240
+      }
+    },
+    {
+      "id": 20,
+      "name": "contract_template.docx",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 650000,
+      "createdAt": "2024-01-30T11:00:00.000Z",
+      "updatedAt": "2024-01-30T11:00:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "work"
+      ],
+      "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "ext": ".docx",
+      "metaData": {
+        "pageCount": 12
+      }
+    },
+    {
+      "id": 21,
+      "name": "invoice_jan.pdf",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 320000,
+      "createdAt": "2024-01-25T10:00:00.000Z",
+      "updatedAt": "2024-01-25T10:00:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "work",
+        "important"
+      ],
+      "mime": "application/pdf",
+      "ext": ".pdf",
+      "metaData": {
+        "pageCount": 3
+      }
+    },
+    {
+      "id": 22,
+      "name": "vacation_photo1.jpg",
+      "url": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4",
+      "size": 2800000,
+      "createdAt": "2024-01-20T15:00:00.000Z",
+      "updatedAt": "2024-01-20T15:00:00.000Z",
+      "folderId": 2,
+      "tags": [
+        "personal"
+      ],
+      "mime": "image/jpeg",
+      "ext": ".jpg",
+      "width": 3500,
+      "height": 2500,
+      "metaData": {}
+    },
+    {
+      "id": 23,
+      "name": "vacation_photo2.jpg",
+      "url": "https://images.unsplash.com/photo-1469474968028-56623f02e42e",
+      "size": 3100000,
+      "createdAt": "2024-01-20T15:05:00.000Z",
+      "updatedAt": "2024-01-20T15:05:00.000Z",
+      "folderId": 2,
+      "tags": [
+        "personal"
+      ],
+      "mime": "image/jpeg",
+      "ext": ".jpg",
+      "width": 4000,
+      "height": 2800,
+      "metaData": {}
+    },
+    {
+      "id": 24,
+      "name": "project_backup.zip",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 85000000,
+      "createdAt": "2024-01-15T12:00:00.000Z",
+      "updatedAt": "2024-01-15T12:00:00.000Z",
+      "folderId": 5,
+      "tags": [
+        "archive",
+        "project"
+      ],
+      "mime": "application/zip",
+      "ext": ".zip",
+      "metaData": {
+        "description": "Full project backup"
+      }
+    },
+    {
+      "id": 25,
+      "name": "presentation_final.pptx",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 3500000,
+      "createdAt": "2024-01-10T16:00:00.000Z",
+      "updatedAt": "2024-01-10T16:00:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "work",
+        "important"
+      ],
+      "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "ext": ".pptx",
+      "metaData": {
+        "pageCount": 35
+      }
+    },
+    {
+      "id": 26,
+      "name": "screenshot_001.png",
+      "url": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97",
+      "size": 1200000,
+      "createdAt": "2024-01-05T09:00:00.000Z",
+      "updatedAt": "2024-01-05T09:00:00.000Z",
+      "folderId": 2,
+      "tags": [
+        "work"
+      ],
+      "mime": "image/png",
+      "ext": ".png",
+      "width": 1920,
+      "height": 1080,
+      "metaData": {}
+    },
+    {
+      "id": 27,
+      "name": "config.json",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 5000,
+      "createdAt": "2023-12-28T14:00:00.000Z",
+      "updatedAt": "2023-12-28T14:00:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "project"
+      ],
+      "mime": "application/json",
+      "ext": ".json",
+      "metaData": {}
+    },
+    {
+      "id": 28,
+      "name": "readme.md",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 8500,
+      "createdAt": "2023-12-20T10:00:00.000Z",
+      "updatedAt": "2023-12-20T10:00:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "project"
+      ],
+      "mime": "text/markdown",
+      "ext": ".md",
+      "metaData": {}
+    },
+    {
+      "id": 29,
+      "name": "database_backup.sql",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 12000000,
+      "createdAt": "2023-12-15T11:00:00.000Z",
+      "updatedAt": "2023-12-15T11:00:00.000Z",
+      "folderId": 5,
+      "tags": [
+        "archive",
+        "important"
+      ],
+      "mime": "application/sql",
+      "ext": ".sql",
+      "metaData": {
+        "description": "Database backup"
+      }
+    },
+    {
+      "id": 30,
+      "name": "tutorial_video.mp4",
+      "url": "https://docs.material-tailwind.com/demo.mp4",
+      "size": 18000000,
+      "createdAt": "2023-12-10T13:00:00.000Z",
+      "updatedAt": "2023-12-10T13:00:00.000Z",
+      "folderId": 3,
+      "tags": [
+        "personal"
+      ],
+      "mime": "video/mp4",
+      "ext": ".mp4",
+      "width": 1920,
+      "height": 1080,
+      "metaData": {
+        "duration": 420,
+        "videoSource": "local"
+      }
+    },
+    {
+      "id": 31,
+      "name": "company_logo.svg",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 45000,
+      "createdAt": "2023-12-05T09:00:00.000Z",
+      "updatedAt": "2023-12-05T09:00:00.000Z",
+      "folderId": 2,
+      "tags": [
+        "work"
+      ],
+      "mime": "image/svg+xml",
+      "ext": ".svg",
+      "metaData": {}
+    },
+    {
+      "id": 32,
+      "name": "report_q4.pdf",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 1800000,
+      "createdAt": "2023-12-01T15:00:00.000Z",
+      "updatedAt": "2023-12-01T15:00:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "work",
+        "important"
+      ],
+      "mime": "application/pdf",
+      "ext": ".pdf",
+      "metaData": {
+        "pageCount": 25,
+        "author": "Finance Team"
+      }
+    },
+    {
+      "id": 33,
+      "name": "nature_photo.webp",
+      "url": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
+      "size": 950000,
+      "createdAt": "2023-11-25T12:00:00.000Z",
+      "updatedAt": "2023-11-25T12:00:00.000Z",
+      "folderId": 2,
+      "tags": [
+        "personal"
+      ],
+      "mime": "image/webp",
+      "ext": ".webp",
+      "width": 3000,
+      "height": 2000,
+      "metaData": {}
+    },
+    {
+      "id": 34,
+      "name": "podcast_intro.mp3",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 2500000,
+      "createdAt": "2023-11-20T10:00:00.000Z",
+      "updatedAt": "2023-11-20T10:00:00.000Z",
+      "folderId": 4,
+      "tags": [
+        "personal"
+      ],
+      "mime": "audio/mpeg",
+      "ext": ".mp3",
+      "metaData": {
+        "duration": 180
+      }
+    },
+    {
+      "id": 35,
+      "name": "data_export.csv",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 850000,
+      "createdAt": "2023-11-15T14:00:00.000Z",
+      "updatedAt": "2023-11-15T14:00:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "work"
+      ],
+      "mime": "text/csv",
+      "ext": ".csv",
+      "metaData": {}
+    },
+    {
+      "id": 36,
+      "name": "wireframes.pdf",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 4200000,
+      "createdAt": "2023-11-10T11:00:00.000Z",
+      "updatedAt": "2023-11-10T11:00:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "project"
+      ],
+      "mime": "application/pdf",
+      "ext": ".pdf",
+      "metaData": {
+        "pageCount": 45
+      }
+    },
+    {
+      "id": 37,
+      "name": "cityscape.jpg",
+      "url": "https://images.unsplash.com/photo-1449824913935-59a10b8d2000",
+      "size": 3800000,
+      "createdAt": "2023-11-05T16:00:00.000Z",
+      "updatedAt": "2023-11-05T16:00:00.000Z",
+      "folderId": 2,
+      "tags": [
+        "personal"
+      ],
+      "mime": "image/jpeg",
+      "ext": ".jpg",
+      "width": 4500,
+      "height": 3000,
+      "metaData": {}
+    },
+    {
+      "id": 38,
+      "name": "interview_recording.mp3",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 8500000,
+      "createdAt": "2023-11-01T09:00:00.000Z",
+      "updatedAt": "2023-11-01T09:00:00.000Z",
+      "folderId": 4,
+      "tags": [
+        "work"
+      ],
+      "mime": "audio/mpeg",
+      "ext": ".mp3",
+      "metaData": {
+        "duration": 1800
+      }
+    },
+    {
+      "id": 39,
+      "name": "client_files.rar",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 45000000,
+      "createdAt": "2023-10-25T13:00:00.000Z",
+      "updatedAt": "2023-10-25T13:00:00.000Z",
+      "folderId": 5,
+      "tags": [
+        "archive",
+        "work"
+      ],
+      "mime": "application/x-rar-compressed",
+      "ext": ".rar",
+      "metaData": {
+        "description": "Client deliverables"
+      }
+    },
+    {
+      "id": 40,
+      "name": "marketing_plan.docx",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 1200000,
+      "createdAt": "2023-10-20T10:00:00.000Z",
+      "updatedAt": "2023-10-20T10:00:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "work"
+      ],
+      "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "ext": ".docx",
+      "metaData": {
+        "pageCount": 18
+      }
+    },
+    {
+      "id": 41,
+      "name": "analytics_data.xlsx",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 2100000,
+      "createdAt": "2023-10-15T15:00:00.000Z",
+      "updatedAt": "2023-10-15T15:00:00.000Z",
+      "folderId": 1,
+      "tags": [
+        "work"
+      ],
+      "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "ext": ".xlsx",
+      "metaData": {
+        "pageCount": 8
+      }
+    },
+    {
+      "id": 42,
+      "name": "sunset_beach.jpg",
+      "url": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+      "size": 3200000,
+      "createdAt": "2023-10-10T17:00:00.000Z",
+      "updatedAt": "2023-10-10T17:00:00.000Z",
+      "folderId": 2,
+      "tags": [
+        "personal"
+      ],
+      "mime": "image/jpeg",
+      "ext": ".jpg",
+      "width": 4000,
+      "height": 2700,
+      "metaData": {}
+    },
+    {
+      "id": 43,
+      "name": "webinar_recording.mp4",
+      "url": "https://docs.material-tailwind.com/demo.mp4",
+      "size": 35000000,
+      "createdAt": "2023-10-05T14:00:00.000Z",
+      "updatedAt": "2023-10-05T14:00:00.000Z",
+      "folderId": 3,
+      "tags": [
+        "work"
+      ],
+      "mime": "video/mp4",
+      "ext": ".mp4",
+      "width": 1920,
+      "height": 1080,
+      "metaData": {
+        "duration": 600,
+        "videoSource": "local"
+      }
+    },
+    {
+      "id": 44,
+      "name": "sound_effects.wav",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 15000000,
+      "createdAt": "2023-10-01T11:00:00.000Z",
+      "updatedAt": "2023-10-01T11:00:00.000Z",
+      "folderId": 4,
+      "tags": [
+        "project"
+      ],
+      "mime": "audio/wav",
+      "ext": ".wav",
+      "metaData": {
+        "duration": 120
+      }
+    },
+    {
+      "id": 45,
+      "name": "legacy_system.zip",
+      "url": "/placeholder.svg?height=400&width=300",
+      "size": 125000000,
+      "createdAt": "2023-09-25T09:00:00.000Z",
+      "updatedAt": "2023-09-25T09:00:00.000Z",
+      "folderId": 5,
+      "tags": [
+        "archive"
+      ],
+      "mime": "application/zip",
+      "ext": ".zip",
+      "metaData": {
+        "description": "Old system files"
+      }
+    }
+  ]
+}
