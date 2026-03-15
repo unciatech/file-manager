@@ -47,24 +47,19 @@ content: [
 
 ## Basic Usage in Your Project
 
-If you want to integrate this File Manager into your own React application (Next.js, Vite, Remix, CRA, etc.), follow this step-by-step guide.
+Integrating the File Manager into your React application (Next.js, Vite, Remix, CRA, etc.) is easy. 
 
-### Step 1: Install the Package
+### Step 1: Install Dependencies
 
-Install the library via NPM:
+Install the core library along with its Radix UI and Tailwind dependencies:
 ```bash
-npm install @unciatech/file-manager
+npm install @unciatech/file-manager class-variance-authority clsx tailwind-merge
 ```
 
-**(Optional) ⚡ Magic Quick Start Scaffolding**
-Instead of setting everything up manually, our init script can spawn a brand new full-stack application instantly:
-```bash
-npx @unciatech/file-manager init my-media-app
-```
-*It will ask if you want Next.js or Vite (React), install Tailwind, install the package, and set everything up including styles!*
+> **Note:** The file manager uses **Tailwind CSS**. Ensure your project has Tailwind properly configured.
 
 **(CRITICAL) Import the styles:**
-The init script includes this automatically, but if you are installing manually, add this import to your root layout / entry file:
+Import the styles in your root layout (`layout.tsx` for Next.js) or top-level file (`main.tsx` / `App.tsx` for Vite):
 ```ts
 import '@unciatech/file-manager/styles';
 ```
@@ -127,33 +122,172 @@ export class MyCustomApiProvider implements IFileManagerProvider {
 > **💡 Pro Tip - The Mock Provider:**
 > If you are just prototyping and don't have a backend ready yet, you can skip Step 2 entirely! We included a fully functional `MockProvider` that fakes network latency and stores data in memory. Just import it and use it right away to see the UI in action.
 
-// app/media/page.tsx
-import { FileManager, MockProvider } from "@unciatech/file-manager";
-import "@unciatech/file-manager/styles";
+### Step 3: Application Setup  
 
-// **Tailwind v4 Users:** Make sure your `globals.css` or `index.css` includes:
-// @source "../node_modules/@unciatech/file-manager";
-// OR import your real provider
-import { MyCustomApiProvider } from "@/lib/my-api-provider"; 
+Below are the complete setup guides for integrating the components into the two most popular React frameworks.  
+
+<details open>
+<summary><b>Example A: Vite (React Router)</b></summary>
+<br>
+
+**1. Set up the Router Shell (`src/main.tsx`)**
+Wrap your application in `BrowserRouter`:
+```tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+import './index.css';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </React.StrictMode>
+);
+```
+
+**2. Add Components & Routes (`src/App.tsx`)**
+```tsx
+import { useState } from 'react';
+import { useNavigate, Routes, Route, Link } from 'react-router-dom';
+import { FileManager, FileManagerModal, MockProvider } from '@unciatech/file-manager';
+
+const provider = new MockProvider();
+
+function FullPage() {
+  const navigate = useNavigate();
+  return (
+    <div className="h-screen w-full flex flex-col">
+      <div className="flex justify-between p-4 border-b">
+        <h1 className="text-xl font-bold">Media Library</h1>
+        <Link to="/" className="text-blue-600 hover:underline">Back to Demo</Link>
+      </div>
+      <div className="flex-1 overflow-hidden relative">
+        <FileManager
+          provider={provider}
+          basePath="full"
+          allowedFileTypes={["images", "videos", "audios", "files"]}
+          onNavigate={(url, opts) => navigate(url, { replace: opts?.replace })}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ModalDemo() {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className="p-10 flex flex-col gap-4">
+      <div className="flex gap-4">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="px-6 py-2 bg-blue-600 text-white rounded-md"
+        >
+          Open File Picker
+        </button>
+        <Link to="/full" className="px-6 py-2 bg-zinc-200 rounded-md">
+          Go to Full Page View
+        </Link>
+      </div>
+
+      <FileManagerModal
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        provider={provider}
+        basePath="/"
+        onFilesSelected={(files) => console.log(files)}
+      />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<ModalDemo />} />
+      <Route path="/full/*" element={<FullPage />} />
+    </Routes>
+  );
+}
+```
+
+</details>
+
+<details open>
+<summary><b>Example B: Next.js (App Router)</b></summary>
+<br>
+
+**1. Create the Full Page View (`app/media/[[...path]]/page.tsx`)**
+The `[[...path]]` catch-all route handles all folder navigations.
+```tsx
+'use client';
+import { useRouter } from 'next/navigation';
+import { FileManager, MockProvider } from '@unciatech/file-manager';
+
+// Instantiate outside the component or in a context
+const provider = new MockProvider();
 
 export default function MediaLibraryPage() {
-  // Instantiate the provider (Real or Mock)
-  const apiProvider = new MockProvider(); 
+  const router = useRouter();
 
   return (
-    <div className="h-screen w-full">
-      <FileManagerProvider
-        mode="page"
-        selectionMode="multiple"
-        allowedFileTypes={["images", "videos", "audios", "files"]}
-        provider={apiProvider}
-      >
-        <FileManager basePath="/media" />
-      </FileManagerProvider>
+    <div className="h-screen w-full flex flex-col">
+      <div className="flex justify-between items-center p-4 border-b border-border">
+        <h1 className="text-xl font-bold">Media Library</h1>
+      </div>
+      <div className="flex-1 relative overflow-hidden">
+        <FileManager
+          provider={provider}
+          basePath="/media"
+          allowedFileTypes={["images", "videos", "audios", "files"]}
+          viewMode="grid"
+          onNavigate={(url, opts) => 
+            opts?.replace ? router.replace(url) : router.push(url)
+          }
+        />
+      </div>
     </div>
   );
 }
 ```
+
+**2. Create the Modal Demo View (`app/modal-demo/page.tsx`)**
+```tsx
+'use client';
+import { useState } from 'react';
+import { FileManagerModal, MockProvider } from '@unciatech/file-manager';
+
+const provider = new MockProvider();
+
+export default function ModalDemoPage() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="p-10">
+      <button
+        onClick={() => setIsOpen(true)}
+        className="px-6 py-2 bg-blue-600 text-white rounded-md"
+      >
+        Open File Picker
+      </button>
+
+      <FileManagerModal
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        provider={provider}
+        basePath="/"
+        onFilesSelected={(files) => {
+          console.log("Selected:", files);
+          setIsOpen(false);
+        }}
+      />
+    </div>
+  );
+}
+```
+</details>
 
 ---
 
