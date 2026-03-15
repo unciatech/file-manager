@@ -1,4 +1,4 @@
-import { mockFiles, mockFolders, mockTags } from "@/data/data";
+import { mockFiles, mockFolders, mockTags, initializeMockData, isDataLoaded } from "@/data/data";
 import {
   Folder,
   FileType,
@@ -18,8 +18,14 @@ import { getFileTypeFromMime } from "@/lib/file-utils";
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class MockProvider implements IFileManagerProvider {
+  private async ensureDataLoaded() {
+    if (!isDataLoaded) {
+      await initializeMockData();
+    }
+  }
 
-  getFolder(folderId: FolderId): Promise<Folder | null> {
+  async getFolder(folderId: FolderId): Promise<Folder | null> {
+    await this.ensureDataLoaded();
     if (folderId === null) return Promise.resolve(null);
     const folder = mockFolders.find((f) => f.id === folderId);
     
@@ -49,6 +55,7 @@ export class MockProvider implements IFileManagerProvider {
     limit: number = 20,
     query: string = ''
   ): Promise<{folders: Folder[], pagination: PaginationInfo}> {
+    await this.ensureDataLoaded();
     await delay(300);
     
     // Filter folders by parent
@@ -86,7 +93,8 @@ export class MockProvider implements IFileManagerProvider {
       }
     };
   }
-  getTags(): Promise<string[]> {
+  async getTags(): Promise<string[]> {
+    await this.ensureDataLoaded();
     return Promise.resolve(mockTags.map((tag) => tag.name));
   }
   async getFiles(
@@ -96,6 +104,7 @@ export class MockProvider implements IFileManagerProvider {
     limit?: number,
     query?: string,
   ): Promise<{ files: FileMetaData[]; pagination: PaginationInfo }> {
+    await this.ensureDataLoaded();
     await delay(500);
     let filteredFiles = [...mockFiles];
 
@@ -165,6 +174,7 @@ export class MockProvider implements IFileManagerProvider {
     files: FileMetaData[];
     pagination: PaginationInfo;
   }> {
+    await this.ensureDataLoaded();
     await delay(300);
     
     // Fetch all folders in current directory
@@ -247,6 +257,7 @@ export class MockProvider implements IFileManagerProvider {
     name: string,
     parentId?: FolderId
   ): Promise<Folder> {
+    await this.ensureDataLoaded();
     await delay(300);
     const newFolder: Folder = {
       id: Date.now(), // simple unique id
@@ -327,7 +338,8 @@ export class MockProvider implements IFileManagerProvider {
     return uploadedFiles;
   }
 
-  renameFolder(folderId: EntityId, newName: string): Promise<Folder> {
+  async renameFolder(folderId: EntityId, newName: string): Promise<Folder> {
+    await this.ensureDataLoaded();
     const folder = mockFolders.find((f) => f.id === folderId);
     if (!folder) {
       return Promise.reject(new Error("Folder not found"));
@@ -337,10 +349,11 @@ export class MockProvider implements IFileManagerProvider {
     return Promise.resolve(folder);
   }
 
-  updateFileMetaData(
+  async updateFileMetaData(
     fileId: EntityId,
     updates: Partial<FileMetaData>
   ): Promise<FileMetaData> {
+    await this.ensureDataLoaded();
     const file = mockFiles.find((f) => f.id === fileId);
     if (!file) {
       return Promise.reject(new Error("File not found"));
@@ -360,7 +373,8 @@ export class MockProvider implements IFileManagerProvider {
     return Promise.resolve(file);
   }
 
-  deleteFiles(fileIds: EntityId[]): Promise<void> {
+  async deleteFiles(fileIds: EntityId[]): Promise<void> {
+    await this.ensureDataLoaded();
     for (const fileId of fileIds) {
       const fileIndex = mockFiles.findIndex((f) => f.id === fileId);
       if (fileIndex !== -1) {
@@ -370,7 +384,8 @@ export class MockProvider implements IFileManagerProvider {
     return Promise.resolve();
   }
 
-  deleteFolders(folderIds: EntityId[]): Promise<void> {
+  async deleteFolders(folderIds: EntityId[]): Promise<void> {
+    await this.ensureDataLoaded();
     for (const folderId of folderIds) {
       const folderIndex = mockFolders.findIndex((f) => f.id === folderId);
       if (folderIndex !== -1) {
@@ -387,7 +402,8 @@ export class MockProvider implements IFileManagerProvider {
     return Promise.resolve();
   }
 
-  findFiles(searchQuery: string): Promise<FileMetaData[]> {
+  async findFiles(searchQuery: string): Promise<FileMetaData[]> {
+    await this.ensureDataLoaded();
     //search tags and file names
     const query = searchQuery?.toLowerCase();
     const foundFiles = mockFiles.filter(
@@ -398,7 +414,8 @@ export class MockProvider implements IFileManagerProvider {
     return Promise.resolve(foundFiles);
   }
   
-  findFolders(searchQuery: string): Promise<Folder[]> {
+  async findFolders(searchQuery: string): Promise<Folder[]> {
+    await this.ensureDataLoaded();
     //search folder with names and tags
     const query = searchQuery?.toLowerCase();
     const foundFolders = mockFolders.filter((folder) =>
@@ -407,7 +424,8 @@ export class MockProvider implements IFileManagerProvider {
     return Promise.resolve(foundFolders);
   }
 
-  moveFiles(fileIds: EntityId[], newFolderId: FolderId): Promise<FileMetaData[]> {
+  async moveFiles(fileIds: EntityId[], newFolderId: FolderId): Promise<FileMetaData[]> {
+    await this.ensureDataLoaded();
     // Move multiple files
     const movedFiles: FileMetaData[] = [];
     for (const fileId of fileIds) {
@@ -420,7 +438,8 @@ export class MockProvider implements IFileManagerProvider {
     }
     return Promise.resolve(movedFiles);   
   }
-  moveFolders(folderIds: FolderId[], newParentId: FolderId): Promise<Folder[]> {
+  async moveFolders(folderIds: FolderId[], newParentId: FolderId): Promise<Folder[]> {
+    await this.ensureDataLoaded();
     // Move multiple folders
     const movedFolders: Folder[] = [];
     for (const folderId of folderIds) {
