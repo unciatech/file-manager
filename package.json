@@ -1,6 +1,6 @@
 {
   "name": "@unciatech/file-manager",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "description": "Modern file manager component for React applications",
   "author": "Avi",
   "license": "MIT",
@@ -43,7 +43,6 @@
   },
   "files": [
     "dist",
-    "styles.css",
     "README.md"
   ],
   "sideEffects": [
