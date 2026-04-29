@@ -23,8 +23,10 @@ interface FileCardProps {
     isCheckboxClick?: boolean
   ) => void;
   readonly onDelete: (fileId: string | number) => void;
+  readonly onSelectionDelete: () => void;
   readonly onEdit: (file: FileMetaData) => void;
   readonly onMove: (file: FileMetaData) => void;
+  readonly onSelectionMove: () => void;
   readonly selectionMode: SelectionMode;
   readonly showCheckbox?: boolean;
   readonly mode?: Mode;
@@ -36,8 +38,10 @@ export function FileCard({
   isSelected,
   onSelect,
   onDelete,
+  onSelectionDelete,
   onEdit,
   onMove,
+  onSelectionMove,
   selectionMode,
   showCheckbox = false,
   mode = MODE.PAGE,
@@ -48,6 +52,13 @@ export function FileCard({
     e.stopPropagation();
     if (confirm(`Are you sure you want to delete "${file.name}"?`)) {
       onDelete(file.id);
+    }
+  };
+
+  const handleSelectionDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete the selected items?')) {
+      onSelectionDelete();
     }
   };
 
@@ -64,6 +75,11 @@ export function FileCard({
   const handleMove = (e: React.MouseEvent) => {
     e.stopPropagation();
     onMove(file);
+  };
+
+  const handleSelectionMove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelectionMove();
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -107,9 +123,24 @@ export function FileCard({
     },
   ];
 
+  const selectionMenuItems: CardMenuItem[] = [
+    {
+      label: "Move to...",
+      icon: <MoveIcon className="size-6" />,
+      onClick: handleSelectionMove,
+    },
+    {
+      label: "Delete",
+      icon: <TrashIcon className="size-6 text-red-600" />,
+      onClick: handleSelectionDelete,
+      variant: "destructive",
+    },
+  ];
+
   return (
     <CardContextMenu
       menuItems={menuItems}
+      selectionMenuItems={selectionMenuItems}
       isInSelectionMode={isInSelectionMode}
       mode={mode}
     >

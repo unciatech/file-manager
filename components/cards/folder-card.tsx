@@ -22,8 +22,10 @@ interface FolderCardProps {
     isCheckboxClick?: boolean
   ) => void;
   readonly onDelete: (folderId: FolderId) => void;
+  readonly onSelectionDelete: () => void;
   readonly onRename: (folder: Folder) => void;
   readonly onMove: (folder: Folder) => void;
+  readonly onSelectionMove: () => void;
   readonly selectionMode: SelectionMode;
   readonly showCheckbox?: boolean;
   readonly mode?: Mode;
@@ -35,8 +37,10 @@ export function FolderCard({
   isSelected,
   onSelect,
   onDelete,
+  onSelectionDelete,
   onRename,
   onMove,
+  onSelectionMove,
   selectionMode,
   showCheckbox,
   mode,
@@ -51,6 +55,13 @@ export function FolderCard({
     }
   };
 
+  const handleSelectionDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete the selected items?\n\nWarning: deleting selected folders will also delete their contents.')) {
+      onSelectionDelete();
+    }
+  };
+
   const handleRename = (e: React.MouseEvent) => {
     e.stopPropagation();
     onRename(folder);
@@ -59,6 +70,11 @@ export function FolderCard({
   const handleMove = (e: React.MouseEvent) => {
     e.stopPropagation();
     onMove(folder);
+  };
+
+  const handleSelectionMove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelectionMove();
   };
 
   const handleSelectFolder = (e: React.MouseEvent) => {
@@ -102,9 +118,24 @@ export function FolderCard({
     },
   ];
 
+  const selectionMenuItems: CardMenuItem[] = [
+    {
+      label: "Move to...",
+      icon: <MoveIcon className="size-5 mr-1" />,
+      onClick: handleSelectionMove,
+    },
+    {
+      label: "Delete",
+      icon: <TrashIcon className="size-5 mr-1 text-red-600" />,
+      onClick: handleSelectionDelete,
+      variant: "destructive",
+    },
+  ];
+
   return (
     <CardContextMenu
       menuItems={menuItems}
+      selectionMenuItems={selectionMenuItems}
       isInSelectionMode={isInSelectionMode}
       mode={mode}
     >

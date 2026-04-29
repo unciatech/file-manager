@@ -306,7 +306,7 @@ export class MockProvider implements IFileManagerProvider {
     files: FileUploadInput[],
     folderId?: FolderId
   ): Promise<FileMetaData[]> {
-    await delay(500);
+    await delay(1000);
 
     const uploadedFiles: FileMetaData[] = [];
 

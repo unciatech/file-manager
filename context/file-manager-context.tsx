@@ -72,7 +72,7 @@ interface FileManagerContextType {
   bulkMove: (targetFolderId: FolderId) => Promise<void>;
   renameFolder: (folderId: EntityId, newName: string) => Promise<void>;
   updateFileMetadata: (fileId: EntityId, metadata: Partial<FileMetaData>) => Promise<void>;
-  bulkDelete: () => Promise<void>;
+  bulkDelete: (targets?: { fileIds?: EntityId[]; folderIds?: FolderId[] }) => Promise<void>;
   refreshData: () => Promise<void>;
 
   // Computed
