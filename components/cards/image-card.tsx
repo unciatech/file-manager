@@ -23,7 +23,7 @@ export function ImageCard({ file }: ImageCardProps) {
             <img
                 src={imageSrc}
                 alt={file?.name?.substring(0, 10) || "image"}
-                className="w-full h-full object-contain rounded-md drop-shadow-md"
+                className="w-full h-full object-contain rounded-md"
                 onError={() => setHasError(true)}
             />
         );

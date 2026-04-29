@@ -47,7 +47,7 @@ export function HeaderNavigation() {
         <div className="flex items-center flex-1 min-w-0 max-w-[calc(100%-40px)]">
           {/* home button */}
           <Button className="mr-2 shrink-0" radius="full" variant="ghost" mode="icon" size="icon"
-            onClick={() => handleFolderClick(null)}>
+            onClick={() => null}>
             <HomeIcon className="size-6 text-gray-900 dark:text-zinc-100" />
           </Button>
           <h1 className="text-lg flex-1 min-w-0 align-middle font-semibold">Home</h1>

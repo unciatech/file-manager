@@ -43,6 +43,13 @@ export function UnifiedGrid() {
     };
 
     const skeletonCount = getSkeletonCount();
+    const handleMoveSelectedItems = () => {
+        setIsMoveFileModalOpen(true);
+    };
+
+    const handleDeleteSelectedItems = () => {
+        bulkDelete();
+    };
 
     if (isLoading) {
         return (
@@ -68,7 +75,8 @@ export function UnifiedGrid() {
                     folder={folder}
                     isSelected={selectedFolders.some(f => f.id === folder.id)}
                     onSelect={handleFolderClick}
-                    onDelete={() => bulkDelete()}
+                    onDelete={(folderId) => bulkDelete({ folderIds: [folderId] })}
+                    onSelectionDelete={handleDeleteSelectedItems}
                     onRename={(folder) => {
                         setFolderToRename(folder);
                         setIsRenameFolderModalOpen(true);
@@ -78,6 +86,7 @@ export function UnifiedGrid() {
                         setSelectedFiles([]);
                         setIsMoveFileModalOpen(true);
                     }}
+                    onSelectionMove={handleMoveSelectedItems}
                     selectionMode={selectionMode}
                     mode={mode}
                     isInSelectionMode={isInSelectionMode()}
@@ -89,7 +98,8 @@ export function UnifiedGrid() {
                     file={file}
                     isSelected={selectedFiles.some(f => f.id === file.id)}
                     onSelect={handleFileClick}
-                    onDelete={() => bulkDelete()}
+                    onDelete={(fileId) => bulkDelete({ fileIds: [fileId] })}
+                    onSelectionDelete={handleDeleteSelectedItems}
                     onEdit={(file) => {
                         setFileDetailsModalFile(file);
                     }}
@@ -98,6 +108,7 @@ export function UnifiedGrid() {
                         setSelectedFolders([]);
                         setIsMoveFileModalOpen(true);
                     }}
+                    onSelectionMove={handleMoveSelectedItems}
                     selectionMode={selectionMode}
                     mode={mode}
                     isInSelectionMode={isInSelectionMode()}

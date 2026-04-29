@@ -261,6 +261,7 @@ export function useFileHandlers(state: FileState) {
           description: message,
         });
         console.error("Upload failed:", error);
+        throw error;
       }
     },
     [currentFolder, provider, refreshData, setSelectedFiles]
@@ -408,18 +409,21 @@ export function useFileHandlers(state: FileState) {
    * Deletes all selected files and folders
    * Clears selection after successful deletion
    */
-  const bulkDelete = useCallback(async () => {
+  const bulkDelete = useCallback(async (targets?: { fileIds?: EntityId[]; folderIds?: FolderId[] }) => {
+    const fileIds = targets?.fileIds ?? selectedFiles.map((f) => f.id);
+    const folderIds = targets?.folderIds ?? selectedFolders.map((f) => f.id);
+
     try {
-      if (selectedFiles.length > 0) {
-        await provider.deleteFiles(selectedFiles.map((f) => f.id));
+      if (fileIds.length > 0) {
+        await provider.deleteFiles(fileIds);
       }
-      if (selectedFolders.length > 0) {
-        await provider.deleteFolders(selectedFolders.map((f) => f.id));
+      if (folderIds.length > 0) {
+        await provider.deleteFolders(folderIds);
       }
       await refreshData(true); // Silent background refresh
       setSelectedFiles([]);
       setSelectedFolders([]);
-      const totalDeleted = selectedFiles.length + selectedFolders.length;
+      const totalDeleted = fileIds.length + folderIds.length;
       toast.success("Delete Successful", {
         description: `${totalDeleted} item(s) deleted successfully`,
       });

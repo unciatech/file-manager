@@ -30,6 +30,7 @@ export interface CardMenuItem {
 interface CardContextMenuProps {
   children: React.ReactNode;
   menuItems: CardMenuItem[];
+  selectionMenuItems?: CardMenuItem[];
   isInSelectionMode?: boolean;
   mode?: Mode;
 }
@@ -37,21 +38,23 @@ interface CardContextMenuProps {
 export function CardContextMenu({
   children,
   menuItems,
+  selectionMenuItems,
   isInSelectionMode = false,
   mode,
 }: Readonly<CardContextMenuProps>) {
-  const shouldShowMenu = !isInSelectionMode && mode !== "modal";
+  const activeMenuItems = isInSelectionMode ? (selectionMenuItems ?? []) : menuItems;
+  const shouldShowMenu = mode !== "modal" && activeMenuItems.length > 0;
 
   const renderMenuItems = (isDropdown: boolean = false) => {
-    return menuItems.map((item, index) => {
-      const isLast = index === menuItems.length - 1;
+    return activeMenuItems.map((item, index) => {
+      const isLast = index === activeMenuItems.length - 1;
       const isDestructive = item.variant === "destructive";
       
       const MenuItemComponent = isDropdown ? DropdownMenuItem : ContextMenuItem;
       const SeparatorComponent = isDropdown ? DropdownMenuSeparator : ContextMenuSeparator;
       
       // Check if next item is destructive to add separator before it
-      const nextItemIsDestructive = index < menuItems.length - 1 && menuItems[index + 1].variant === "destructive";
+      const nextItemIsDestructive = index < activeMenuItems.length - 1 && activeMenuItems[index + 1].variant === "destructive";
       
       return (
         <React.Fragment key={index}>
