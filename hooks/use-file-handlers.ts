@@ -169,6 +169,9 @@ export function useFileHandlers(state: FileState) {
       if (mode === MODE.PAGE) {
         // PAGE mode: Navigate via URL - let URL change trigger state updates
         setIsLoading(true);
+        setCurrentFolder(folder);
+        setSelectedFiles([]);
+        setSelectedFolders([]);
         const path = basePath ?? '/media';
         const normalizedPath = path.startsWith('/') ? path : `/${path}`;
         const newUrl = folderId === null ? normalizedPath : `${normalizedPath}/${folderId}`;
@@ -176,6 +179,7 @@ export function useFileHandlers(state: FileState) {
       } else {
         // MODAL mode: Update URL with folderId and let state sync from URL
         setIsLoading(true);
+        setCurrentFolder(folder);
         
         // Clear selections when navigating
         setSelectedFiles([]);
@@ -195,7 +199,7 @@ export function useFileHandlers(state: FileState) {
         push(newUrl, { scroll: false });
       }
     },
-    [isInSelectionMode, mode, push, setSelectedFolders, setSelectedFiles, basePath, setIsLoading]
+    [isInSelectionMode, mode, push, setSelectedFolders, setSelectedFiles, basePath, setCurrentFolder, setIsLoading]
   );
 
   /**
