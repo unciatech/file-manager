@@ -1,6 +1,6 @@
 {
   "name": "@unciatech/file-manager",
-  "version": "0.0.45",
+  "version": "0.0.46",
   "description": "Modern file manager component for React applications",
   "author": "Avi",
   "license": "MIT",

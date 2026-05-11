@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useFileManager } from '@/context/file-manager-context';
 import { FileMetaData } from '@/types/file-manager';
 import {
@@ -18,6 +18,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import {
   useFileUpload,
   type EntityId,
+  type FileWithPreview,
 } from '@/hooks/use-file-upload';
 import { type FileUploadItem } from '@/hooks/use-file-upload';
 import { cn } from '@/lib/utils';
@@ -36,6 +37,7 @@ export function UploadModal() {
     isUploadModalOpen,
     setIsUploadModalOpen,
     uploadFiles,
+    refreshData,
     allowedFileTypes,
     maxUploadFiles,
     maxUploadSize,
@@ -49,7 +51,7 @@ export function UploadModal() {
   const [uploadItems, setUploadItems] = useState<FileUploadItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleFilesChange = useCallback((newFiles: Array<{ file: File | FileMetaData; id: EntityId; preview?: string }>) => {
+  const handleFilesChange = useCallback((newFiles: FileWithPreview[]) => {
     setUploadItems((prevUploadItems) =>
       newFiles.map((file) => {
         const existingFile = prevUploadItems.find((existing) => existing.id === file.id);
@@ -92,25 +94,50 @@ export function UploadModal() {
     onFilesChange: handleFilesChange,
   });
 
-  useEffect(() => {
-    if (!isUploadModalOpen) {
-      setIsSubmitting(false);
-      clearFiles();
-      setUploadItems([]);
-    }
-  }, [clearFiles, isUploadModalOpen]);
+  const resetUploadState = () => {
+    setIsSubmitting(false);
+    clearFiles();
+    setUploadItems([]);
+  };
 
   const removeUploadFile = (fileId: EntityId) => {
     if (isSubmitting) return;
     removeFile(fileId);
   };
 
-  const retryUpload = (fileId: EntityId) => {
+  const buildFileUploadInput = (item: FileUploadItem): FileUploadInput => ({
+    file: item.file as File,
+    metadata: {},
+  });
+
+  const retryUpload = async (fileId: EntityId) => {
+    const target = uploadItems.find((item) => item.id === fileId);
+    if (!target || !(target.file instanceof File)) {
+      return;
+    }
+
     setUploadItems((prev) =>
       prev.map((file) =>
         file.id === fileId ? { ...file, progress: 0, status: 'uploading' as const, error: undefined } : file,
       ),
     );
+
+    try {
+      await uploadFiles([buildFileUploadInput(target)], { refresh: false, showToast: false, clearSelection: false });
+      setUploadItems((prev) =>
+        prev.map((file) =>
+          file.id === fileId ? { ...file, status: 'completed' as const, error: undefined } : file,
+        ),
+      );
+      await refreshData(true);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload file';
+      setUploadItems((prev) =>
+        prev.map((file) =>
+          file.id === fileId ? { ...file, status: 'error' as const, error: errorMessage } : file,
+        ),
+      );
+    }
   };
 
   const handleUpload = async () => {
@@ -120,45 +147,49 @@ export function UploadModal() {
     if (completedFiles.length === 0 || isSubmitting) return;
 
     setIsSubmitting(true);
-    setUploadItems((prev) =>
-      prev.map((item) =>
-        completedFiles.some((completedFile) => completedFile.id === item.id)
-          ? { ...item, status: 'uploading' as const, progress: 100, error: undefined }
-          : item,
-      ),
-    );
 
-    try {
-      const fileInputs: FileUploadInput[] = completedFiles.map((item) => ({
-        name: item.file.name,
-        size: item.file.size,
-        type: getFileTypeFromMime(item.file.type, item.file.name.split('.').pop()),
-        lastModified: item.file instanceof File ? item.file.lastModified : Date.now(),
-        file: item.file as File,
-        metadata: {}
-      }));
-
-      await uploadFiles(fileInputs);
-      handleClose(true);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to upload files';
+    const uploadTasks = completedFiles.map(async (item) => {
       setUploadItems((prev) =>
-        prev.map((item) =>
-          completedFiles.some((completedFile) => completedFile.id === item.id)
-            ? { ...item, status: 'error' as const, error: errorMessage }
-            : item,
+        prev.map((current) =>
+          current.id === item.id
+            ? { ...current, status: 'uploading' as const, progress: 100, error: undefined }
+            : current,
         ),
       );
-    } finally {
-      setIsSubmitting(false);
+
+      try {
+        await uploadFiles([buildFileUploadInput(item)], { refresh: false, showToast: false, clearSelection: false });
+        setUploadItems((prev) =>
+          prev.map((current) =>
+            current.id === item.id ? { ...current, status: 'completed' as const, error: undefined } : current,
+          ),
+        );
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to upload file';
+        setUploadItems((prev) =>
+          prev.map((current) =>
+            current.id === item.id ? { ...current, status: 'error' as const, error: errorMessage } : current,
+          ),
+        );
+        throw error;
+      }
+    });
+
+    const results = await Promise.allSettled(uploadTasks);
+    await refreshData(true);
+
+    const allSucceeded = results.every((result) => result.status === 'fulfilled');
+    if (allSucceeded) {
+      handleClose(true);
     }
+
+    setIsSubmitting(false);
   };
 
   const handleClose = (force = false) => {
     if (isSubmitting && !force) return;
     setIsUploadModalOpen(false);
-    clearFiles();
-    setUploadItems([]);
+    resetUploadState();
   };
 
   const getFilePreviewComponent = (file: File, preview?: string) => {
@@ -186,8 +217,17 @@ export function UploadModal() {
   const canUpload = completedCount > 0 && uploadingCount === 0;
 
   return (
-    <Dialog open={isUploadModalOpen} onOpenChange={(open) => !isSubmitting && setIsUploadModalOpen(open)}>
-      <DialogContent className="p-0 max-w-4xl max-h-[80vh] flex flex-col" variant="default" showCloseButton={false}>
+    <Dialog
+      open={isUploadModalOpen}
+      onOpenChange={(open) => {
+        if (isSubmitting) return;
+        setIsUploadModalOpen(open);
+        if (!open) {
+          resetUploadState();
+        }
+      }}
+    >
+      <DialogContent className="p-0 max-w-4xl m-auto flex flex-col" variant="fullscreen" showCloseButton={false}>
         <DialogHeader className="pt-5 pb-3 m-0 border-b border-border">
           <DialogTitle className="px-6 text-base">
             <div className="flex w-full items-center justify-between gap-2">
@@ -197,7 +237,7 @@ export function UploadModal() {
                   <Kbd><span className="text-lg">⌘</span> + U</Kbd>
                 </KbdGroup>
               </span>
-              <CloseButton onClick={handleClose} disabled={isSubmitting} />
+              <CloseButton onClick={() => handleClose()} disabled={isSubmitting} />
             </div>
           </DialogTitle>
           <DialogDescription />
@@ -207,10 +247,11 @@ export function UploadModal() {
           {/* Upload Area */}
           <div
             className={cn(
-              'relative w-full rounded-xl border-2 border-dashed bg-muted border-muted-foreground/25 px-6 py-16 text-center transition-colors mb-4',
+              'relative w-full  m-auto rounded-xl border-2 border-dashed bg-muted border-muted-foreground/25 px-6 py-16 text-center transition-colors transition-[min-height,height] duration-300 ease-out mb-4',
               isDragging
                 ? 'border-primary bg-primary/5'
                 : 'border-muted-foreground/25 hover:border-muted-foreground/50',
+              uploadItems && uploadItems.length > 0 ? 'h-fit' : 'h-full',
             )}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
@@ -219,7 +260,7 @@ export function UploadModal() {
           >
             <input {...getInputProps()} className="sr-only" />
 
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center justify-center gap-4 h-full">
               <div
                 className={cn(
                   'flex h-12 w-12 items-center justify-center rounded-full transition-colors',
@@ -328,7 +369,7 @@ export function UploadModal() {
               <AlertContent>
                 <AlertTitle>File upload error(s)</AlertTitle>
                 <AlertDescription>
-                  {errors.map((error) => (
+                  {Array.from(new Set(errors)).map((error) => (
                     <p key={error} className="last:mb-0">
                       {error}
                     </p>
@@ -341,7 +382,7 @@ export function UploadModal() {
 
         <DialogFooter className="px-6 py-4 border-t border-border w-full sm:justify-between justify-center items-center flex-col sm:flex-row gap-2 ">
           <DialogClose asChild>
-            <Button type="button" radius="full" variant="outline" onClick={handleClose} disabled={isSubmitting} className='w-full md:w-auto'>
+            <Button type="button" radius="full" variant="outline" onClick={() => handleClose()} disabled={isSubmitting} className='w-full md:w-auto'>
               Cancel
             </Button>
           </DialogClose>

@@ -7,6 +7,12 @@ import { FileUploadInput } from "@/types/provider";
 import { useBrowserRouter } from "./use-browser-router";
 import { toast } from "sonner";
 
+export type UploadFilesOptions = {
+  refresh?: boolean;
+  showToast?: boolean;
+  clearSelection?: boolean;
+};
+
 /**
  * Helper function to toggle files in the selection
  * @param prev - Previous selection array
@@ -250,20 +256,31 @@ export function useFileHandlers(state: FileState) {
    * @param fileUploadInput - Array of file upload data
    */
   const uploadFiles = useCallback(
-    async (fileUploadInput: FileUploadInput[]) => {
+    async (fileUploadInput: FileUploadInput[], options: UploadFilesOptions = {}) => {
+      const refresh = options.refresh ?? true;
+      const showToast = options.showToast ?? true;
+      const clearSelection = options.clearSelection ?? true;
       try {
         await provider.uploadFiles(fileUploadInput, currentFolder?.id ?? null);
         // Refresh data silently in background (no loading skeleton)
-        await refreshData(true);
-        setSelectedFiles([]);
-        toast.success("Upload Successful", {
-          description: `${fileUploadInput.length} file(s) uploaded successfully`,
-        });
+        if (refresh) {
+          await refreshData(true);
+        }
+        if (clearSelection) {
+          setSelectedFiles([]);
+        }
+        if (showToast) {
+          toast.success("Upload Successful", {
+            description: `${fileUploadInput.length} file(s) uploaded successfully`,
+          });
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : "Failed to upload files";
-        toast.error("Upload Failed", {
-          description: message,
-        });
+        if (showToast) {
+          toast.error("Upload Failed", {
+            description: message,
+          });
+        }
         console.error("Upload failed:", error);
         throw error;
       }

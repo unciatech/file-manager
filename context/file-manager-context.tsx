@@ -1,6 +1,6 @@
 "use client";
 
-import { useFileHandlers } from "@/hooks/use-file-handlers";
+import { useFileHandlers, type UploadFilesOptions } from "@/hooks/use-file-handlers";
 import { useFileState } from "@/hooks/use-file-state";
 import { EntityId, FileManagerRootProps, FileMetaData, FileType, FolderId, Folder, PaginationInfo, Mode, SelectionMode, SELECTION_MODE, MODE } from "@/types/file-manager";
 import { FileUploadInput, IFileManagerProvider } from "@/types/provider";
@@ -67,13 +67,13 @@ interface FileManagerContextType {
   updateSearchQuery: (query: string) => void;
 
   // CRUD
-  uploadFiles: (fileUploadInput: FileUploadInput[]) => Promise<void>;
+  uploadFiles: (fileUploadInput: FileUploadInput[], options?: UploadFilesOptions) => Promise<void>;
   createFolder: (name: string) => Promise<void>;
   bulkMove: (targetFolderId: FolderId) => Promise<void>;
   renameFolder: (folderId: EntityId, newName: string) => Promise<void>;
   updateFileMetadata: (fileId: EntityId, metadata: Partial<FileMetaData>) => Promise<void>;
   bulkDelete: (targets?: { fileIds?: EntityId[]; folderIds?: FolderId[] }) => Promise<void>;
-  refreshData: () => Promise<void>;
+  refreshData: (silent?: boolean) => Promise<void>;
 
   // Computed
   isInSelectionMode: () => boolean;
