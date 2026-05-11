@@ -32,7 +32,7 @@ export function DetailsLayout({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent
-        className="p-0 max-w-6xl w-full m-auto h-[80vh] flex flex-col overflow-hidden"
+        className="p-0 max-w-6xl m-auto h-[80vh] flex flex-col overflow-hidden"
         variant="fullscreen"
         showCloseButton={false}
       >

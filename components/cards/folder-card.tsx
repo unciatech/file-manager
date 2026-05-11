@@ -46,11 +46,12 @@ export function FolderCard({
   mode,
   isInSelectionMode
 }: FolderCardProps) {
+  const itemCount = (folder.fileCount ?? 0) + (folder.folderCount ?? 0);
 
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm(`Are you sure you want to delete "${folder.name}"?\n\n⚠️ Warning: This will also delete all ${folder.fileCount} file(s) inside this folder.`)) {
+    if (confirm(`Are you sure you want to delete "${folder.name}"?\n\n⚠️ Warning: This will also delete all ${itemCount} item(s) inside this folder.`)) {
       onDelete(folder.id);
     }
   };
@@ -176,7 +177,7 @@ export function FolderCard({
           </span>
 
           <div className={`flex items-center justify-center gap-1 mt-1 transition-opacity duration-200 ${isSelected ? "opacity-60" : "opacity-100"}`}>
-            <span className="text-[11px] text-primary font-medium tracking-tight px-1.5 rounded-full">{folder.fileCount} items</span>
+            <span className="text-[11px] text-primary font-medium tracking-tight px-1.5 rounded-full">{itemCount} items</span>
           </div>
         </div>
       </div>

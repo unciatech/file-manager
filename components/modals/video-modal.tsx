@@ -12,6 +12,8 @@ import { getFileSize } from '@/lib/file-size';
 import { formatDate, formatDuration } from '@/lib/format-utils';
 import { Field, FieldLabel } from '../ui/field';
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '../ui/input-group';
+import { TagInput } from '@/components/ui/tag-input';
+import { useTags } from '@/hooks/use-tags';
 
 /**
  * Props for the VideoModal component.
@@ -37,6 +39,8 @@ export function VideoModal({ file, onClose, onSave }: VideoModalProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [fileName, setFileName] = useState(file.name);
   const [caption, setCaption] = useState(file.caption || '');
+  const [tags, setTags] = useState<string[]>(file.tags ?? []);
+  const availableTags = useTags();
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -44,6 +48,7 @@ export function VideoModal({ file, onClose, onSave }: VideoModalProps) {
       await onSave?.({
         name: fileName,
         caption,
+        tags,
       });
       onClose();
     } finally {
@@ -151,6 +156,17 @@ export function VideoModal({ file, onClose, onSave }: VideoModalProps) {
             onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setCaption(e.target.value)}
             placeholder="Add a caption"
             rows={3}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="video-tags">Tags</Label>
+          <TagInput
+            tags={tags}
+            setTags={setTags}
+            allTags={availableTags}
+            inputId="video-tags"
+            placeholder="Add a tag"
           />
         </div>
       </div>

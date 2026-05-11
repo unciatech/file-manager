@@ -9,10 +9,17 @@ export function HeaderNavigation() {
   const {
     currentFolder,
     handleFolderClick,
+    handleClearSelection,
     isLoading,
+    isInSelectionMode,
   } = useFileManager();
 
   const handleBackClick = () => {
+    if (isInSelectionMode()) {
+      handleClearSelection();
+      return;
+    }
+
     history.back();
   };
 

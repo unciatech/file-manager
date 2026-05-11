@@ -12,6 +12,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/favicon.ico" />
         {/* Blocking script: applies .dark before first paint to prevent flash in all browsers including Safari */}
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {

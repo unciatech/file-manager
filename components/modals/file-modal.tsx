@@ -13,6 +13,8 @@ import { formatDate } from '@/lib/format-utils';
 import { getFileComponents } from '@/components/grid/file-component-registry';
 import { Field, FieldLabel } from '../ui/field';
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '../ui/input-group';
+import { TagInput } from '@/components/ui/tag-input';
+import { useTags } from '@/hooks/use-tags';
 
 interface FileModalProps {
   file: FileMetaData;
@@ -24,12 +26,15 @@ export function FileModal({ file, onClose, onSave }: Readonly<FileModalProps>) {
   const [isSaving, setIsSaving] = useState(false);
   const [fileName, setFileName] = useState(file.name);
   const [description, setDescription] = useState(file.metaData?.description || '');
+  const [tags, setTags] = useState<string[]>(file.tags ?? []);
+  const availableTags = useTags();
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
       await onSave?.({
         name: fileName,
+        tags,
         metaData: {
           ...file.metaData,
           description,
@@ -137,6 +142,17 @@ export function FileModal({ file, onClose, onSave }: Readonly<FileModalProps>) {
             onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
             placeholder="Add a description"
             rows={3}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="file-tags">Tags</Label>
+          <TagInput
+            tags={tags}
+            setTags={setTags}
+            allTags={availableTags}
+            inputId="file-tags"
+            placeholder="Add a tag"
           />
         </div>
       </div>

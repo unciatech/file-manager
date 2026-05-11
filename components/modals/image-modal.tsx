@@ -12,6 +12,8 @@ import { formatDate } from '@/lib/format-utils';
 import { Field, FieldLabel } from '../ui/field';
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '../ui/input-group';
 import { Loader2Icon } from '../icons';
+import { TagInput } from '@/components/ui/tag-input';
+import { useTags } from '@/hooks/use-tags';
 
 /**
  * Props for the ImageModal component.
@@ -38,6 +40,8 @@ export function ImageModal({ file, onClose, onSave }: ImageModalProps) {
   const [fileName, setFileName] = useState(file.name);
   const [alternativeText, setAlternativeText] = useState(file.alternativeText || '');
   const [caption, setCaption] = useState(file.caption || '');
+  const [tags, setTags] = useState<string[]>(file.tags ?? []);
+  const availableTags = useTags();
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -46,6 +50,7 @@ export function ImageModal({ file, onClose, onSave }: ImageModalProps) {
         name: fileName,
         alternativeText,
         caption,
+        tags,
       });
       onClose();
     } finally {
@@ -160,6 +165,17 @@ export function ImageModal({ file, onClose, onSave }: ImageModalProps) {
             onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setCaption(e.target.value)}
             placeholder="Add a caption"
             rows={3}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="image-tags">Tags</Label>
+          <TagInput
+            tags={tags}
+            setTags={setTags}
+            allTags={availableTags}
+            inputId="image-tags"
+            placeholder="Add a tag"
           />
         </div>
       </div>
