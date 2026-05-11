@@ -22,9 +22,25 @@ function Command({ className, ...props }: React.ComponentProps<typeof CommandPri
 type CommandDialogProps = DialogProps & { className?: string };
 
 const CommandDialog = ({ children, className, shouldFilter, ...props }: CommandDialogProps & { shouldFilter?: boolean }) => {
+  const handleOpenAutoFocus = React.useCallback((event: Event) => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    if (window.matchMedia('(max-width: 639px)').matches) {
+      event.preventDefault();
+      const input = document.querySelector<HTMLInputElement>('[data-slot="command-input-field"]');
+      input?.focus();
+    }
+  }, []);
+
   return (
     <Dialog {...props}>
-      <DialogContent className={cn('overflow-hidden p-0 shadow-lg', className)}>
+      <DialogContent
+        variant="command"
+        onOpenAutoFocus={handleOpenAutoFocus}
+        className={cn('overflow-hidden p-0 shadow-lg', className)}
+      >
         <DialogTitle className="hidden" />
         <Command 
           shouldFilter={shouldFilter}
@@ -42,6 +58,7 @@ function CommandInput({ className, ...props }: React.ComponentProps<typeof Comma
     <div className="flex items-center border-border border-b px-3" cmdk-input-wrapper="" data-slot="command-input">
       <SearchIcon className="me-2 h-4 w-4 shrink-0 opacity-50" />
       <CommandPrimitive.Input
+        data-slot="command-input-field"
         className={cn(
           'flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none! shadow-none! focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 border-none text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
           className,

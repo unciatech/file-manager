@@ -22,6 +22,12 @@ export function KeyboardShortcuts() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || target?.isContentEditable) {
+        return;
+      }
+
       // Cmd/Ctrl+K - Toggle Search Modal
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();

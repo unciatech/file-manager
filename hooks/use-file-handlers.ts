@@ -2,7 +2,7 @@
 
 import { useCallback, MouseEvent } from "react";
 import { FileState } from "./use-file-state";
-import { FileMetaData, Folder, FolderId, MODE } from "@/types/file-manager";
+import { EntityId, FileMetaData, Folder, FolderId, MODE } from "@/types/file-manager";
 import { FileUploadInput } from "@/types/provider";
 import { useBrowserRouter } from "./use-browser-router";
 import { toast } from "sonner";

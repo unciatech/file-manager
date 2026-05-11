@@ -7,12 +7,15 @@ import { CrossIcon } from '../icons';
 import { Dialog as DialogPrimitive } from 'radix-ui';
 
 const dialogContentVariants = cva(
-  'flex flex-col fixed outline-0 z-50 border border-border bg-background text-foreground shadow-lg shadow-black/5 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 rounded-2xl',
+  'flex flex-col fixed outline-0 z-50 border border-border bg-background text-foreground shadow-lg shadow-black/5 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
   {
     variants: {
       variant: {
-        default: 'left-[50%] top-[50%] max-w-lg translate-x-[-50%] translate-y-[-50%] w-full p-6 max-h-[90dvh]',
-        fullscreen: 'top-5 left-5 right-5 bottom-5',
+        default:
+          'left-[50%] top-[50%] max-w-lg translate-x-[-50%] translate-y-[-50%] w-full p-6 max-h-[90dvh] rounded-2xl data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+        fullscreen: 'top-5 left-5 right-5 bottom-5 rounded-2xl data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+        command:
+          'left-0 top-0 right-0 w-full max-w-none translate-x-0 translate-y-0 rounded-none max-h-[100dvh] data-[state=closed]:slide-out-to-top-4 data-[state=open]:slide-in-from-top-4 sm:left-[50%] sm:top-[50%] sm:max-w-4xl sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl sm:max-h-[90dvh] sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95',
       },
     },
     defaultVariants: {
